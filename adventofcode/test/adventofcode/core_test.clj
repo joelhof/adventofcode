@@ -2,6 +2,11 @@
   (:require [clojure.test :refer :all]
             [adventofcode.core :refer :all :as core]))
 
+(defn stringToVector
+  [string]
+  (mapv #(Integer/parseInt (str %)) (seq string))  
+)  
+  
 (deftest reverseCaptchaTest
   (testing "1122 is 3"
     (is (= (core/reverseCaptcha [1 1 2 2]) 3)))
@@ -10,6 +15,19 @@
   (testing "1234 is 0"
     (is (= (core/reverseCaptcha [1 2 3 4]) 0)))
   (testing "91212129 is 9"
-    (is (= (core/reverseCaptcha (mapv #(Integer/parseInt (str %)) (seq "91212129"))) 9)))
-  
+    (is (= (core/reverseCaptcha (stringToVector "91212129"))) 9))
+)
+
+(deftest reverseCaptchaTestPart2
+  (testing "1212 is 6"
+    (is (= (core/reverseCaptcha [1 2 1 2] 2) 6)))
+  (testing "1221 is 0"
+    (is (= (core/reverseCaptcha [1 2 2 1] 2) 0)))
+  (testing "123425 is 0"
+    (is (= (core/reverseCaptcha [1 2 3 4 2 5] 3) 4)))
+  (testing "123123 is 9"
+    (is (= (core/reverseCaptcha (stringToVector "123123") 3) 12)))
+  (testing "12131415 is 4"
+    (is (= (core/reverseCaptcha (stringToVector "12131415") 4) 4)))
+
 )

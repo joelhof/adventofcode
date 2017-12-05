@@ -20,3 +20,7 @@
 (def result
   (reverseCaptcha (mapv #(Integer/parseInt (str %)) (seq input)))
   )
+
+(def result2
+  (reverseCaptcha (mapv #(Integer/parseInt (str %)) (seq input)) (/ (count input) 2))
+)
