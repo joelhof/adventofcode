@@ -29,5 +29,13 @@
     (is (= (core/reverseCaptcha (stringToVector "123123") 3) 12)))
   (testing "12131415 is 4"
     (is (= (core/reverseCaptcha (stringToVector "12131415") 4) 4)))
+)
 
+(deftest checkSumTest
+  (testing "5 1 9 5 check sum is 8"
+    (is (= (core/rowCheckSum [5 1 9 5]) 8))
+  )
+  (testing "5 1 9 5, 7 5 3, 2 4 6 8, total checksum is 18"
+    (is (= (core/checkSum [[5 1 9 5] [7 5 3] [2 4 6 8]]) 18))
+  )
 )
