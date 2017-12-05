@@ -1,12 +1,13 @@
 (ns adventofcode.core)
 
 (defn reverseCaptcha
-  "Compare with digit n steps ahead"
+  "Compare with next digit
+  Compare with digit n steps ahead"
   ([coll] (reverseCaptcha coll 1))
   ([coll, n]
   (reduce +
     (map-indexed
-      (fn [index a] (let [b (get coll (if (= (inc index) (count coll)) 0 (inc index)))]
+      (fn [index a] (let [b (nth (take (* 2 (count coll)) (cycle coll)) (+ index n))]
                       (if (= a b) a 0)))
       coll)
   ))  
