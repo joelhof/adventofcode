@@ -36,6 +36,19 @@
     (is (= (core/rowCheckSum [5 1 9 5]) 8))
   )
   (testing "5 1 9 5, 7 5 3, 2 4 6 8, total checksum is 18"
-    (is (= (core/checkSum [[5 1 9 5] [7 5 3] [2 4 6 8]]) 18))
+    (is (= (core/spreadSheetCheckSum core/rowCheckSum [[5 1 9 5] [7 5 3] [2 4 6 8]]) 18))
   )
+)
+
+(deftest moduloCheckSumTest
+  (testing "5 9 2 8"
+    (is (= (core/rowModuloCheckSum [5 9 2 8]) 4))    
+  )
+  (testing "5 9 2 8"
+    (is (= (core/rowModuloCheckSum [9 4 7 3]) 3))
+  )
+  (testing "5 9 2 8"
+    (is (= (core/rowModuloCheckSum [3 8 6 5]) 2))
+  )
+
 )

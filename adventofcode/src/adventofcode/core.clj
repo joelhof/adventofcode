@@ -30,7 +30,17 @@
   (- (apply max row) (apply min row))
 )
 
-(defn checkSum
-  [spreadSheet]
-  (reduce + (map rowCheckSum spreadSheet))  
+(defn spreadSheetCheckSum
+  [f spreadSheet]
+  (reduce + (map f spreadSheet))  
 )
+
+(defn rowModuloCheckSum
+  "Pick out the 2 evenly divisible numbers and divide them"
+  [row]
+  (let [sortedRow (reverse (sort row))]
+   (apply / (first (filter #(= (count %) 2)
+                           (map (fn[x] (filter #(= (mod % x) 0) sortedRow)) sortedRow)))
+  ))
+)
+
