@@ -50,5 +50,10 @@
   (testing "5 9 2 8"
     (is (= (core/rowModuloCheckSum [3 8 6 5]) 2))
   )
+)
 
+(deftest spiralMemoryTest
+  (testing "2"
+    (is (= (core/spiralMemory 2) 1))       
+  )
 )

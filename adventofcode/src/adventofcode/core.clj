@@ -44,3 +44,71 @@
   ))
 )
 
+(defn spiralLayer
+ "Calculate which spiral layer n, x belongs to"
+  [x]
+  (let [layers (range 1 (+ (Math/sqrt x) 2) 2)]
+    (vector (- (count layers) 1) (last layers))
+  )
+)
+
+(defn layerCorners
+  "Return a vector containing the 4 corners of spiral layer r"
+  [r]
+    (vector [r r] [(- r) r] [(- r) (- r)] [r (- r)])
+)
+
+(defn layerStart
+  "Return the coordinates of the first number in a layer
+ [x y]"
+  [r]
+  (let [lastCorner (last (layerCorners r))]
+    (vector (lastCorner 0) (+ (lastCorner 1) 1))
+  )
+)
+ 
+(defn layerStartNumber
+  [n]
+  (int (+ (Math/pow (- n 2) 2) 1))
+)
+
+(defn spiralStateMachine
+  "Return the cartesian coordinates [x,y] of number n located in a spiral matrix"
+  ([n] (spiralStateMachine n [0 0]))
+  ([n previousMove] (spiralStateMachine n
+                      (layerStartNumber (nth (spiralLayer n) 1))
+                      previousMove
+                      (layerStart (nth (spiralLayer n) 0))))
+  ([n i previousMove currentPos]
+    (println n i previousMove currentPos)
+    (if (= n i) currentPos
+;      (case previousMove
+       ;"We moved to the right, check if we need to turn up"
+;       [1 0] "Moved RIGHT"
+    
+       ;"We moved to the left, check if we need to turn down"
+;       [-1 0] "Moved LEFT" ;(if (== turnDown))
+
+       ;We moved up, check if we need to turn left
+;       [0 1] "Moved UP" ;(if (== previousMove )  )
+
+       ;We moved down check if need to turn right
+;       [0 -1] "Moved DOWN" ;(if (== previousMove )  )
+;       )
+    
+    (spiralStateMachine n (inc i) [0 1] [(currentPos 0) (inc (currentPos 1))])
+  ))
+)
+
+(defn manhattanDistance
+  "Return the manhattan distance of cartesian coordinates [x,y] of point p"  
+  [p]
+  (reduce + (map #(Math/abs %) p))
+)
+
+(defn spiralMemory
+  ""
+  [n]
+  (manhattanDistance (spiralStateMachine n))
+)
+
