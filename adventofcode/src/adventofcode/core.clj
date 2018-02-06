@@ -84,8 +84,11 @@
     (if (= n i) currentPos
       (cond
         ;"We are at top right corner, turn left"
-        (= (first corners) currentPos) (spiralStateMachine n (inc i) [(- 1) 0] [(dec (currentPos 0)) (currentPos 1)])
-        ;"We moved to the left, check if we need to turn down"
+        (= (first corners) currentPos) (spiralStateMachine n (inc i) [(- 1) 0]
+                                                           (vec (map + [(- 1) 0] currentPos)))
+        ;"We are at top left corner, turn down"
+        (= (second corners) currentPos) (spiralStateMachine n (inc i) [0 (- 1)]
+                                                           (vec (map + [0 (- 1)] currentPos)))
 ;       [-1 0] "Moved LEFT" ;(if (== turnDown))
 
        ;We moved up, check if we need to turn left
