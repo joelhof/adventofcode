@@ -79,7 +79,7 @@
          [0 1]
          (layerStart (first (spiralLayer n)))))
   ([n i previousMove currentPos]
-    (println n i previousMove currentPos)
+;    (println n i previousMove currentPos)
     (let [corners (layerCorners (first (spiralLayer n)))]
     (if (= n i) currentPos
       (cond
@@ -92,9 +92,6 @@
         ;"We are at bottom left corner, turn right"
         (= (nth corners 2) currentPos) (spiralStateMachine n (inc i) [1 0]
                                                            (vec (map + [1 0] currentPos)))
-       ;We moved down check if need to turn right
-;       [0 -1] "Moved DOWN" ;(if (== previousMove )  )
-       
        :else (spiralStateMachine n (inc i) previousMove
                                  (vec (map + previousMove currentPos)))
       )

@@ -68,4 +68,10 @@
   (testing "n = 9"
     (is (= (core/spiralMemory 9) 2))       
   )
+  (testing "n = 10"
+    (is (= (core/spiralMemory 10) 3))       
+  )
+  (testing "n = 40"
+    (is (= (core/spiralMemory 40) 3))       
+  )
 )
