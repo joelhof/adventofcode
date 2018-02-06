@@ -59,4 +59,7 @@
   (testing "n = 4"
     (is (= (core/spiralMemory 4) 1))       
   )
+  (testing "n = 5"
+    (is (= (core/spiralMemory 5) 2))       
+  )
 )

@@ -74,11 +74,10 @@
 
 (defn spiralStateMachine
   "Return the cartesian coordinates [x,y] of number n located in a spiral matrix"
-  ([n] (spiralStateMachine n [0 0]))
-  ([n previousMove] (spiralStateMachine n
-                      (layerStartNumber (nth (spiralLayer n) 1))
-                      previousMove
-                      (layerStart (first (spiralLayer n)))))
+  ([n] (spiralStateMachine n
+         (layerStartNumber (nth (spiralLayer n) 1))
+         [0 1]
+         (layerStart (first (spiralLayer n)))))
   ([n i previousMove currentPos]
     (println n i previousMove currentPos)
     (let [corners (layerCorners (first (spiralLayer n)))]
@@ -95,7 +94,9 @@
        ;We moved down check if need to turn right
 ;       [0 -1] "Moved DOWN" ;(if (== previousMove )  )
        
-       :else (spiralStateMachine n (inc i) [0 1] [(currentPos 0) (inc (currentPos 1))])
+       :else (spiralStateMachine n (inc i) previousMove
+                                 (vec (map + previousMove currentPos)))
+                      
       )
     )
     )
