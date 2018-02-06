@@ -78,15 +78,15 @@
   ([n previousMove] (spiralStateMachine n
                       (layerStartNumber (nth (spiralLayer n) 1))
                       previousMove
-                      (layerStart (nth (spiralLayer n) 0))))
+                      (layerStart (first (spiralLayer n)))))
   ([n i previousMove currentPos]
     (println n i previousMove currentPos)
+    (let [corners (layerCorners (first (spiralLayer n)))]
     (if (= n i) currentPos
-;      (case previousMove
-       ;"We moved to the right, check if we need to turn up"
-;       [1 0] "Moved RIGHT"
-    
-       ;"We moved to the left, check if we need to turn down"
+      (cond
+        ;"We are at top right corner, turn left"
+        (= (first corners) currentPos) (spiralStateMachine n (inc i) [(- 1) 0] [(dec (currentPos 0)) (currentPos 1)])
+        ;"We moved to the left, check if we need to turn down"
 ;       [-1 0] "Moved LEFT" ;(if (== turnDown))
 
        ;We moved up, check if we need to turn left
@@ -94,10 +94,12 @@
 
        ;We moved down check if need to turn right
 ;       [0 -1] "Moved DOWN" ;(if (== previousMove )  )
-;       )
-    
-    (spiralStateMachine n (inc i) [0 1] [(currentPos 0) (inc (currentPos 1))])
-  ))
+       
+       :else (spiralStateMachine n (inc i) [0 1] [(currentPos 0) (inc (currentPos 1))])
+      )
+    )
+    )
+  )
 )
 
 (defn manhattanDistance

@@ -53,7 +53,10 @@
 )
 
 (deftest spiralMemoryTest
-  (testing "2"
+  (testing "n = 2"
     (is (= (core/spiralMemory 2) 1))       
+  )
+  (testing "n = 4"
+    (is (= (core/spiralMemory 4) 1))       
   )
 )
