@@ -89,17 +89,14 @@
         ;"We are at top left corner, turn down"
         (= (second corners) currentPos) (spiralStateMachine n (inc i) [0 (- 1)]
                                                            (vec (map + [0 (- 1)] currentPos)))
-;       [-1 0] "Moved LEFT" ;(if (== turnDown))
-
-       ;We moved up, check if we need to turn left
-;       [0 1] "Moved UP" ;(if (== previousMove )  )
-
+        ;"We are at bottom left corner, turn right"
+        (= (nth corners 2) currentPos) (spiralStateMachine n (inc i) [1 0]
+                                                           (vec (map + [1 0] currentPos)))
        ;We moved down check if need to turn right
 ;       [0 -1] "Moved DOWN" ;(if (== previousMove )  )
        
        :else (spiralStateMachine n (inc i) previousMove
                                  (vec (map + previousMove currentPos)))
-                      
       )
     )
     )
