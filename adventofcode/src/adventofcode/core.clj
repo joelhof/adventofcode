@@ -72,6 +72,23 @@
   (int (+ (Math/pow (- n 2) 2) 1))
 )
 
+(defn getNextMove
+  "Get the move in a counter clockwise spiral"
+  [n previousMove currentPos]
+  (let [corners (layerCorners (first (spiralLayer n)))]
+     (cond
+        ;"We are at top right corner, turn left"
+        (= (first corners) currentPos) [(- 1) 0]
+        ;"We are at top left corner, turn down"
+        (= (second corners) currentPos) [0 (- 1)]
+        ;"We are at bottom left corner, turn right"
+        (= (nth corners 2) currentPos) [1 0]
+        ;"We dont need to turn, just continue along previous axis"
+        :else previousMove 
+      )
+    )
+)  
+  
 (defn spiralStateMachine
   "Return the cartesian coordinates [x,y] of number n located in a spiral matrix"
   ([n] (spiralStateMachine n
@@ -80,22 +97,10 @@
          (layerStart (first (spiralLayer n)))))
   ([n i previousMove currentPos]
 ;    (println n i previousMove currentPos)
-    (let [corners (layerCorners (first (spiralLayer n)))]
     (if (= n i) currentPos
-      (cond
-        ;"We are at top right corner, turn left"
-        (= (first corners) currentPos) (spiralStateMachine n (inc i) [(- 1) 0]
-                                                           (vec (map + [(- 1) 0] currentPos)))
-        ;"We are at top left corner, turn down"
-        (= (second corners) currentPos) (spiralStateMachine n (inc i) [0 (- 1)]
-                                                           (vec (map + [0 (- 1)] currentPos)))
-        ;"We are at bottom left corner, turn right"
-        (= (nth corners 2) currentPos) (spiralStateMachine n (inc i) [1 0]
-                                                           (vec (map + [1 0] currentPos)))
-       :else (spiralStateMachine n (inc i) previousMove
-                                 (vec (map + previousMove currentPos)))
-      )
-    )
+      (let [nextMove (getNextMove n previousMove currentPos)]
+        (spiralStateMachine n (inc i) nextMove
+                                    (vec (map + nextMove currentPos))))
     )
   )
 )
