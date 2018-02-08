@@ -117,3 +117,34 @@
   (manhattanDistance (spiralStateMachine n))
 )
 
+(defn surroundingPositions 
+  [pos]
+  (map #(vec (map + % pos)) [[1 0] [0 1] [-1 0] [0 -1] [-1 -1] [1 1] [1 -1] [-1 1]])
+)
+
+(defn summation 
+  [positions s]
+  (reduce + (map #(s % 0) positions))
+)
+
+(defn s_ij
+  [pos s]
+  (-> pos
+    (surroundingPositions ,,,)
+    (summation ,,, s)
+  )
+)
+
+(defn spiralMemoryStress
+  ""
+  ([n] (spiralMemoryStress n {[0 0] 1} [0 1] [1 0]))
+  ([n s previousMove currentPos]
+    (println n s)
+    (if (> (apply max (vals s)) n) (s (vec (map - currentPos previousMove)))
+      (let [nextMove (getNextMove n previousMove currentPos)]
+        (spiralMemoryStress n (assoc s currentPos (s_ij currentPos s))
+                            nextMove (vec (map + nextMove currentPos)))
+      )
+    )
+  )
+)

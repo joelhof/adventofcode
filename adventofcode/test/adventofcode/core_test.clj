@@ -75,3 +75,9 @@
     (is (= (core/spiralMemory 40) 3))       
   )
 )
+
+(deftest spiralMemoryStressTest 
+  (testing "n = 2"
+    (is (= (core/spiralMemoryStress 2) 4))       
+  )
+)
