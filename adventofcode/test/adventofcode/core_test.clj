@@ -83,4 +83,10 @@
   (testing "n = 23"
     (is (= (core/spiralMemoryStress 23) 25))       
   )
+  (testing "n = 26"
+    (is (= (core/spiralMemoryStress 26) 54))       
+  )
+  (testing "n = 747"
+    (is (= (core/spiralMemoryStress 747) 806))       
+  )
 )

@@ -77,12 +77,14 @@
   [n previousMove currentPos]
   (let [corners (layerCorners (first (spiralLayer n)))]
      (cond
-        ;"We are at top right corner, turn left"
+        ;"We are at top right corner, turn LEFT"
         (= (first corners) currentPos) [(- 1) 0]
-        ;"We are at top left corner, turn down"
+        ;"We are at top left corner, turn DOWN"
         (= (second corners) currentPos) [0 (- 1)]
-        ;"We are at bottom left corner, turn right"
+        ;"We are at bottom left corner, turn RIGHT"
         (= (nth corners 2) currentPos) [1 0]
+        ;"We are at first pos in a new layer, move UP
+        (= (layerStart (first (spiralLayer n))) currentPos) [0 1]
         ;"We dont need to turn, just continue along previous axis"
         :else previousMove 
       )
@@ -137,13 +139,14 @@
 
 (defn spiralMemoryStress
   ""
-  ([n] (spiralMemoryStress n {[0 0] 1} [0 1] [1 0] 1))
-  ([n s previousMove currentPos i]
-    (println n s)
-    (if (> (apply max (vals s)) n) (s (vec (map - currentPos previousMove)))
-      (let [nextMove (getNextMove i previousMove currentPos)]
+  ([n] (spiralMemoryStress n {[0 0] 1} [0 1] [1 0]))
+  ([n s previousMove currentPos]
+;    (println n previousMove currentPos s)
+    (if (> (apply max (vals s)) n)
+      (s (vec (map - currentPos previousMove)))
+      (let [nextMove (getNextMove (+ (count s) 1) previousMove currentPos)]
         (spiralMemoryStress n (assoc s currentPos (s_ij currentPos s))
-                            nextMove (vec (map + nextMove currentPos)) (inc i))
+                            nextMove (vec (map + nextMove currentPos)))
       )
     )
   )
