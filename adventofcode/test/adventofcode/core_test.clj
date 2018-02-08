@@ -80,4 +80,7 @@
   (testing "n = 2"
     (is (= (core/spiralMemoryStress 2) 4))       
   )
+  (testing "n = 23"
+    (is (= (core/spiralMemoryStress 23) 25))       
+  )
 )
