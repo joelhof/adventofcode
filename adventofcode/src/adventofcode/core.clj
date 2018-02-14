@@ -1,4 +1,7 @@
-(ns adventofcode.core)
+(ns adventofcode.core
+  (:require [clojure.string :as string])
+)
+
 
 (defn reverseCaptcha
   "Compare with next digit or
@@ -150,4 +153,11 @@
       )
     )
   )
+)
+
+(defn isPassphraseValid?
+  [pass]
+  (if (< (apply max (vals (frequencies (string/split pass #" ")))) 2)
+    1
+    0)
 )

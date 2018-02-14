@@ -90,3 +90,15 @@
     (is (= (core/spiralMemoryStress 747) 806))       
   )
 )
+
+(deftest validpassphrase
+  (testing "aa bb cc dd ee"
+    (is (= (core/isPassphraseValid? "aa bb cc dd ee") 1))         
+  )
+  (testing "aa bb cc dd aa"
+    (is (= (core/isPassphraseValid? "aa bb cc dd aa") 0))         
+  )
+  (testing "aa bb cc dd aaa"
+   (is (= (core/isPassphraseValid? "aa bb cc dd aaa") 1))         
+  )
+)
