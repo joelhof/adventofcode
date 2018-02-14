@@ -1,5 +1,6 @@
 (ns adventofcode.calendar
-  (:require [adventofcode.core :as core])
+  (:require [adventofcode.core :as core]
+            [clojure.string :as string])
 )
 
 (def input 
@@ -23,4 +24,11 @@
   []
   (println "Day Two, part 2, calculating checksum...")
   (core/spreadSheetCheckSum core/rowModuloCheckSum (spreadSheet input))
+)
+
+(defn dayFourPart1
+  []
+  (println "Day Four, part 1, counting valid passphrases...")
+  (reduce + (map core/isPassphraseValid?
+                 (string/split-lines (slurp "resources/day4input1.txt"))))
 )
