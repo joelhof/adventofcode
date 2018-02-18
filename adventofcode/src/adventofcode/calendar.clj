@@ -32,3 +32,10 @@
   (reduce + (map core/isPassphraseValid?
                  (string/split-lines (slurp "resources/day4input1.txt"))))
 )
+
+(defn dayFourPart2
+  []
+  (println "Day Four, part 2, counting valid passphrases...")
+  (reduce + (map core/isPassphraseValid?
+                 (string/split-lines (slurp "resources/day4input1.txt"))))
+)

@@ -156,8 +156,11 @@
 )
 
 (defn isPassphraseValid?
+  "Only words with distinct letter distributions are allowed, i.e no anagrams"
   [pass]
-  (if (< (apply max (vals (frequencies (string/split pass #" ")))) 2)
-    1
-    0)
+  (let [words (string/split pass #" ")]
+    (if (= (count words) (count (distinct (map frequencies words))))
+      1
+      0)
+  )
 )

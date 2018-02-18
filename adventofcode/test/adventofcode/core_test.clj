@@ -101,4 +101,10 @@
   (testing "aa bb cc dd aaa"
    (is (= (core/isPassphraseValid? "aa bb cc dd aaa") 1))         
   )
+  (testing "oiii ioii iioi iiio"
+   (is (= (core/isPassphraseValid? "oiii ioii iioi iiio") 0))         
+  )
+  (testing "a ab abc abd abf abj"
+    (is (= (core/isPassphraseValid? "a ab abc abd abf abj") 1))   
+  )
 )
