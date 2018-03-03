@@ -39,3 +39,11 @@
   (reduce + (map core/isPassphraseValid?
                  (string/split-lines (slurp "resources/day4input1.txt"))))
 )
+
+(defn dayFivePart1
+  []
+  (println "Day Five, part 1, escaping maze...")
+  (core/jump
+    (vec (map #(Integer/valueOf %)
+              (string/split-lines (slurp "resources/day5Input1.txt")))))
+)  
