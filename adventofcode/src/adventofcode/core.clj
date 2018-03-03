@@ -164,3 +164,34 @@
       0)
   )
 )
+
+(defn escape?
+  [position instructions]
+  (let [move (nth instructions position)]
+    (if (neg? move)
+      (> (Math/abs move) position)
+      (>= move (- (count instructions) position))
+    )
+  )
+)  
+
+(def counter (atom 0))
+
+(defn getUpdatedInstr [instructions currentPos]
+  (if (> (nth instructions currentPos) 2)
+    (update instructions currentPos dec)
+    (update instructions currentPos inc)
+    )
+  )
+
+(defn jump
+  ([instructions] (jump instructions 0))
+  ([instructions currentPos]
+    (swap! counter inc)
+    (if (escape? currentPos instructions)
+      (deref counter)
+      (recur (getUpdatedInstr instructions currentPos)
+                   (+ currentPos (nth instructions currentPos)))
+    )
+  )
+)

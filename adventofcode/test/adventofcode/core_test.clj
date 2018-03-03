@@ -108,3 +108,15 @@
     (is (= (core/isPassphraseValid? "a ab abc abd abf abj") 1))   
   )
 )
+
+(deftest escapeTest
+  (testing "escape from 0 [1]"
+    (is (= (core/escape? 0 [1]) true))
+  )  
+)
+
+(deftest instructionJumpTest
+  (testing "[0 3  0  1  -3]"
+    (is (= (core/jump [0 3  0  1  -3]) 5))      
+  )
+)
