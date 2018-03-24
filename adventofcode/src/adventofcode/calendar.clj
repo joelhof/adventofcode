@@ -46,4 +46,13 @@
   (core/jump
     (vec (map #(Integer/valueOf %)
               (string/split-lines (slurp "resources/day5Input1.txt")))))
-)  
+)
+
+(defn daySixPart1
+  []
+  (println "Day Six, part 1, reallocating memory...")
+  (core/reallocate (vec (map #(Integer/valueOf %)
+                             (string/split
+                               (string/trim-newline
+                                 (slurp "resources/day6part1.txt")) #"\t"))))
+  )

@@ -228,6 +228,13 @@
 
 (defn reallocate
   "Reallocate memory blocks until a config is repeated" 
-  [bank]
-  0
+  [banks]
+  (loop [previous #{banks}
+         banks (redistribute banks)
+         steps 1]
+    (if (contains? previous banks)
+      steps
+      (recur (conj previous banks) (redistribute banks) (inc steps))
+      )
+    )
 )
