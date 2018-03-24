@@ -120,3 +120,15 @@
     (is (= (core/jump [0 3  0  1  -3]) 5))      
   )
 )
+
+(deftest redistributeTest
+  (testing "[0 2 7 0]"
+    (is (= (core/redistribute [0 2 7 0]) [2 4 1 2]))         
+  )
+)
+
+(deftest countReallocateStepsTest
+  (testing "[0 2 7 0]"
+    (is (= (core/reallocate [0 2 7 0]) 5))        
+  )
+)

@@ -195,3 +195,39 @@
     )
   )
 )
+
+(defn bankToRedistribute
+ [banks]
+ (apply max banks)
+)
+
+(defn indexToRedistribute
+ [banks index]
+ (nth (take
+        (+ (count banks) (bankToRedistribute banks))
+        (cycle (range (count banks))))
+      (inc index))
+)
+
+(defn redistribute
+  "Redistribute memory blocks among banks" 
+  [banks]
+    (loop [bank (bankToRedistribute banks)
+           index (.indexOf banks bank)
+           banks (update banks index (fn [old] 0))]
+      (if (zero? bank) 
+        banks
+        (recur
+          (dec bank)
+          (indexToRedistribute banks index)
+          (update banks (indexToRedistribute banks index) inc)
+        )
+      )
+    )
+)
+
+(defn reallocate
+  "Reallocate memory blocks until a config is repeated" 
+  [bank]
+  0
+)
