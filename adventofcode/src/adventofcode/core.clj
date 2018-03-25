@@ -229,12 +229,12 @@
 (defn reallocate
   "Reallocate memory blocks until a config is repeated" 
   [banks]
-  (loop [previous #{banks}
+  (loop [visited [banks]
          banks (redistribute banks)
          steps 1]
-    (if (contains? previous banks)
-      steps
-      (recur (conj previous banks) (redistribute banks) (inc steps))
+    (if (some #{banks} visited)
+      [steps (- (count visited) (.indexOf visited banks))]
+      (recur (conj visited banks) (redistribute banks) (inc steps))
       )
     )
 )

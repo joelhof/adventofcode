@@ -129,6 +129,6 @@
 
 (deftest countReallocateStepsTest
   (testing "[0 2 7 0]"
-    (is (= (core/reallocate [0 2 7 0]) 5))        
+    (is (= (core/reallocate [0 2 7 0]) [5 4]))        
   )
 )
