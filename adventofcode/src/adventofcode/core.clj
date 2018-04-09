@@ -238,3 +238,9 @@
       )
     )
 )
+
+(defn parseNode
+  [nodeStr]
+  (let [splitted (string/split nodeStr #" ")]
+     {:name (first splitted) :weight (second splitted)})
+)

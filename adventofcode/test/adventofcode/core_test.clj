@@ -132,3 +132,9 @@
     (is (= (core/reallocate [0 2 7 0]) [5 4]))        
   )
 )
+
+(deftest parseNodeTest
+  (testing "pbga (66)"
+    (is (= (core/parseNode "pbga (66)") {:name "pbga", :weight "(66)"}))         
+  )  
+)
