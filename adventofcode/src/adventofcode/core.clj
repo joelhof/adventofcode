@@ -239,8 +239,22 @@
     )
 )
 
+(defn parentNode
+  [parentStr]
+  (let [parent (string/split parentStr #" ")]
+     {:name (first parent) :weight (second parent)})
+)
+
+(defn getChildren
+  [nodeStr]
+   (if (.contains nodeStr "->")
+     (mapv string/trim (string/split (second (string/split nodeStr #"->")) #","))
+     []
+   )
+)
+
 (defn parseNode
   [nodeStr]
-  (let [splitted (string/split nodeStr #" ")]
-     {:name (first splitted) :weight (second splitted)})
+    (assoc (parentNode nodeStr) :children (getChildren nodeStr))
 )
+

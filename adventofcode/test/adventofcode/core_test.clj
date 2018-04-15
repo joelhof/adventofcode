@@ -135,6 +135,12 @@
 
 (deftest parseNodeTest
   (testing "pbga (66)"
-    (is (= (core/parseNode "pbga (66)") {:name "pbga", :weight "(66)"}))         
+    (is (= (core/parseNode "pbga (66)") {:name "pbga", :weight "(66)", :children []}))         
+  )
+  (testing "fwft (72) -> ktlj, cntj, xhth"
+    (is (= (core/parseNode "fwft (72) -> ktlj, cntj, xhth")
+           {:name "fwft",
+            :weight "(72)",
+            :children ["ktlj" "cntj" "xhth"]}))         
   )  
 )
