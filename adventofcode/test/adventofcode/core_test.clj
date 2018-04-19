@@ -142,5 +142,14 @@
            {:name "fwft",
             :weight "(72)",
             :children ["ktlj" "cntj" "xhth"]}))         
+  )
+)  
+(deftest findTreeRootTest
+  (testing "pbga (66)" "fwft (72) -> pbga" "tknk (41) -> fwft"
+    (is (= (core/findRoot ["pbga (66)" "fwft (72) -> pbga" "tknk (41) -> fwft"])
+           {:name "tknk"
+            :weight "(41)"
+            :children ["fwft"]})         
+    )
   )  
 )

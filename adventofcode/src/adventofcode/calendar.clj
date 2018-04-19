@@ -56,3 +56,9 @@
                                (string/trim-newline
                                  (slurp "resources/day6part1.txt")) #"\t"))))
   )
+
+(defn daySevenPart1
+  []
+  (println "Day Seven, part 1, finding tree root...")
+  (:name (core/findRoot (string/split-lines (slurp "resources/day7input1.txt"))))
+)

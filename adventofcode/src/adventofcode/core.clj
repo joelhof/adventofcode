@@ -258,3 +258,19 @@
     (assoc (parentNode nodeStr) :children (getChildren nodeStr))
 )
 
+(defn findRoot
+  [nodeStrings]
+  (let [nodes (map parseNode nodeStrings)]
+    (loop [parent (nth nodes 0)
+           root nil] ; pick a start node, i.e an index.
+      (if (nil? parent)
+        root
+      ; find it's parent
+      ; recur until no parent is found
+        (recur (first (filter #(.contains (set (:children %)) (:name parent)) nodes))
+               parent)
+      )
+    )
+  )
+)
+  
