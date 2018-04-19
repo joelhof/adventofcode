@@ -262,11 +262,9 @@
   [nodeStrings]
   (let [nodes (map parseNode nodeStrings)]
     (loop [parent (nth nodes 0)
-           root nil] ; pick a start node, i.e an index.
+           root nil]
       (if (nil? parent)
         root
-      ; find it's parent
-      ; recur until no parent is found
         (recur (first (filter #(.contains (set (:children %)) (:name parent)) nodes))
                parent)
       )
@@ -274,3 +272,16 @@
   )
 )
   
+(defn balanceTree
+  [nodeStrings]
+  (let [nodes (into {}
+                    (for [n (map parseNode nodeStrings)]
+                      [(keyword (:name n)) n]))
+        root (findRoot nodeStrings)]
+    ((keyword (:name root)) nodes)
+    ; starting at root, 
+    ; recursively compare child weights
+    ; need to compare child with all other children to determine which
+    ; weigth is deviating
+  )
+)
