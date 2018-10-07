@@ -151,5 +151,37 @@
             :weight "(41)"
             :children ["fwft"]})         
     )
-  )  
+  )
+)
+(deftest findUnbalancedChildTest
+         (testing "padx (45)"
+                  "tknk (41) -> ugml, padx"
+                  "ugml (68)"
+                  (is (= (core/findUnbalancedChild :tknk [68 45]
+                                                   {:tknk {:name "tknk", :weight "(41)", :children ["ugml" "padx"]},
+                                                    :ugml {:name "ugml", :weight "(68)", :children []},
+                                                    :padx {:name "padx", :weight "(45)", :children []}})
+                         {:name "padx", :weight "(45)", :children [] :diff -23})
+                  )
+         )
+)
+(deftest balanceTreeTest
+ (testing "root (5) -> fwft tknk" "fwft (7) -> fgjk klsd" "tknk (15)" "fgjk (5)" "klsd (5)"
+  (is (= (core/balanceTree ["root (5) -> fwft, tknk"
+                            "fwft (7) -> fgjk, klsd"
+                            "tknk (15)"
+                            "fgjk (5)"
+                            "klsd (5)"])
+         {:name "fwft", :weight "(7)", :children ["fgjk" "klsd"] :diff -2})
+  )
+ )
+ (testing "root (5) -> fwft tknk" "fwft (5) -> fgjk klsd" "tknk (15)" "fgjk (5)" "klsd (5)"
+  (is (= (core/balanceTree ["root (5) -> fwft, tknk"
+                                            "fwft (5) -> fgjk, klsd"
+                                            "tknk (15)"
+                                            "fgjk (5)"
+                                            "klsd (5)"])
+         35)
+  )
+ )
 )
