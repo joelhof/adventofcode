@@ -274,42 +274,47 @@
 
 (defn intWeight
   [node]
-  (Integer/valueOf (re-find #"\d+" (:weight node)))
+    (Integer/valueOf (re-find #"\d+" (:weight node)))
 )
 
 (defn findUnbalancedChild
-  [root childWeights nodes]
-      (if (= 2 (count childWeights))
-        (assoc (first (sort-by #(intWeight %) (map #((keyword %) nodes) (:children (root nodes)))))
-          :diff (reduce - (sort childWeights)))
-        )
-     ; (let [fq (frequencies [56 66 66])])
-     ; (- (ffirst (sort-by val (frequencies [56 66 66])))
-     ;(first (second (sort-by val (frequencies [56 66 66])))))
+      [root childWeights nodes]
+      (let [weights (sort-by val (frequencies childWeights))
+            unbalancedWeight (ffirst weights)
+            unbalancedChild (filter #(= (:totalWeight %) unbalancedWeight)
+                                    (map #((keyword %) nodes) (:children (root nodes))))
+            ]
+           (assoc (first unbalancedChild) :diff (reduce - (map first weights)))
+           )
+)
+
+(defn setTotalWeight!
+  [nodes n totalWeight]
+      (swap! nodes assoc-in [n :totalWeight] totalWeight)
+      (:totalWeight (n @nodes))
 )
 
 (defn balance
   ""
   [root nodes]
-      (println root (:children (root nodes)))
-      (if (empty? (:children (root nodes)))
-         (intWeight  (root nodes))
+      (if (empty? (:children (root @nodes)))
+         (setTotalWeight! nodes root (intWeight (root @nodes)))
          (let [childWeights (reduce conj []
-                       (map #(balance (keyword %) nodes) (:children (root nodes))))]
+                       (map #(balance (keyword %) nodes) (:children (root @nodes))))]
               (if (> (count (frequencies childWeights)) 1)
-                (findUnbalancedChild root childWeights nodes)
-                (reduce + (intWeight (root nodes)) childWeights)
+                (findUnbalancedChild root childWeights @nodes)
+                (setTotalWeight! nodes root (reduce + (intWeight (root @nodes)) childWeights))
               )
          )
-         )
       )
+)
 
 (defn balanceTree
       [nodeStrings]
-      (let [nodeMap (into {}
-                        (for [n (map parseNode nodeStrings)]
-                             [(keyword (:name n)) n]))
+      (let [nodeMap (atom (into {}
+                                (for [n (map parseNode nodeStrings)]
+                                     [(keyword (:name n)) n])))
             root (findRoot nodeStrings)]
            (balance (keyword (:name root)) nodeMap)
-           )
+      )
 )

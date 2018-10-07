@@ -168,11 +168,11 @@
 (deftest balanceTreeTest
  (testing "root (5) -> fwft tknk" "fwft (7) -> fgjk klsd" "tknk (15)" "fgjk (5)" "klsd (5)"
   (is (= (core/balanceTree ["root (5) -> fwft, tknk"
-                            "fwft (7) -> fgjk, klsd"
+                            "fwft (3) -> fgjk, klsd"
                             "tknk (15)"
                             "fgjk (5)"
                             "klsd (5)"])
-         {:name "fwft", :weight "(7)", :children ["fgjk" "klsd"] :diff -2})
+         {:name "fwft", :weight "(3)", :children ["fgjk" "klsd"] :totalWeight 13 :diff -2})
   )
  )
  (testing "root (5) -> fwft tknk" "fwft (5) -> fgjk klsd" "tknk (15)" "fgjk (5)" "klsd (5)"
@@ -183,5 +183,32 @@
                                             "klsd (5)"])
          35)
   )
+ )
+ (testing "root (5) -> fwft tknk" "fwft (7) -> fgjk klsd" "tknk (15)" "fgjk (5)" "klsd (5)"
+   (is (= (core/balanceTree ["root (5) -> fwft, tknk, klpn"
+                                            "fwft (7) -> fgjk, klsd"
+                                            "tknk (15)"
+                                            "fgjk (5)"
+                                            "klsd (5)"
+                                            "klpn (15)"])
+          {:name "fwft", :weight "(7)", :children ["fgjk" "klsd"] :totalWeight 17 :diff 2})
+   )
+ )
+ (testing "Test case from website"
+   (is (= (core/balanceTree ["pbga (66)"
+                             "xhth (57)"
+                             "ebii (61)"
+                             "havc (66)"
+                             "ktlj (57)"
+                             "fwft (72) -> ktlj, cntj, xhth"
+                             "qoyq (66)"
+                             "padx (45) -> pbga, havc, qoyq"
+                             "tknk (41) -> ugml, padx, fwft"
+                             "jptl (61)"
+                             "ugml (68) -> gyxo, ebii, jptl"
+                             "gyxo (61)"
+                             "cntj (57)"])
+          {:name "ugml", :weight "(68)", :children ["gyxo" "ebii" "jptl"], :totalWeight 251, :diff 8})
+   )
  )
 )
