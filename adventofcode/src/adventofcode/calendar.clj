@@ -62,3 +62,13 @@
   (println "Day Seven, part 1, finding tree root...")
   (:name (core/findRoot (string/split-lines (slurp "resources/day7input1.txt"))))
 )
+
+(defn daySevenPart2
+  []
+  (println "Day Seven, part 2, finding unbalanced node...")
+  (let [unbalancedNode (core/balanceTree (string/split-lines (slurp "resources/day7input1.txt")))
+        ]
+       (println "Unbalanced node needs to weigh:")
+       (- (core/intWeight unbalancedNode) (:diff unbalancedNode))
+       )
+      )
