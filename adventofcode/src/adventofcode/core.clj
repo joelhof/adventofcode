@@ -285,7 +285,7 @@
                                     (map #((keyword %) nodes) (:children (root nodes))))
             ]
            (assoc (first unbalancedChild) :diff (reduce - (map first weights)))
-           )
+      )
 )
 
 (defn setTotalWeight!
@@ -294,6 +294,11 @@
       (:totalWeight (n @nodes))
 )
 
+(defn unbalanced
+      [childWeights]
+      (filter #(instance? clojure.lang.PersistentArrayMap %) childWeights)
+      )
+
 (defn balance
   ""
   [root nodes]
@@ -301,9 +306,12 @@
          (setTotalWeight! nodes root (intWeight (root @nodes)))
          (let [childWeights (reduce conj []
                        (map #(balance (keyword %) nodes) (:children (root @nodes))))]
-              (if (> (count (frequencies childWeights)) 1)
-                (findUnbalancedChild root childWeights @nodes)
-                (setTotalWeight! nodes root (reduce + (intWeight (root @nodes)) childWeights))
+              (if (empty? (unbalanced childWeights))
+                (if (> (count (frequencies childWeights)) 1)
+                  (findUnbalancedChild root childWeights @nodes)
+                  (setTotalWeight! nodes root (reduce + (intWeight (root @nodes)) childWeights))
+                )
+                (first (unbalanced childWeights))
               )
          )
       )
