@@ -212,3 +212,25 @@
    )
  )
 )
+
+(deftest toPrefixTest
+  (testing "a + b -> (+ a b)"
+    (is (= (toPrefix ["a" "+" "b"]) '(+ (get r "a" 0) b)))
+  )
+  (testing "a inc 5 -> (+ a 5)"
+   (is (= (toPrefix ["a" "inc" "5"]) '(+ (get r "a" 0) 5)))
+  )
+  (testing "a dec 5 -> (- a 5)"
+    (is (= (toPrefix ["a" "dec" "5"]) '(- (get r "a" 0) 5)))
+  )
+)
+
+(deftest parseInstructionTest
+  (testing "a inc 5 if b > 1"
+    (is (= (parseInstruction "a inc 5 if b > 1")
+           '(if (> (get r "b" 0) 1) (assoc r "a" (+ (get r "a" 0) 5)))
+           )
+    )
+  )
+
+)
