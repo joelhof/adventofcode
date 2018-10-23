@@ -327,20 +327,16 @@
       )
 )
 
-(defn toExpr [str]
-      (string/join ["(" str ")"]))
+(def r (atom {}))
 
 (defn registerValue
       [x]
-      (list 'get 'r x 0)
+      (list 'get '@r x 0)
       )
 
 (defn toPrefix [expr]
       "Converts expr in the form 'a * b' to Clojure expression (* (get r a 0) b).
       Also maps operand 'inc' to '+' and 'dec' to '-'"
-      ;(toExpr (string/join " " [(string/replace
-      ;                            (string/replace (second expr) "inc" "+") "dec" "-")
-      ;                          (registerValue (first expr)) (last expr)]))
       (list (read-string (string/replace (string/replace (second expr) "inc" "+") "dec" "-"))
             (registerValue (first expr)) (read-string (last expr)))
 
@@ -350,21 +346,25 @@
       (let [ tmp (split-at 3 (string/split instrString #" "))
             condition (second tmp)
             operation (first tmp)]
-           ;(toExpr (string/join " " [
-           ;                          (first condition)
-           ;                          (toPrefix (rest condition))
-           ;                          (list 'assoc 'r (first operation)
-           ;                            (toPrefix operation) 0)
-           ;                          ])
-           ;        )
            (list (read-string (first condition))
                  (toPrefix (rest condition))
-                 (list 'assoc 'r (first operation) (toPrefix operation))
+                 (list 'assoc '@r (first operation) (toPrefix operation))
                  )
            )
       )
 
 (defn evaluateInstruction
-      [register instr]
-      (assoc register (str (first instr)) (eval (read-string (parseInstruction instr))))
+      [instr]
+      ;(println (parseInstruction instr))
+      (eval (parseInstruction instr))
+)
+(defn updateRegister! [register]
+      (if (nil? register)
+         @r
+        (reset! r register)
+        )
+      )
+(defn evaluateInstructions [instructions]
+
+     (reduce #(max (val %1) (val %2)) (last (doall (map #(updateRegister! (evaluateInstruction %)) instructions))))
 )

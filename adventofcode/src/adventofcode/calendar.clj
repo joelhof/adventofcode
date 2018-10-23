@@ -1,5 +1,5 @@
 (ns adventofcode.calendar
-  (:require [adventofcode.core :as core]
+  (:require [adventofcode.core :as core :refer [r] :rename {r r}]
             [clojure.string :as string])
 )
 
@@ -72,3 +72,8 @@
        (- (core/intWeight unbalancedNode) (:diff unbalancedNode))
        )
       )
+
+(defn dayEightPart1
+      []
+      (println "Day eight, part 1, find max register value")
+      (core/evaluateInstructions (string/split-lines (slurp "resources/day8input1.txt"))))
