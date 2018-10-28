@@ -215,13 +215,13 @@
 
 (deftest toPrefixTest
   (testing "a + b -> (+ a b)"
-    (is (= (core/toPrefix ["a" "+" "b"]) '(+ (get r "a" 0) b)))
+    (is (= (core/toPrefix ["a" "+" "b"]) '(+ (get @r "a" 0) b)))
   )
   (testing "a inc 5 -> (+ a 5)"
-   (is (= (core/toPrefix ["a" "inc" "5"]) '(+ (get r "a" 0) 5)))
+   (is (= (core/toPrefix ["a" "inc" "5"]) '(+ (get @r "a" 0) 5)))
   )
   (testing "a dec 5 -> (- a 5)"
-    (is (= (core/toPrefix ["a" "dec" "5"]) '(- (get r "a" 0) 5)))
+    (is (= (core/toPrefix ["a" "dec" "5"]) '(- (get @r "a" 0) 5)))
   )
 )
 
@@ -232,6 +232,7 @@
            )
     )
   )
+  
 )
 
 (deftest evaluateInstructionTest
