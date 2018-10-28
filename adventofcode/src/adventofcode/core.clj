@@ -337,13 +337,18 @@
 (defn toPrefix [expr]
       "Converts expr in the form 'a * b' to Clojure expression (* (get r a 0) b).
       Also maps operand 'inc' to '+' and 'dec' to '-'"
-      (list (read-string (string/replace (string/replace (second expr) "inc" "+") "dec" "-"))
+      (list (-> (second expr)
+                (string/replace "inc" "+")
+                (string/replace  "dec" "-")
+                (string/replace  "==" "=")
+                (read-string )
+                )
             (registerValue (first expr)) (read-string (last expr)))
 
       )
 
 (defn parseInstruction [instrString]
-      (let [ tmp (split-at 3 (string/split instrString #" "))
+      (let [tmp (split-at 3 (string/split instrString #" "))
             condition (second tmp)
             operation (first tmp)]
            (list (read-string (first condition))

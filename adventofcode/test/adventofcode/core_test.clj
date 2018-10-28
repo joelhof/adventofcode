@@ -228,11 +228,16 @@
 (deftest parseInstructionTest
   (testing "a inc 5 if b > 1"
     (is (= (core/parseInstruction "a inc 5 if b > 1")
-           '(if (> (get r "b" 0) 1) (assoc r "a" (+ (get r "a" 0) 5)))
+           '(if (> (get @r "b" 0) 1) (assoc @r "a" (+ (get @r "a" 0) 5)))
            )
     )
   )
-  
+  (testing "a inc 5 if b == 1"
+    (is (= (core/parseInstruction "a inc 5 if b == 1")
+            '(if (= (get @r "b" 0) 1) (assoc @r "a" (+ (get @r "a" 0) 5)))
+        )
+    )
+  )
 )
 
 (deftest evaluateInstructionTest
