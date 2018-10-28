@@ -374,13 +374,32 @@
       ;(println (parseInstruction instr))
       (eval (parseInstruction instr))
 )
+
 (defn updateRegister! [register]
       (if (nil? register)
          @r
         (reset! r register)
         )
-      )
-(defn evaluateInstructions [instructions]
+)
 
-     (reduce #(max (val %1) (val %2)) (last (doall (map #(updateRegister! (evaluateInstruction %)) instructions))))
+(defn evaluateInstructions
+      [instructions]
+   (doall (map #(updateRegister! (evaluateInstruction %)) instructions))
+)
+
+
+(defn currentMaxRegisterValue
+      [instructions]
+      (apply max (map val (last (evaluateInstructions instructions)))
+       )
+)
+
+(defn allTimeMaxRegisterValue
+      [instructions]
+      (->> instructions
+          (evaluateInstructions)
+          (mapcat #(map val %))
+          (apply max)
+      )
+
 )

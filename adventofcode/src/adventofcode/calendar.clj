@@ -76,4 +76,9 @@
 (defn dayEightPart1
       []
       (println "Day eight, part 1, find max register value")
-      (core/evaluateInstructions (string/split-lines (slurp "resources/day8input1.txt"))))
+      (core/currentMaxRegisterValue (string/split-lines (slurp "resources/day8input1.txt"))))
+
+(defn dayEightPart2
+      []
+      (println "Day eight, part 2, find all time max register value")
+      (core/allTimeMaxRegisterValue (string/split-lines (slurp "resources/day8input1.txt"))))
