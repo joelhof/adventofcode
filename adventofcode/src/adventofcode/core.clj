@@ -334,6 +334,17 @@
       (list 'get '@r x 0)
       )
 
+(defn negate [expr]
+      "expr is list. If first character is !, negate expr, otherwise return expr"
+      (if (-> expr
+              (first)
+              (str)
+              (.startsWith "!"))
+        (cons 'not (list (cons '= (rest expr))))
+        expr
+      )
+)
+
 (defn toPrefix [expr]
       "Converts expr in the form 'a * b' to Clojure expression (* (get r a 0) b).
       Also maps operand 'inc' to '+' and 'dec' to '-'"
@@ -343,16 +354,16 @@
                 (string/replace  "==" "=")
                 (read-string )
                 )
-            (registerValue (first expr)) (read-string (last expr)))
-
+            (registerValue (first expr)) (read-string (last expr))
       )
+)
 
 (defn parseInstruction [instrString]
       (let [tmp (split-at 3 (string/split instrString #" "))
             condition (second tmp)
             operation (first tmp)]
            (list (read-string (first condition))
-                 (toPrefix (rest condition))
+                 (negate (toPrefix (rest condition)))
                  (list 'assoc '@r (first operation) (toPrefix operation))
                  )
            )
