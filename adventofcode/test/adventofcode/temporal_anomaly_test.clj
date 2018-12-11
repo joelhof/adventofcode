@@ -2,7 +2,6 @@
   (:require [clojure.test :refer :all]
     [adventofcode.eighteen.temporal-anomaly :refer :all :as core]))
 
-
 (deftest letterCountTest
   (testing "abcdef contains no letters that appear exactly two or three times"
     (is (= (core/letterCount "abcdef") [0 0]))
@@ -30,3 +29,30 @@
                                       "bababc"]) 6))
   )
 )
+
+(deftest compareStringTest
+  (testing "compare 'abcde' 'axcye'"
+    (is (= (core/hammingDistance "abcde" "axcye") 2))
+  )
+)
+
+(deftest areaTest
+  (testing "#1 @ 1,3: 2x2"
+    (is (= (core/area "#1" 1 3 2 2) {[3 1] ["#1"], [4 1] ["#1"], [3 2] ["#1"], [4 2] ["#1"]}))
+  )
+)
+
+(deftest readClaimTest
+  (testing "#1 @ 1,3: 2x2"
+    (is (= (core/readClaim "#1 @ 1,3: 2x2") ["#1" 1 3 2 2]))
+  )
+)
+
+;(deftest getDayTest
+;  (testing "[1518-08-19 00:32] wakes up"
+;    (is (= (getDay "[1518-08-19 00:32] wakes up"))))
+;  (testing "[1518-06-20 00:54] falls asleep"
+;    (is (= (getDay "[1518-06-20 00:54] falls asleep"))))
+;  (testing "[1518-04-13 00:00] Guard #2113 begins shift"
+;    (is (= (getDay "[1518-04-13 00:00] Guard #2113 begins shift"))))
+;)
