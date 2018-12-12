@@ -1,6 +1,7 @@
 (ns adventofcode.eighteen.temporal-anomaly
     (:require [clojure.string :as string])
-    (:require [clojure.set :as clojure.set]))
+    (:require [clojure.set :as clojure.set])
+    (:import (java.time.format DateTimeFormatter) (java.time LocalDateTime)))
 
 (defn freq
       []
@@ -141,7 +142,7 @@
   )
 )
 
-(def dayThreePart1
+(defn dayThreePart1 []
   (->> (slurp "resources/eighteen/dayThree.txt")
        (string/split-lines )
        (mapv readClaim )
@@ -150,11 +151,29 @@
        )
 )
 
-(def dayThreePart2
+(defn dayThreePart2 []
   (->> (slurp "resources/eighteen/dayThree.txt")
        (string/split-lines )
        (mapv readClaim )
        (findIntactClaim )
        (println "Day 3, part 2:" ,,,)
        )
+)
+
+(defn parseDateTime
+  [datetime]
+  (LocalDateTime/parse datetime (DateTimeFormatter/ofPattern "yyyy-MM-dd HH:mm"))
+)
+
+(defn extractDateTimeStr
+  [s]
+   (second (re-find #"\[(.*)\]" s))
+)
+
+(defn dayFourPart1 []
+      (->> "resources/eighteen/dayFour.txt"
+        (slurp )
+        (string/split-lines )
+        (sort-by #(parseDateTime (extractDateTimeStr %)) )
+      )
 )
