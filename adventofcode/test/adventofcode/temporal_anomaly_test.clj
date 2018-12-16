@@ -48,11 +48,14 @@
   )
 )
 
-;(deftest getDayTest
-;  (testing "[1518-08-19 00:32] wakes up"
-;    (is (= (getDay "[1518-08-19 00:32] wakes up"))))
-;  (testing "[1518-06-20 00:54] falls asleep"
-;    (is (= (getDay "[1518-06-20 00:54] falls asleep"))))
-;  (testing "[1518-04-13 00:00] Guard #2113 begins shift"
-;    (is (= (getDay "[1518-04-13 00:00] Guard #2113 begins shift"))))
-;)
+(deftest recurUntilEventsAreExhausted
+  (testing "Recur until Events are exhausted, return state map"
+    (is (= (core/parseEvents ["[1518-07-04 23:58] Guard #1213 begins shift"
+                              "[1518-07-05 00:53] falls asleep"
+                              "[1518-07-05 00:58] wakes up"
+                              "[1518-07-06 00:00] Guard #2777 begins shift"
+                              "[1518-07-06 00:25] falls asleep"
+                              "[1518-07-06 00:38] wakes up"] {:i 0})
+           {:i 6}))
+  )
+)

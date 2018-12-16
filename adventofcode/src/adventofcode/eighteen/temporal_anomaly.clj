@@ -170,6 +170,25 @@
    (second (re-find #"\[(.*)\]" s))
 )
 
+; if string is '#Id begins shift' -> parse id, set current id.
+; if string is 'falls asleep' store hh:mm
+; if string is 'wakes up' -> calculate and store sleep time in array of size 60.
+; assoc sleep time array with guard id.
+; keep state in map: {current:#id, sleep: nil or 'hh:mm', sleepTimes:{ #ids: [] }}
+; recur until event list is exhausted
+
+(defn parseEvents
+  [events state]
+  (loop [events events, state state]
+    (if (empty? events)
+          state  ; we're done
+          (recur (rest events) (assoc state :i (inc (state :i))))
+    )
+  )
+)
+
+
+
 (defn dayFourPart1 []
       (->> "resources/eighteen/dayFour.txt"
         (slurp )
