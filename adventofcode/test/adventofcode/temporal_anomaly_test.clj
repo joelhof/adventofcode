@@ -1,6 +1,6 @@
 (ns adventofcode.temporal-anomaly-test
-  (:require [clojure.test :refer :all]
-    [adventofcode.eighteen.temporal-anomaly :refer :all :as core]))
+    (:require [clojure.test :refer :all]
+      [adventofcode.eighteen.temporal-anomaly :refer :all :as core]) (:import (java.time LocalDateTime) (java.time.format DateTimeFormatter)))
 
 (deftest letterCountTest
   (testing "abcdef contains no letters that appear exactly two or three times"
@@ -45,6 +45,26 @@
 (deftest readClaimTest
   (testing "#1 @ 1,3: 2x2"
     (is (= (core/readClaim "#1 @ 1,3: 2x2") ["#1" 1 3 2 2]))
+  )
+)
+
+(deftest parseEventTest
+  (testing "[1518-07-04 23:58] Guard #1213 begins shift"
+            (is (= (core/parseEvent "[1518-07-04 23:58] Guard #1213 begins shift" {})
+                   {:current "#1213"}))
+            )
+  (testing "[1518-07-04 23:58] Guard #1213 begins shift"
+             (is (= (core/parseEvent "[1518-11-22 00:42] falls asleep" {:current "#1213"})
+                    {:current "#1213",
+                     :sleep (LocalDateTime/parse "1518-11-22 00:42"
+                                                 (DateTimeFormatter/ofPattern "yyyy-MM-dd HH:mm"))})
+             )
+  )
+  (testing "[1518-11-22 00:53] wakes up"
+           (is (= (core/parseEvent "[1518-11-22 00:53] wakes up"
+                                   (parseEvent "[1518-11-22 00:42] falls asleep" {:current "#2141"}))
+                  {:current "#2141" :sleep nil :sleepTimes { "#2141" {46 1, 48 1, 50 1, 43 1, 44 1, 51 1, 47 1, 45 1, 53 1, 52 1, 42 1, 49 1}}})
+               )
   )
 )
 

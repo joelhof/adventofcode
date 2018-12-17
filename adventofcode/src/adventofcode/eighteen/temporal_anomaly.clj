@@ -1,7 +1,7 @@
 (ns adventofcode.eighteen.temporal-anomaly
     (:require [clojure.string :as string])
     (:require [clojure.set :as clojure.set])
-    (:import (java.time.format DateTimeFormatter) (java.time LocalDateTime)))
+    (:import (java.time.format DateTimeFormatter) (java.time LocalDateTime) (java.time.temporal ChronoUnit)))
 
 (defn freq
       []
@@ -177,6 +177,41 @@
 ; keep state in map: {current:#id, sleep: nil or 'hh:mm', sleepTimes:{ #ids: [] }}
 ; recur until event list is exhausted
 
+(defn getGuard
+  [s]
+  (re-find #"#\d{4}" s)
+)
+
+(defn inc-default
+  [x]
+  (inc (or x 0))
+)
+
+(defn sleptBetween
+      [sleep sleepLength]
+      (reduce #(update %1 %2 inc-default) sleep sleepLength)
+)
+
+(defn addSleepTime
+  [event state]
+  (let [
+        sleepLength (range (.getMinute (:sleep state))
+                        (inc (.getMinute (parseDateTime (extractDateTimeStr event)))))
+        newState (update-in state [:sleepTimes (:current state)] sleptBetween sleepLength)
+        ]
+        (assoc newState :sleep nil)
+       )
+)
+
+(defn parseEvent
+  [event state]
+  (cond
+    (.contains event "begins shift") (assoc state :current (getGuard event))
+    (.contains event "falls asleep") (assoc state :sleep (parseDateTime (extractDateTimeStr event)))
+    (.contains event "wakes up") (addSleepTime event state)
+    :else state)
+)
+
 (defn parseEvents
   [events state]
   (loop [events events, state state]
@@ -186,8 +221,6 @@
     )
   )
 )
-
-
 
 (defn dayFourPart1 []
       (->> "resources/eighteen/dayFour.txt"
