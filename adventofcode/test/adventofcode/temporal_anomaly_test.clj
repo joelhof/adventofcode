@@ -70,12 +70,13 @@
 
 (deftest recurUntilEventsAreExhausted
   (testing "Recur until Events are exhausted, return state map"
-    (is (= (core/parseEvents ["[1518-07-04 23:58] Guard #1213 begins shift"
-                              "[1518-07-05 00:53] falls asleep"
-                              "[1518-07-05 00:58] wakes up"
-                              "[1518-07-06 00:00] Guard #2777 begins shift"
-                              "[1518-07-06 00:25] falls asleep"
-                              "[1518-07-06 00:38] wakes up"] {:i 0})
-           {:i 6}))
+    (is (= (:current (core/parseEvents {} ["[1518-07-04 23:58] Guard #1213 begins shift"
+                                           "[1518-07-05 00:53] falls asleep"
+                                           "[1518-07-05 00:58] wakes up"
+                                           "[1518-07-06 00:00] Guard #2777 begins shift"
+                                           "[1518-07-06 00:25] falls asleep"
+                                           "[1518-07-06 00:38] wakes up"] )
+             ) "#2777"
+           ))
   )
 )

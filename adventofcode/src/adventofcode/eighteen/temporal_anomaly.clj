@@ -179,7 +179,7 @@
 
 (defn getGuard
   [s]
-  (re-find #"#\d{4}" s)
+  (re-find #"#\d*" s)
 )
 
 (defn inc-default
@@ -209,15 +209,15 @@
     (.contains event "begins shift") (assoc state :current (getGuard event))
     (.contains event "falls asleep") (assoc state :sleep (parseDateTime (extractDateTimeStr event)))
     (.contains event "wakes up") (addSleepTime event state)
-    :else state)
+    :else (throw (RuntimeException. "Unmatched event type")))
 )
 
 (defn parseEvents
-  [events state]
+  [state events]
   (loop [events events, state state]
     (if (empty? events)
-          state  ; we're done
-          (recur (rest events) (assoc state :i (inc (state :i))))
+          state
+          (recur (rest events) (parseEvent (first events) state))
     )
   )
 )
@@ -226,6 +226,7 @@
       (->> "resources/eighteen/dayFour.txt"
         (slurp )
         (string/split-lines )
-        (sort-by #(parseDateTime (extractDateTimeStr %)) )
+        (sort-by #(parseDateTime (extractDateTimeStr %)))
+        (parseEvents {} ,,,)
       )
 )
