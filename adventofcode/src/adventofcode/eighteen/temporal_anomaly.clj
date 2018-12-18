@@ -222,11 +222,27 @@
   )
 )
 
+(defn sumSleepTime
+      [e]
+      (reduce + (vals (val e)))
+)
+
+(defn calculateAnswer
+      [m]
+      (* (first (last (sort-by val (val m))))
+         (Integer/valueOf (string/replace (key m) "#" "")))
+)
+
 (defn dayFourPart1 []
       (->> "resources/eighteen/dayFour.txt"
-        (slurp )
-        (string/split-lines )
-        (sort-by #(parseDateTime (extractDateTimeStr %)))
+        (slurp ,,,)
+        (string/split-lines ,,,)
+        (sort-by #(parseDateTime (extractDateTimeStr %)) ,,,)
         (parseEvents {} ,,,)
+        (:sleepTimes ,,,)
+        (sort-by sumSleepTime ,,,)
+        (last ,,,)
+        (calculateAnswer ,,,)
+        (println "Day 4, part 1: The Guard ID multiplied by the day is" ,,,)
       )
 )
