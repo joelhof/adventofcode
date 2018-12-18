@@ -229,20 +229,32 @@
 
 (defn calculateAnswer
       [m]
+      (println (first (last (sort-by val (val m)))))
+      (println (Integer/valueOf (string/replace (key m) "#" "")))
       (* (first (last (sort-by val (val m))))
          (Integer/valueOf (string/replace (key m) "#" "")))
 )
 
-(defn dayFourPart1 []
+(defn findGuard-by
+      [f]
       (->> "resources/eighteen/dayFour.txt"
-        (slurp ,,,)
-        (string/split-lines ,,,)
-        (sort-by #(parseDateTime (extractDateTimeStr %)) ,,,)
-        (parseEvents {} ,,,)
-        (:sleepTimes ,,,)
-        (sort-by sumSleepTime ,,,)
-        (last ,,,)
-        (calculateAnswer ,,,)
-        (println "Day 4, part 1: The Guard ID multiplied by the day is" ,,,)
+           (slurp ,,,)
+           (string/split-lines ,,,)
+           (sort-by #(parseDateTime (extractDateTimeStr %)) ,,,)
+           (parseEvents {} ,,,)
+           (:sleepTimes ,,,)
+           (sort-by f ,,,)
+           (last ,,,)
+           (calculateAnswer ,,,)
       )
+)
+
+(defn dayFourPart1 []
+      (println "Day 4, part 1: The Guard ID multiplied by the day is"
+               (findGuard-by sumSleepTime))
+)
+
+(defn dayFourPart2 []
+      (println "Day 4, part 2: The Guard ID multiplied by the day is"
+               (findGuard-by #(last (sort (vals (val %))))))
 )
