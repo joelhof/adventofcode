@@ -80,3 +80,9 @@
            ))
   )
 )
+
+(deftest oppositePolarityTest
+  (testing "aA annihilates each other"
+    (= (core/polymer-reaction "aA") "")
+  )
+)

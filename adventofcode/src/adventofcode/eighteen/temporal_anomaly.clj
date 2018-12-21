@@ -251,10 +251,28 @@
 
 (defn dayFourPart1 []
       (println "Day 4, part 1: The Guard ID multiplied by the day is"
-               (findGuard-by sumSleepTime))
+               (findGuard-by #(reduce + (vals (val %)))))
 )
 
 (defn dayFourPart2 []
       (println "Day 4, part 2: The Guard ID multiplied by the day is"
                (findGuard-by #(last (sort (vals (val %))))))
+)
+
+; day five
+
+; scan input char by char
+; if 2 adjacent chars are found
+
+(defn reacts?
+  [a b]
+  (and (not (= a b)) (.equalsIgnoreCase (str a) (str b)))
+)
+
+(defn polymer-reaction
+  [s]
+  (if (reacts? (first s) (second s))
+    (rest (rest s))
+    s
+    )
 )
