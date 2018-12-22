@@ -328,7 +328,7 @@
 (defn alchemical-reduction
   [path]
   (->> path
-      ;(slurp ,,,)
+      (slurp ,,,)
       (seq ,,,)
       (apply list  ,,,)
       (polymer-reactions ,,,)
@@ -336,10 +336,7 @@
   )
 )
 
-(defn polymer-reaction
-  [s]
-  (if (reacts? (first s) (second s))
-    (rest (rest s))
-    s
-    )
+(defn dayFivePart1 []
+      (println "Day 5, part 1: the length of the polymer is:")
+      (count (alchemical-reduction "resources/eighteen/dayFive.txt"))
 )
