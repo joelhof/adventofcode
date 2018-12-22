@@ -86,10 +86,10 @@
     (is (= (core/polymer-reactions (apply list (seq "aA"))) ()))
   )
   (testing "abBA annihilates"
-    (is (= (core/polymer-reactions (apply list (seq "abB"))) ()))
+    (is (= (core/polymer-reactions (apply list (seq "abBA"))) ()))
   )
   (testing "abAB does not react"
-    (is (= (core/polymer-reactions (apply list (seq "abAB"))) [\a \b \A]))
+    (is (= (core/polymer-reactions (apply list (seq "abAB"))) '(\B \A \b \a)))
   )
 )
 

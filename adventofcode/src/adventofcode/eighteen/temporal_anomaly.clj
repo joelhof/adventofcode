@@ -301,21 +301,17 @@
 
 (defn polymer-reactions
   [stack]
-  (println "new!")
-  (loop [current (peek stack)
-        previous nil
-        s (pop stack)
-        polymers '()]
-        (println current previous s polymers)
-    (if (or (= \newline current) (empty? s))
+  (loop [unreacted stack
+         polymers '()]
+        ;(println unreacted)
+        ;(println polymers)
+    (if (or (= \newline (peek unreacted)) (empty? unreacted))
         polymers
-        (if (reacts? current (peek s))
-          ; reaction! discard current and pop stack again
-          (let [popped (pop s)]
-               (recur previous (peek polymers) popped (pop-or-empty polymers))
-          )
-          ; if no reaction, store current as previous
-          (recur (peek s) current (pop s) (conj polymers current))
+        (if (reacts? (peek unreacted) (peek polymers))
+          ; reaction! pop unreacted and pop polymers
+          (recur (pop unreacted) (pop-or-empty polymers))
+          ; if no reaction, store head of unreacted in polymers, pop unreacted
+          (recur (pop unreacted) (conj polymers (peek unreacted)))
         )
     )
   )
@@ -324,8 +320,8 @@
 (defn format-polymers
   [polymers]
    (-> polymers
-       ;(reverse ,,,)
-     (string/join ,,,)
+       (reverse ,,,)
+       (string/join ,,,)
    )
 )
 
