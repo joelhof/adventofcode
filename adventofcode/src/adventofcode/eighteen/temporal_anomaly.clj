@@ -276,25 +276,6 @@
   (and (not (= a b)) (.equalsIgnoreCase (str a) (str b)))
 )
 
-;(defn read-polymers
-;  [rdr]
-;  (loop [^Integer c (.read rdr)
-;         read ]
-;    (when-not (= -1 c)
-;      (do (println (char c))
-;          (recur (.read rdr) (cons (char c) (lazy-seq))
-;      )
-;    )
-;  )
-;)
-;
-;(defn alchemical-reduction
-;  [path]
-;  (with-open [rdr (clojure.java.io/reader "resources/eighteen/dayFive.txt")]
-;    (read-polymers rdr)
-;  )
-;)
-
 (defn pop-or-empty
       [stack]
       (if (empty? stack) (list) (pop stack)))
@@ -303,12 +284,9 @@
   [stack]
   (loop [unreacted stack
          polymers '()]
-        ;(println unreacted)
-        ;(println polymers)
     (if (or (= \newline (peek unreacted)) (empty? unreacted))
         polymers
         (if (reacts? (peek unreacted) (peek polymers))
-          ; reaction! pop unreacted and pop polymers
           (recur (pop unreacted) (pop-or-empty polymers))
           ; if no reaction, store head of unreacted in polymers, pop unreacted
           (recur (pop unreacted) (conj polymers (peek unreacted)))
@@ -326,9 +304,8 @@
 )
 
 (defn alchemical-reduction
-  [path]
-  (->> path
-      (slurp ,,,)
+  [polymer-str]
+  (->> polymer-str
       (seq ,,,)
       (apply list  ,,,)
       (polymer-reactions ,,,)
@@ -336,7 +313,30 @@
   )
 )
 
+(defn clean-polymer
+      [polymer-str remove]
+      (string/replace polymer-str
+                      (re-pattern (string/join [(.toLowerCase (str remove)) "|" (.toUpperCase (str remove))]))
+                      ""
+      )
+)
+
+(defn find-shortest-polymer
+  [input]
+  (->> input
+       (.toUpperCase ,,,)
+       (into #{} ,,,)
+       (map #(clean-polymer input %) ,,,)
+       (reduce #(min %1 (count (alchemical-reduction %2))) Integer/MAX_VALUE ,,,)
+  )
+)
+
 (defn dayFivePart1 []
       (println "Day 5, part 1: the length of the polymer is:")
-      (count (alchemical-reduction "resources/eighteen/dayFive.txt"))
+      (count (alchemical-reduction (slurp "resources/eighteen/dayFive.txt")))
+)
+
+(defn dayFivePart2 []
+  (println "Day 5, part 2: The shortest cleaned polymer is:")
+  (find-shortest-polymer (slurp "resources/eighteen/dayFive.txt"))
 )

@@ -98,3 +98,9 @@
     (is (= (core/alchemical-reduction "dabAcCaCBAcCcaDA") "dabCBAcaDA"))
   )
 )
+
+(deftest polymer-clean-test
+  (testing "clean dabAcCaCBAcCcaDA from a and A"
+    (is (= (core/clean-polymer "dabAcCaCBAcCcaDA" \a)) "dbcCCBcCcD")
+  )
+)
