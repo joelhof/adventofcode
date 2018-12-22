@@ -83,6 +83,18 @@
 
 (deftest oppositePolarityTest
   (testing "aA annihilates each other"
-    (= (core/polymer-reaction "aA") "")
+    (is (= (core/polymer-reactions (apply list (seq "aA"))) ()))
+  )
+  (testing "abBA annihilates"
+    (is (= (core/polymer-reactions (apply list (seq "abB"))) ()))
+  )
+  (testing "abAB does not react"
+    (is (= (core/polymer-reactions (apply list (seq "abAB"))) [\a \b \A]))
+  )
+)
+
+(deftest polymer-reaction-test
+  (testing "dabAcCaCBAcCcaDA"
+    (is (= (core/alchemical-reduction "dabAcCaCBAcCcaDA") "dabCBAcaDA"))
   )
 )

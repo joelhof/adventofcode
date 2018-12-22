@@ -1,7 +1,11 @@
 (ns adventofcode.eighteen.temporal-anomaly
     (:require [clojure.string :as string])
     (:require [clojure.set :as clojure.set])
-    (:import (java.time.format DateTimeFormatter) (java.time LocalDateTime) (java.time.temporal ChronoUnit)))
+    (:import (java.time.format DateTimeFormatter)
+             (java.time LocalDateTime)
+             (java.time.temporal ChronoUnit))
+
+    )
 
 (defn freq
       []
@@ -262,11 +266,78 @@
 ; day five
 
 ; scan input char by char
-; if 2 adjacent chars are found
+; compare current char to next
+; if reaction occurs, throw away current and next
+;   and set current to previous
+; recur
 
 (defn reacts?
   [a b]
   (and (not (= a b)) (.equalsIgnoreCase (str a) (str b)))
+)
+
+;(defn read-polymers
+;  [rdr]
+;  (loop [^Integer c (.read rdr)
+;         read ]
+;    (when-not (= -1 c)
+;      (do (println (char c))
+;          (recur (.read rdr) (cons (char c) (lazy-seq))
+;      )
+;    )
+;  )
+;)
+;
+;(defn alchemical-reduction
+;  [path]
+;  (with-open [rdr (clojure.java.io/reader "resources/eighteen/dayFive.txt")]
+;    (read-polymers rdr)
+;  )
+;)
+
+(defn pop-or-empty
+      [stack]
+      (if (empty? stack) (list) (pop stack)))
+
+(defn polymer-reactions
+  [stack]
+  (println "new!")
+  (loop [current (peek stack)
+        previous nil
+        s (pop stack)
+        polymers '()]
+        (println current previous s polymers)
+    (if (or (= \newline current) (empty? s))
+        polymers
+        (if (reacts? current (peek s))
+          ; reaction! discard current and pop stack again
+          (let [popped (pop s)]
+               (recur previous (peek polymers) popped (pop-or-empty polymers))
+          )
+          ; if no reaction, store current as previous
+          (recur (peek s) current (pop s) (conj polymers current))
+        )
+    )
+  )
+)
+
+(defn format-polymers
+  [polymers]
+   (-> polymers
+       ;(reverse ,,,)
+     (string/join ,,,)
+   )
+)
+
+(defn alchemical-reduction
+  [path]
+  (->> path
+      ;(slurp ,,,)
+      (seq ,,,)
+      (apply list  ,,,)
+      (polymer-reactions ,,,)
+      (format-polymers ,,,)
+  )
 )
 
 (defn polymer-reaction
