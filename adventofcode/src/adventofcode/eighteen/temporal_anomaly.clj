@@ -340,3 +340,29 @@
   (println "Day 5, part 2: The shortest cleaned polymer is:")
   (find-shortest-polymer (slurp "resources/eighteen/dayFive.txt"))
 )
+
+; day 6
+; given a point [x, y] find closest label point [A]
+; if only A is min-distance from [x y]
+;   assign [x,y] to A
+; else
+;   do nothing
+; group all points by input label
+; remove labels w. unbounded areas
+; find the label w. the most points assigned
+
+(defn manhattan
+      [[x y] [u v]]
+      (+ (Math/abs (- u x)) (Math/abs (- v y)))
+)
+
+(defn nearest-label
+  [p labels]
+      ;(reduce #(assoc %1 %2 (manhattan p %2)) {} labels)
+      (->> labels
+           (group-by #(manhattan p %) ,,,)
+           (sort ,,,)
+           (first ,,,)
+           (second ,,,)
+      )
+)

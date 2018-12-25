@@ -104,3 +104,16 @@
     (is (= (core/clean-polymer "dabAcCaCBAcCcaDA" \a)) "dbcCCBcCcD")
   )
 )
+
+(deftest find-nearest-label-test
+  (testing "[1 1] is closest to [1,3]"
+    (is (= (core/nearest-label [1 3] [[1, 1]
+                                      [1, 6]
+                                      [8, 3]
+                                      [3, 4]
+                                      [5, 5]
+                                      [8, 9]])
+           [[1 1]])
+    )
+  )
+)
