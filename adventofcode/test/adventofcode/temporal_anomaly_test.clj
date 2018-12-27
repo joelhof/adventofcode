@@ -107,7 +107,7 @@
 
 (deftest find-nearest-label-test
   (testing "[1 1] is closest to [1,3]"
-    (is (= (core/nearest-label [1 3] [[1, 1]
+    (is (= (core/nearest-labels [1 3] [[1, 1]
                                       [1, 6]
                                       [8, 3]
                                       [3, 4]
@@ -117,7 +117,7 @@
     )
   )
   (testing "Tie: [1 6] [3 4] is closest to [0 4]"
-    (is (= (core/nearest-label [0 4] [[1, 1]
+    (is (= (core/nearest-labels [0 4] [[1, 1]
                                       [1, 6]
                                       [8, 3]
                                       [3, 4]

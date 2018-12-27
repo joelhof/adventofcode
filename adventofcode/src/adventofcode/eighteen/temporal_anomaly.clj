@@ -2,8 +2,8 @@
     (:require [clojure.string :as string])
     (:require [clojure.set :as clojure.set])
     (:import (java.time.format DateTimeFormatter)
-             (java.time LocalDateTime)
-             (java.time.temporal ChronoUnit))
+      (java.time LocalDateTime)
+      (java.time.temporal ChronoUnit) (java.awt ScrollPaneAdjustable))
 
     )
 
@@ -342,6 +342,8 @@
 )
 
 ; day 6
+; Calculate grid.
+; Loop over every grid point->
 ; given a point [x, y] find closest label point [A]
 ; if only A is min-distance from [x y]
 ;   assign [x,y] to A
@@ -356,7 +358,7 @@
       (+ (Math/abs (- u x)) (Math/abs (- v y)))
 )
 
-(defn nearest-label
+(defn nearest-labels
   [p labels]
       ;(reduce #(assoc %1 %2 (manhattan p %2)) {} labels)
       (->> labels
@@ -365,4 +367,19 @@
            (first ,,,)
            (second ,,,)
       )
+)
+
+(defn nearest-label
+  [p labels]
+  (let [labels (nearest-labels p labels)]
+       (if (> (count labels) 1)
+         nil
+         (first labels)
+       )
+  )
+)
+
+(defn group-by-labels
+  [grid labels]
+  (reduce #(update %1 (nearest-label %2 labels) conj %2) {} grid)
 )
