@@ -409,16 +409,16 @@
 )
 
 (defn largest-area
-      [labels]
-      (->> labels
-           (calculate-grid ,,,)
-           (group-by-labels labels  ,,,)
-           ; remove boundary labels
-           (filter #(and (not (nil? (first %))) (interior? (first %) (grid-bounds labels))) ,,,)
-           (map #(count (val %)) ,,,)
-           (sort ,,,)
-           ;(apply max ,,,)
-      )
+  [labels]
+  (->> labels
+       (calculate-grid ,,,)
+       (group-by-labels labels  ,,,)
+       ; remove boundary labels
+       (filter #(and (not (nil? (first %))) (interior? (first %) (grid-bounds labels))) ,,,)
+       (map #(count (val %)) ,,,)
+       (sort ,,,)
+       ;(apply max ,,,)
+  )
 )
 
 (defn daySixPart1
@@ -428,5 +428,33 @@
        (string/split-lines ,,,)
        (mapv #(mapv read-string (clojure.string/split % #",")) ,,,)
        (largest-area ,,,)
+  )
+)
+
+(defn total-distance
+  [p labels]
+  (->> labels
+    (map #(manhattan p %) ,,,)
+    (reduce + ,,,)
+  )
+)
+
+(defn safe-region-area
+  [labels]
+  (->> labels
+    (calculate-grid ,,,)
+       ;(concat labels ,,,)
+    (filter #(< (total-distance % labels) 10000) ,,,)
+    (count ,,,)
+  )
+)
+
+(defn daySixPart2
+  []
+  (println "Day 6, part 2: The size of the area within 10000 steps from every label is:")
+  (->> (slurp "resources/eighteen/daySix.txt")
+       (string/split-lines ,,,)
+       (mapv #(mapv read-string (clojure.string/split % #",")) ,,,)
+       (safe-region-area ,,,)
   )
 )

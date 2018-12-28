@@ -138,3 +138,15 @@
                                [8, 9]]) 17))
   )
 )
+
+(deftest total-distance-test
+  (testing "The total manhattan distance to all labels from 4,3 is 30"
+    (is (= (core/total-distance [4 3] [[1, 1]
+                                       [1, 6]
+                                       [8, 3]
+                                       [3, 4]
+                                       [5, 5]
+                                       [8, 9]]) 30)
+     )
+  )
+)
