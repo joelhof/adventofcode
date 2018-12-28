@@ -443,7 +443,6 @@
   [labels]
   (->> labels
     (calculate-grid ,,,)
-       ;(concat labels ,,,)
     (filter #(< (total-distance % labels) 10000) ,,,)
     (count ,,,)
   )
@@ -456,5 +455,22 @@
        (string/split-lines ,,,)
        (mapv #(mapv read-string (clojure.string/split % #",")) ,,,)
        (safe-region-area ,,,)
+  )
+)
+
+; day 7, solution draft:
+; parse instruction steps into map.
+; loop: put all instructions that do not occur as a child in set of ready instructions
+; sort ready instructions
+; pick first
+; put chosen instruction key in execution order list
+; remove chosen instruction from instruction map.
+; recur
+
+(defn parse-instruction-step
+  [s instructions]
+  (let [parent (keyword (str (nth s 5)))
+        child (keyword (str (nth s 36)))]
+    (update instructions parent #(conj % child))
   )
 )

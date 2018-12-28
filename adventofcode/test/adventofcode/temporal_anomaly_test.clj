@@ -150,3 +150,12 @@
      )
   )
 )
+
+(deftest parse-instruction-step-test
+  (testing
+    (is (= (core/parse-instruction-step
+             "Step C must be finished before step A can begin." {})
+           {:C '(:A)})
+    )
+  )
+)
