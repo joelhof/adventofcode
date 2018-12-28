@@ -127,3 +127,14 @@
       )
     )
 )
+
+(deftest find-largest-finite-area-test
+  (testing "Example from instructions"
+    (is (= (core/largest-area [[1, 1]
+                               [1, 6]
+                               [8, 3]
+                               [3, 4]
+                               [5, 5]
+                               [8, 9]]) 17))
+  )
+)

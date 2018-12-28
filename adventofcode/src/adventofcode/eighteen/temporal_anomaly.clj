@@ -380,6 +380,52 @@
 )
 
 (defn group-by-labels
-  [grid labels]
+  [labels grid]
   (reduce #(update %1 (nearest-label %2 labels) conj %2) {} grid)
+)
+
+(defn grid-bounds
+      [labels]
+      (let [maxX (reduce #(max (first %2) %1) -1 labels)
+            maxY (reduce #(max (second %2) %1) -1 labels)
+            minX (reduce #(min (first %2) %1) Integer/MAX_VALUE labels)
+            minY (reduce #(min (second %2) %1) Integer/MAX_VALUE labels)]
+           [maxX maxY minX minY]
+      )
+)
+
+(defn calculate-grid
+  [labels]
+  (let [[maxX maxY minX minY] (grid-bounds labels)]
+       (points [minX minY] [maxX maxY]))
+)
+
+(defn interior?
+  [point [maxX maxY minX minY]]
+      (and (> (first point) minX)
+           (< (first point) maxX)
+           (> (second point) minY)
+           (< (second point) maxY))
+)
+
+(defn largest-area
+      [labels]
+      (->> labels
+           (calculate-grid ,,,)
+           (group-by-labels labels  ,,,)
+           ; remove boundary labels
+           (filter #(and (not (nil? (first %))) (interior? (first %) (grid-bounds labels))) ,,,)
+           (map #(count (val %)) ,,,)
+           ;(apply max ,,,)
+      )
+)
+
+(defn daySixPart1
+  []
+  (println "Day 6, part 1: The largest finite area is:")
+  (->> (slurp "resources/eighteen/daySix.txt")
+       (string/split-lines ,,,)
+       (mapv #(mapv read-string (clojure.string/split % #",")) ,,,)
+       (largest-area ,,,)
+  )
 )
