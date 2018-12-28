@@ -416,6 +416,7 @@
            ; remove boundary labels
            (filter #(and (not (nil? (first %))) (interior? (first %) (grid-bounds labels))) ,,,)
            (map #(count (val %)) ,,,)
+           (sort ,,,)
            ;(apply max ,,,)
       )
 )
