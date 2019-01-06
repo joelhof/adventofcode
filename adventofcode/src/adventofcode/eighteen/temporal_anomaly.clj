@@ -501,3 +501,7 @@
        )
   )
 )
+
+(defn daySevenPart1 []
+      (instruction-order (string/split-lines (slurp "resources/eighteen/daySeven.txt")))
+      )
