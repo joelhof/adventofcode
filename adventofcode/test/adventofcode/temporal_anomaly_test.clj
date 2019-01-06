@@ -1,6 +1,8 @@
 (ns adventofcode.temporal-anomaly-test
     (:require [clojure.test :refer :all]
-      [adventofcode.eighteen.temporal-anomaly :refer :all :as core]) (:import (java.time LocalDateTime) (java.time.format DateTimeFormatter)))
+      [adventofcode.eighteen.temporal-anomaly :refer :all :as core])
+    (:require [clojure.string :as string])
+    (:import (java.time LocalDateTime) (java.time.format DateTimeFormatter)))
 
 (deftest letterCountTest
   (testing "abcdef contains no letters that appear exactly two or three times"
@@ -156,6 +158,24 @@
     (is (= (core/parse-instruction-step
              "Step C must be finished before step A can begin." {})
            {:C '(:A)})
+    )
+  )
+)
+
+(def steps "Step C must be finished before step A can begin.\nStep C must be finished before step F can begin.\nStep A must be finished before step B can begin.\nStep A must be finished before step D can begin.\nStep B must be finished before step E can begin.\nStep D must be finished before step E can begin.\nStep F must be finished before step E can begin.")
+
+(deftest test-ready-instructions
+  (testing "Only C is ready"
+    (is (= (core/ready-steps {:C '(:F :A), :A '(:D :B), :B '(:E), :D '(:E), :F '(:E)})
+           [:C (:F :A)])
+    )
+  )
+)
+
+(deftest order-instructions-test
+  (testing "Example from instructions"
+    (is (= (core/instruction-order (string/split-lines steps))
+           "CABDFE")
     )
   )
 )

@@ -464,7 +464,7 @@
 ; sort ready instructions
 ; pick first
 ; put chosen instruction key in execution order list
-; remove chosen instruction from instruction map.
+; remove chosen instruction key from instruction map.
 ; recur
 
 (defn parse-instruction-step
@@ -472,5 +472,33 @@
   (let [parent (keyword (str (nth s 5)))
         child (keyword (str (nth s 36)))]
     (update instructions parent #(conj % child))
+  )
+)
+
+(defn ready-steps
+  [instr]
+  (let [has-prerequisite (set (flatten (map val instr)))]
+    (filter #(not (contains? has-prerequisite (key %))) instr)
+  )
+)
+
+(defn next-instruction
+      [instructions]
+      (-> (ready-steps instructions)
+          (sort ,,,)
+          (first ,,,)
+      )
+)
+
+(defn instruction-order
+  [steps]
+  (loop [instructions (reduce #(parse-instruction-step %2 %1) {} steps)
+        next (next-instruction instructions)
+        order []]
+        (println order)
+       (if (nil? next)
+         (string/join order)
+         (recur (dissoc instructions (key next)) (next-instruction (dissoc instructions (key next))) (conj order (name (key next))))
+       )
   )
 )
