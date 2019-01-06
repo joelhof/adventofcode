@@ -471,7 +471,7 @@
   [s instructions]
   (let [parent (keyword (str (nth s 5)))
         child (keyword (str (nth s 36)))]
-    (update instructions parent #(conj % child))
+    (update (update instructions child identity) parent #(conj % child))
   )
 )
 
@@ -495,7 +495,6 @@
   (loop [instructions (reduce #(parse-instruction-step %2 %1) {} steps)
         next (next-instruction instructions)
         order []]
-        (println order)
        (if (nil? next)
          (string/join order)
          (recur (dissoc instructions (key next)) (next-instruction (dissoc instructions (key next))) (conj order (name (key next))))
