@@ -504,4 +504,19 @@
 
 (defn daySevenPart1 []
       (instruction-order (string/split-lines (slurp "resources/eighteen/daySeven.txt")))
-      )
+)
+
+; day seven part 2:
+; add offset
+; get task latency, i.e order of task in alphabet
+; do same algorithm as for part 1, except:
+;    dont put tasks into execution order list immediately
+;    instead, continue to pick
+; give tasks
+
+(def alphabet "abcdefghijklmnopqrstuvwxyz")
+
+(defn task-latency
+  [task]
+    (+ 60 (inc (.indexOf alphabet (.toLowerCase task))))
+)
