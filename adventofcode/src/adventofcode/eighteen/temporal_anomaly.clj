@@ -506,17 +506,59 @@
       (instruction-order (string/split-lines (slurp "resources/eighteen/daySeven.txt")))
 )
 
+; remove chosen instruction key from instruction map.
+; recur
+
 ; day seven part 2:
-; add offset
-; get task latency, i.e order of task in alphabet
-; do same algorithm as for part 1, except:
-;    dont put tasks into execution order list immediately
-;    instead, continue to pick
-; give tasks
+; parse instruction steps into map.
+; Construct 'matrix' W(t,m), m is number of workers, t is time.
+; calculate Tmax.?
+; construct topological sort T, of S, see part 1.
+; while (not (isempty? T))
+;   remove finished jobs from T
+;   j = pop head of T. (find ready instructions)
+;   loop: pick first instruction j
+;     assign j to W(t,m)
+;     recur until all workers are busy or ready list is exhausted.
+;   recur (inc t)
+;
+; calculate makespan from W.
+; (makespan W) (apply max (map count W))
+;
 
 (def alphabet "abcdefghijklmnopqrstuvwxyz")
 
-(defn task-latency
+(def task-offset 60)
+
+(defn task-duration
   [task]
-    (+ 60 (inc (.indexOf alphabet (.toLowerCase task))))
+    (+ task-offset (inc (.indexOf alphabet (.toLowerCase task))))
+)
+
+(defn assign-jobs
+  "Assign available jobs from T to W(t,:)"
+  [W T t]
+)
+
+(defn remove-finished-jobs
+  "Removes jobs that have finished at time from T"
+  [T time]
+  (dissoc T (first (map key T)))
+)
+
+(defn parallell-schedule
+  [steps]
+  (loop [W []
+         T (instruction-order steps)
+         time 0]
+    (if (empty? T)
+      W
+      (recur (assign-jobs W T time) (remove-finished-jobs T time) (inc time))
+    )
+  )
+)
+
+(defn makespan
+  [W]
+  (apply max (map count W))
 )
