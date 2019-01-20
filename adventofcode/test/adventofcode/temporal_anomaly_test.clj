@@ -179,3 +179,13 @@
     )
   )
 )
+
+(deftest assign-job-test
+  (testing "Assign C to W(2,1)"
+    (is (= (core/assign-jobs [{[0 0] :C} {}]
+                             (reduce #(core/parse-instruction-step %2 %1) {} (string/split-lines steps))
+                             1)
+           [{[0 0] :C [1 0] :C} {}])
+    )
+  )
+)

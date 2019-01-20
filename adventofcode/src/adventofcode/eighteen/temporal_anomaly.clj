@@ -530,14 +530,38 @@
 
 (def task-offset 60)
 
+(def workers 5)
+
 (defn task-duration
   [task]
     (+ task-offset (inc (.indexOf alphabet (.toLowerCase task))))
 )
 
+(defn queue
+  "From internet"
+  ([] (clojure.lang.PersistentQueue/EMPTY))
+  ([coll]
+  (reduce conj clojure.lang.PersistentQueue/EMPTY coll))
+)
+
 (defn assign-jobs
   "Assign available jobs from T to W(t,:)"
   [W T t]
+      ; loop over workers/instructions
+      (loop [ready-instructions (queue (ready-steps T))
+             machines (queue (range workers))
+             W W]
+        (println "t:" t " machine:" (peek machines) "W:" W)
+        (if (or (empty? ready-instructions) (empty? machines))
+          W
+          (recur (pop ready-instructions)
+                 (pop machines)
+                 (update-in W
+                            [(peek machines) [t (peek machines)]]
+                            (fn [x] (first (peek ready-instructions))))
+          )
+        )
+      )
 )
 
 (defn remove-finished-jobs
