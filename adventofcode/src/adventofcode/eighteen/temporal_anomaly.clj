@@ -568,7 +568,9 @@
 (defn remove-finished-jobs
   "Removes jobs that have finished at time from T"
   [T time]
-  (dissoc T (first (map key T)))
+  (println "Removing finished jobs:")
+   T
+      ;(dissoc T (first (map key T)))
 )
 
 (defn parallell-schedule

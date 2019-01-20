@@ -205,3 +205,13 @@
     )
   )
 )
+
+(with-redefs [core/task-offset 0]
+  (deftest remove-finished-jobs-test
+    (testing "Dont Remove :C at time 1"
+      (is (core/remove-finished-jobs {:A '(:D :B), :C '(:F :A), :F '(:E), :B '(:E), :D '(:E), :E nil}
+                                     1)
+          {:A '(:D :B), :C '(:F :A), :F '(:E), :B '(:E), :D '(:E), :E nil})
+    )
+  )
+)
