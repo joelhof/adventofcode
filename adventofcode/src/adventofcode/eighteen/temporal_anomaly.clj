@@ -547,6 +547,7 @@
 (defn assign-jobs
   "Assign available jobs from T to W(t,:)"
   [W T t]
+      (println "Assign jobs...")
       ; loop over workers/instructions
       (loop [ready-instructions (queue (ready-steps T))
              machines (queue (range workers))

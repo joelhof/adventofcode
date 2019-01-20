@@ -195,4 +195,13 @@
             [{[0 0] :C [1 0] :C [2 0] :C [3 0] :A} {[3 1] :F}])
        )
   )
+  (testing "Assign A to W(3,0), only 1 worker is available"
+    (with-redefs [core/workers 1]
+      (is (= (core/assign-jobs [{[0 0] :C [1 0] :C [2 0] :C} {}]
+                               {:A '(:D :B), :F '(:E), :B '(:E), :D '(:E), :E nil}
+                               3)
+             [{[0 0] :C [1 0] :C [2 0] :C [3 0] :A} {}])
+      )
+    )
+  )
 )
