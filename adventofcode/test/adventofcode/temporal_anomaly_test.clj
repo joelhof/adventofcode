@@ -181,11 +181,18 @@
 )
 
 (deftest assign-job-test
-  (testing "Assign C to W(2,1)"
+  (testing "Assign C to W(1,0)"
     (is (= (core/assign-jobs [{[0 0] :C} {}]
                              (reduce #(core/parse-instruction-step %2 %1) {} (string/split-lines steps))
                              1)
            [{[0 0] :C [1 0] :C} {}])
     )
+  )
+  (testing "Assign A to W(3,0) and F to W(3,1)"
+     (is (= (core/assign-jobs [{[0 0] :C [1 0] :C [2 0] :C} {}]
+                              {:A '(:D :B), :F '(:E), :B '(:E), :D '(:E), :E nil}
+                              3)
+            [{[0 0] :C [1 0] :C [2 0] :C [3 0] :A} {[3 1] :F}])
+       )
   )
 )
