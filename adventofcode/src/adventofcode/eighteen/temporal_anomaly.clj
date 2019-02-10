@@ -526,6 +526,8 @@
 ; (makespan W) (apply max (map count W))
 ;
 
+(defn print-me [x] (doto x println))
+
 (def alphabet "abcdefghijklmnopqrstuvwxyz")
 
 (def task-offset 60)
@@ -534,7 +536,8 @@
 
 (defn task-duration
   [task]
-    (+ task-offset (inc (.indexOf alphabet (.toLowerCase task))))
+    (println "taskduration " task)
+    (print-me (+ task-offset (inc (.indexOf alphabet (.toLowerCase (name task))))))
 )
 
 (defn queue
@@ -565,12 +568,28 @@
       )
 )
 
+(defn isFinished?
+  "True if task is finished"
+  [task time]
+      (println "is task finished?" task time)
+      (print-me (>= time
+                    (+ (:start (val task)) (task-duration (key task)))))
+)
+
 (defn remove-finished-jobs
   "Removes jobs that have finished at time from T"
   [T time]
-  (println "Removing finished jobs:")
-   T
-      ;(dissoc T (first (map key T)))
+  (println "Removing finished jobs:"  "task offset " task-offset)
+     (->> (filter #(:start (val %)) T)
+          ;Filter out started jobs
+         (map first ,,,) ;Filter out started jobs
+         (select-keys T ,,,) ;Filter out started jobs
+         (print-me ,,,)
+          (filter #(isFinished? % time) ,,,) ; Filter out jobs whose (+ start duration) >= time
+         (map key ,,,)
+         (apply dissoc T ,,,)
+          (print-me ,,,)
+     )
 )
 
 (defn parallell-schedule

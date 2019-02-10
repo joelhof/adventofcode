@@ -206,12 +206,20 @@
   )
 )
 
-(with-redefs [core/task-offset 0]
+(with-redefs [core/task-offset 0
+              core/workers 2]
   (deftest remove-finished-jobs-test
     (testing "Dont Remove :C at time 1"
-      (is (core/remove-finished-jobs {:A '(:D :B), :C '(:F :A), :F '(:E), :B '(:E), :D '(:E), :E nil}
-                                     1)
-          {:A '(:D :B), :C '(:F :A), :F '(:E), :B '(:E), :D '(:E), :E nil})
+      (is (= (core/remove-finished-jobs {:A '(:D :B), :C '(:F :A), :F '(:E), :B '(:E), :D '(:E), :E nil}
+                                        1)
+             {:A '(:D :B), :C '(:F :A), :F '(:E), :B '(:E), :D '(:E), :E nil}
+          )
+      )
+    )
+    (testing "Remove :C at time=3"
+      (is (= (core/remove-finished-jobs {:A '(:D :B), :C {:start 0, :children '(:F :A)}}
+                                        63)
+             {:A '(:D :B)}))
     )
   )
 )
