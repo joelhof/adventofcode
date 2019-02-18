@@ -237,7 +237,12 @@
 (deftest parallell-schedule-test
   (testing "Example from instructions"
     (is (= (core/parallell-schedule ["Step C must be finished before step A can begin."])
-           {})
+           [{[0 0] :C, [1 0] :C, [2 0] :C, [3 0] :A}])
+    )
+  )
+  (testing "Example from instructions"
+    (is (= (core/parallell-schedule (string/split-lines steps))
+                         nil)
     )
   )
 )

@@ -545,8 +545,8 @@
 
 (defn task-duration
   [task]
-    (println "taskduration " task)
-    (print-me (+ task-offset (inc (.indexOf alphabet (.toLowerCase (name task))))))
+      ;(println "taskduration " task)
+    (+ task-offset (inc (.indexOf alphabet (.toLowerCase (name task)))))
 )
 
 (defn queue
@@ -559,12 +559,12 @@
 (defn assign-jobs
   "Assign available jobs from T to W(t,:)"
   [W T t]
-      (println "Assign jobs...T:" T)
+      ;(println "Assign jobs...T:" T)
       ; loop over workers/instructions
       (loop [ready-instructions (queue (ready-steps T))
              machines (queue (range workers))
              W W]
-        (println "t:" t " machine:" (peek machines) "W:" W)
+            ;(println "t:" t " machine:" (peek machines) "W:" W)
         (if (or (empty? ready-instructions) (empty? machines))
           W
           (recur (pop ready-instructions)
@@ -581,7 +581,7 @@
   "True if task is finished"
   [task time]
       (println "is task finished?" task time)
-      (print-me (>= time
+      (print-me (>= (inc time)
                     (+ (:start (val task)) (task-duration (key task)))))
 )
 
@@ -601,7 +601,7 @@
 (defn remove-finished-jobs
   "Removes jobs that have finished at time from T"
   [T time]
-  (println "Removing finished jobs:"  "task offset " task-offset)
+      ;(println "Removing finished jobs:"  "task offset " task-offset)
      (->> (filter #(:start (val %)) T)
           ;Filter out started jobs
          (map first ,,,) ;Filter out started jobs
@@ -619,11 +619,9 @@
   (loop [W []
          T (steps-to-map steps)
          time 0]
-    (println T)
+    (println "time: " time T)
     (if (empty? T)
       W
-      ; TODO: Must set :start field in graph T for each job that gets assigned
-      ; otherwise they are not removed when finished!
       (let [jobs (assign-jobs W T time)]
            (recur jobs
                   (remove-finished-jobs (update-start-times jobs T time) time)
