@@ -490,9 +490,14 @@
       )
 )
 
+(defn steps-to-map
+  [steps]
+  (reduce #(parse-instruction-step %2 %1) {} steps)
+)
+
 (defn instruction-order
   [steps]
-  (loop [instructions (reduce #(parse-instruction-step %2 %1) {} steps)
+  (loop [instructions (steps-to-map steps)
         next (next-instruction instructions)
         order []]
        (if (nil? next)
@@ -530,9 +535,9 @@
 
 (def alphabet "abcdefghijklmnopqrstuvwxyz")
 
-(def task-offset 60)
+(def task-offset 0)                                         ; 60 in solution
 
-(def workers 5)
+(def workers 2)                                             ; 5 in solution
 
 (defn task-duration
   [task]
@@ -550,7 +555,7 @@
 (defn assign-jobs
   "Assign available jobs from T to W(t,:)"
   [W T t]
-      (println "Assign jobs...")
+      (println "Assign jobs...T:" T)
       ; loop over workers/instructions
       (loop [ready-instructions (queue (ready-steps T))
              machines (queue (range workers))
@@ -576,6 +581,19 @@
                     (+ (:start (val task)) (task-duration (key task)))))
 )
 
+(defn update-start-times
+  [W T time]
+  (->> (map #(vector time %) (range 0 workers))
+    (select-keys (first W) ,,,)
+    (vals ,,,)
+       ; Dont update key k if old value already contains :start
+    (reduce (fn [m k] (update m k #(if (= (type %1) clojure.lang.PersistentArrayMap)
+                                     %1
+                                     (array-map :children %1 :start %2)) time))
+            T ,,,)
+  )
+)
+
 (defn remove-finished-jobs
   "Removes jobs that have finished at time from T"
   [T time]
@@ -584,22 +602,28 @@
           ;Filter out started jobs
          (map first ,,,) ;Filter out started jobs
          (select-keys T ,,,) ;Filter out started jobs
-         (print-me ,,,)
+          ;(print-me ,,,)
           (filter #(isFinished? % time) ,,,) ; Filter out jobs whose (+ start duration) >= time
          (map key ,,,)
          (apply dissoc T ,,,)
-          (print-me ,,,)
+          ; (print-me ,,,)
      )
 )
 
 (defn parallell-schedule
   [steps]
   (loop [W []
-         T (instruction-order steps)
+         T (steps-to-map steps)
          time 0]
+    (println T)
     (if (empty? T)
       W
-      (recur (assign-jobs W T time) (remove-finished-jobs T time) (inc time))
+      ; TODO: Must set :start field in graph T for each job that gets assigned
+      ; otherwise they are not removed when finished!
+      (let [jobs (assign-jobs W T time)]
+           (recur jobs
+                  (remove-finished-jobs (update-start-times jobs T time) time)
+                  (inc time)))
     )
   )
 )
