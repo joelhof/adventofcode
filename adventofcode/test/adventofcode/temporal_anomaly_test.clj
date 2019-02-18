@@ -223,3 +223,21 @@
     )
   )
 )
+
+(deftest test-ready-instructions-with-map
+  (testing "Only C is ready"
+    (is
+      (= (core/ready-steps {:C {:start 0, :children '(:F :A)}, :A '(:D :B), :B '(:E), :D '(:E), :F '(:E)})
+         '([:C {:start 0, :children (:F :A)}])
+      )
+    )
+  )
+)
+
+(deftest parallell-schedule-test
+  (testing "Example from instructions"
+    (is (= (core/parallell-schedule ["Step C must be finished before step A can begin."])
+           {})
+    )
+  )
+)

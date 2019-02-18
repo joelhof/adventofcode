@@ -475,9 +475,13 @@
   )
 )
 
+(defmulti dependent class)
+(defmethod dependent clojure.lang.PersistentArrayMap [this] (:children this))
+(defmethod dependent :default [this] this)
+
 (defn ready-steps
   [instr]
-  (let [has-prerequisite (set (flatten (map val instr)))]
+  (let [has-prerequisite (set (flatten (map #(dependent (val %)) instr)))]
     (filter #(not (contains? has-prerequisite (key %))) instr)
   )
 )
