@@ -556,33 +556,72 @@
   (reduce conj clojure.lang.PersistentQueue/EMPTY coll))
 )
 
-(defn assign-jobs
-  "Assign available jobs from T to W(t,:)"
-  [W T t]
-      ;(println "Assign jobs...T:" T)
-      ; loop over workers/instructions
-      (loop [ready-instructions (queue (ready-steps T))
-             machines (queue (range workers))
-             W W]
-            ;(println "t:" t " machine:" (peek machines) "W:" W)
-        (if (or (empty? ready-instructions) (empty? machines))
-          W
-          (recur (pop ready-instructions)
-                 (pop machines)
-                 (update-in W
-                            [(peek machines) [t (peek machines)]]
-                            (fn [x] (first (peek ready-instructions))))
-          )
+(defn isFinished?
+  "True if task is finished"
+  [task time]
+      ;(println "is task finished?" task time)
+  ;(print-me
+    (>= (inc time)
+                (+ (:start (val task)) (task-duration (key task))))
+  ;)
+)
+
+(defn getPreviousTask
+      [worker-map]
+  (val (last (into (sorted-map) worker-map)))
+)
+
+; update T with worker id?
+; or construct ready steps map, keyed by machine.
+; construct ready steps map by checking if previously assigned task is finished
+; if task is not finished, assign it again
+; else pop ready instruction queue.
+; But need to prevent workers from stealing?
+; Remove unfinished tasks from ready-instructions.
+
+(defn next-instr
+      [instructions machine W time]
+      ; Prepend instructions with existing if present.
+      ; if there is no existing instructions and no instruction return empty queue
+      (println (reduce conj [] instructions))
+      (if (or (empty? W) (nil? machine) (>= machine (count W)))
+        instructions
+        (let [previous-task (getPreviousTask (nth W machine))
+              available-tasks (set instructions)]
+             (if (contains? available-tasks previous-task)
+               (-> (disj available-tasks previous-task)
+                   (sort ,,,)
+                   (conj ,,, previous-task)
+                   (queue ,,,)
+               )
+               instructions
+             )
         )
       )
 )
 
-(defn isFinished?
-  "True if task is finished"
-  [task time]
-      (println "is task finished?" task time)
-      (print-me (>= (inc time)
-                    (+ (:start (val task)) (task-duration (key task)))))
+(defn assign-jobs
+  "Assign available jobs from T to W(t,:)"
+  [W T t]
+      ;(println "Assign jobs...T:" T)
+
+      (loop [ready-instructions (queue (map first (ready-steps T)))
+             machines (queue (range workers))
+             W W]
+            ;(println "t:" t " machine:" (peek machines) "W:" W)
+            ; [Let ready-instructions (next-instruction ready-instructions machine T)
+        (let [instructions (next-instr ready-instructions (peek machines) W t)]
+             (if (or (empty? ready-instructions) (empty? machines))
+               W
+               (recur (pop instructions)
+                      (pop machines)
+                      (update-in W
+                                 [(peek machines) [t (peek machines)]]
+                                 (fn [x] (peek instructions)))
+                      )
+               )
+        )
+      )
 )
 
 (defn update-start-times

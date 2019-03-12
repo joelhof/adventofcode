@@ -204,6 +204,13 @@
       )
     )
   )
+  (testing "Assign F to W(4,1), and B to W(4,0)"
+      (is (= (core/assign-jobs [{[0 0] :C [1 0] :C [2 0] :C [3 0] :A} {[3 1] :F}]
+                               {:F '(:E), :B '(:E), :D '(:E), :E nil}
+                               4)
+             [{[0 0] :C [1 0] :C [2 0] :C [3 0] :A [4 0] :B} {[3 1] :F [4 1] :F}])
+      )
+  )
 )
 
 (with-redefs [core/task-offset 0
@@ -229,6 +236,29 @@
     (is
       (= (core/ready-steps {:C {:start 0, :children '(:F :A)}, :A '(:D :B), :B '(:E), :D '(:E), :F '(:E)})
          '([:C {:start 0, :children (:F :A)}])
+      )
+    )
+  )
+)
+
+(deftest test-next-instr
+  (testing ":F is next for worker 1"
+    (is
+      (= (peek (core/next-instr (core/queue (map first (core/ready-steps {:F {:start 3, :children '(:E)}, :B '(:E), :D '(:E), :E nil})))
+                                1
+                                [{[0 0] :C [1 0] :C [2 0] :C [3 0] :A} {[3 1] :F}]
+                                4))
+         (peek (queue [:F :B :D]))
+      )
+    )
+  )
+  (testing ":B is next for worker 0"
+    (is
+      (= (peek (core/next-instr (core/queue (map first (core/ready-steps {:F {:start 3, :children '(:E)}, :B '(:E), :D '(:E), :E nil})))
+                                0
+                                [{[0 0] :C [1 0] :C [2 0] :C [3 0] :A} {[3 1] :F}]
+                                4))
+         (peek (queue [:B :D :F]))
       )
     )
   )
