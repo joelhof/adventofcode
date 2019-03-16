@@ -539,9 +539,9 @@
 
 (def alphabet "abcdefghijklmnopqrstuvwxyz")
 
-(def task-offset 0)                                         ; 60 in solution
+(def task-offset 60)                                         ; 60 in solution
 
-(def workers 2)                                             ; 5 in solution
+(def workers 5)                                             ; 5 in solution
 
 (defn task-duration
   [task]
@@ -585,7 +585,7 @@
       ; if there is no existing instructions and no other instruction return nil
       ;(println "next-instr" (reduce conj [] available-tasks))
       (if (or (empty? W) (nil? machine) (>= machine (count W)))
-        (first available-tasks)
+        (first (sort available-tasks))
         (let [previous-task (getPreviousTask (nth W machine))]
              (if (contains? available-tasks previous-task)
                previous-task
@@ -609,7 +609,7 @@
       (loop [ready-instructions (set (map first (ready-steps T)))
              machines (queue (range workers))
              W W]
-        (println "assign jobs:" (reduce conj [] machines) ready-instructions)
+            ;(println "assign jobs:" (reduce conj [] machines) ready-instructions W)
         (let [assigned (next-instr ready-instructions (peek machines) W t)]
              (if (empty? machines)
                W
@@ -661,6 +661,7 @@
          T (steps-to-map steps)
          time 0]
         ;(println "time: " time T W)
+    ;(if (or (> time 5) (empty? T))
     (if (empty? T)
       W
       (let [jobs (assign-jobs W T time)]
@@ -673,5 +674,20 @@
 
 (defn makespan
   [W]
-  (apply max (map count W))
+  (->> (map keys W)
+      (map #(map first %) ,,,)
+      (flatten ,,,)
+      (apply max ,,,)
+    )
+)
+
+(defn daySevenPart2
+ []
+ (-> (slurp "resources/eighteen/daySeven.txt")
+     (string/split-lines ,,,)
+     (print-me ,,,)
+     (parallell-schedule ,,,)
+     (print-me ,,,)
+     (makespan ,,,)
+ )
 )
