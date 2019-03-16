@@ -244,22 +244,33 @@
 (deftest test-next-instr
   (testing ":F is next for worker 1"
     (is
-      (= (peek (core/next-instr (core/queue (map first (core/ready-steps {:F {:start 3, :children '(:E)}, :B '(:E), :D '(:E), :E nil})))
+      (= (core/next-instr (set (map first (core/ready-steps {:F {:start 3, :children '(:E)}, :B '(:E), :D '(:E), :E nil})))
                                 1
                                 [{[0 0] :C [1 0] :C [2 0] :C [3 0] :A} {[3 1] :F}]
-                                4))
-         (peek (queue [:F :B :D]))
+                                4)
+         :F
       )
     )
   )
   (testing ":B is next for worker 0"
     (is
-      (= (peek (core/next-instr (core/queue (map first (core/ready-steps {:F {:start 3, :children '(:E)}, :B '(:E), :D '(:E), :E nil})))
+      (= (core/next-instr (set (map first (core/ready-steps {:F {:start 3, :children '(:E)}, :B '(:E), :D '(:E), :E nil})))
                                 0
                                 [{[0 0] :C [1 0] :C [2 0] :C [3 0] :A} {[3 1] :F}]
-                                4))
-         (peek (queue [:B :D :F]))
+                                4)
+         :B
       )
+    )
+  )
+)
+
+(deftest update-start-times-test
+  (testing "Update both :A and :F"
+    (is (= (core/update-start-times [{[0 0] :C [1 0] :C [2 0] :C [3 0] :A} {[3 1] :F}]
+                                    {:A '(:D :B), :F '(:E), :B '(:E), :D '(:E), :E nil}
+                                    3)
+           {:A {:start 3 :children '(:D :B)} ,:F {:start 3 :children '(:E)} ,:B '(:E), :D '(:E), :E nil}
+        )
     )
   )
 )
@@ -272,7 +283,22 @@
   )
   (testing "Example from instructions"
     (is (= (core/parallell-schedule (string/split-lines steps))
-                         nil)
+           [{[0 0] :C,
+             [1 0] :C,
+             [11 0] :E,
+             [3 0] :A,
+             [9 0] :D,
+             [13 0] :E,
+             [8 0] :D,
+             [12 0] :E,
+             [10 0] :E,
+             [7 0] :D,
+             [2 0] :C,
+             [5 0] :B,
+             [6 0] :D,
+             [14 0] :E,
+             [4 0] :B}
+            {[3 1] :F, [4 1] :F, [5 1] :F, [6 1] :F, [7 1] :F, [8 1] :F}])
     )
   )
 )

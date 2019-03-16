@@ -568,7 +568,8 @@
 
 (defn getPreviousTask
       [worker-map]
-  (val (last (into (sorted-map) worker-map)))
+      ;(println "getPreviousTask" worker-map)
+  (#(if % (val %) nil) (last (into (sorted-map) worker-map)))
 )
 
 ; update T with worker id?
@@ -580,21 +581,18 @@
 ; Remove unfinished tasks from ready-instructions.
 
 (defn next-instr
-      [instructions machine W time]
-      ; Prepend instructions with existing if present.
-      ; if there is no existing instructions and no instruction return empty queue
-      (println (reduce conj [] instructions))
+      [available-tasks machine W time]
+      ; if there is no existing instructions and no other instruction return nil
+      ;(println "next-instr" (reduce conj [] available-tasks))
       (if (or (empty? W) (nil? machine) (>= machine (count W)))
-        instructions
-        (let [previous-task (getPreviousTask (nth W machine))
-              available-tasks (set instructions)]
+        (first available-tasks)
+        (let [previous-task (getPreviousTask (nth W machine))]
              (if (contains? available-tasks previous-task)
-               (-> (disj available-tasks previous-task)
+               previous-task
+               (-> (apply disj available-tasks (map getPreviousTask W))
                    (sort ,,,)
-                   (conj ,,, previous-task)
-                   (queue ,,,)
+                   (first ,,,)
                )
-               instructions
              )
         )
       )
@@ -604,20 +602,24 @@
   "Assign available jobs from T to W(t,:)"
   [W T t]
       ;(println "Assign jobs...T:" T)
-
-      (loop [ready-instructions (queue (map first (ready-steps T)))
+      ; Need to use set or map instead of queue to store available instructions
+      ; Use disj instead of pop in recur
+      ; have next-instr return just the particular instruction for the given
+      ; machine
+      (loop [ready-instructions (set (map first (ready-steps T)))
              machines (queue (range workers))
              W W]
-            ;(println "t:" t " machine:" (peek machines) "W:" W)
-            ; [Let ready-instructions (next-instruction ready-instructions machine T)
-        (let [instructions (next-instr ready-instructions (peek machines) W t)]
-             (if (or (empty? ready-instructions) (empty? machines))
+        (println "assign jobs:" (reduce conj [] machines) ready-instructions)
+        (let [assigned (next-instr ready-instructions (peek machines) W t)]
+             (if (empty? machines)
                W
-               (recur (pop instructions)
+               (recur (disj ready-instructions assigned)
                       (pop machines)
-                      (update-in W
-                                 [(peek machines) [t (peek machines)]]
-                                 (fn [x] (peek instructions)))
+                      (if assigned
+                        (update-in W
+                                   [(peek machines) [t (peek machines)]]
+                                   (fn [x] assigned))
+                        W)
                       )
                )
         )
@@ -627,7 +629,7 @@
 (defn update-start-times
   [W T time]
   (->> (map #(vector time %) (range 0 workers))
-    (select-keys (first W) ,,,)
+    (select-keys (apply merge W) ,,,)
     (vals ,,,)
        ; Dont update key k if old value already contains :start
     (reduce (fn [m k] (update m k #(if (= (type %1) clojure.lang.PersistentArrayMap)
@@ -658,7 +660,7 @@
   (loop [W []
          T (steps-to-map steps)
          time 0]
-    (println "time: " time T)
+        ;(println "time: " time T W)
     (if (empty? T)
       W
       (let [jobs (assign-jobs W T time)]
