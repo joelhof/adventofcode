@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Try to solve Day 8 with java, for comparision...
@@ -31,14 +32,23 @@ public class DayEight {
         }
 
         public int sum() {
-            return Arrays.stream(this.metadata).mapToInt(Integer::valueOf).sum();
+            return sum(this);
+        }
+
+        private static int sum(Node node) {
+            return Arrays.stream(node.metadata)
+                    .mapToInt(Integer::valueOf).sum()
+                    + node.children.stream()
+                    .mapToInt(c -> sum(c)).sum();
         }
 
         public static Node parse(String s) {
             String[] input = s.split(" ");
             Node node = new Node(input);
-
-
+            if (node.headers[0] > 0) {
+                String[] rest = Arrays.copyOfRange(input, 2, input.length - node.headers[1]);
+                node.children.add(parse(String.join(" ", rest)));
+            }
             return node;
         }
 
