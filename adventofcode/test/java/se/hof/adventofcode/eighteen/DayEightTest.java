@@ -40,4 +40,19 @@ public class DayEightTest {
         assertEquals(138, n.sum());
     }
 
+    @Test
+    public void parseNodeWithNoChildrenAndNoMetadata() {
+        String s = "0 0";
+        DayEight.Node n = DayEight.Node.parse(s);
+        assertEquals(0, n.children.size());
+        assertEquals(0, n.sum());
+    }
+
+    @Test
+    public void parseNodeWith3Children() {
+        String s = "3 3 0 3 10 11 12 0 1 2 0 1 99 1 1 2";
+        DayEight.Node n = DayEight.Node.parse(s);
+        assertEquals(3, n.children.size());
+        assertEquals(138, n.sum());
+    }
 }

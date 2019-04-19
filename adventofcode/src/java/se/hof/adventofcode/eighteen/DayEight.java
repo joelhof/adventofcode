@@ -53,37 +53,20 @@ public class DayEight {
 
         public static Node parse(String s) {
             String[] input = s.split(" ");
-            Node node = new Node(input);
-            if (node.headers[0] == 1) {
-                String[] rest = Arrays.copyOfRange(input, 2, input.length - node.headers[1]);
-                node.children.add(parse(String.join(" ", rest)));
-            } else if (node.headers[0] > 1) {
+            Node parent = new Node(input);
+            if (parent.headers[0] > 0) {
                 int p = NR_OF_HEADERS;
-                for (int i = 0; i < node.headers[0]; i++) {
-                    Node n;
-                    if (Integer.valueOf(input[p]) == 0) {
-                        int to = p + Integer.valueOf(input[p + 1]) + NR_OF_HEADERS;
-                        n = new Node(Arrays.copyOfRange(input, p, to));
-                        p = to;
-                    } else {
-                        String[] rest = Arrays.copyOfRange(input, p, input.length - node.headers[1]);
-                        n = parse(String.join(" ", rest));
-
-                    }
-
-                    node.children.add(n);
+                for (int i = 0; i < parent.headers[0]; i++) {
+                    Node child;
+                    int to = Integer.valueOf(input[p]) == 0
+                            ? p + Integer.valueOf(input[p + 1]) + NR_OF_HEADERS
+                            : input.length - parent.headers[1];
+                    child = parse(String.join(" ", Arrays.copyOfRange(input, p, to)));
+                    p = to;
+                    parent.children.add(child);
                 }
             }
-            return node;
-        }
-
-        private static Node parse(String[] input) {
-            if (input.length < 3)
-                return null;
-            Node node = new Node(input);
-            String[] rest = Arrays.copyOfRange(input, 2, input.length - node.headers[1]);
-            Node.parse(input);
-            return node;
+            return parent;
         }
     }
 }
