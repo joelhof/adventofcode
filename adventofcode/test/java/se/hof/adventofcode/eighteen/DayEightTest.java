@@ -6,14 +6,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class DayEightTest {
 
-    DayEight.Node node;
-
     @Test
     public void parseChildlessNodeTest() {
-        String s = "0 1 99";
-        DayEight.Node n = DayEight.Node.parse(s);
+        String input = "0 1 99";
+        DayEight.Node n = DayEight.Node.parse(input);
 
-        assertEquals(99, n.sum());
+        int expectedSum = 99;
+        assertEquals(expectedSum, n.sum());
     }
 
     @Test
@@ -32,4 +31,13 @@ public class DayEightTest {
 
         assertEquals(101, n.sum());
     }
+
+    @Test
+    public void parseNodeWithNChildren() {
+        String s = "2 3 0 3 10 11 12 1 1 0 1 99 2 1 1 2";
+        DayEight.Node n = DayEight.Node.parse(s);
+        assertEquals(2, n.children.size());
+        assertEquals(138, n.sum());
+    }
+
 }
