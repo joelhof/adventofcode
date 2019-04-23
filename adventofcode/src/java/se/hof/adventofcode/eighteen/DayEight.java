@@ -28,19 +28,15 @@ public class DayEight {
 
     public static class Node {
         public static final int NR_OF_HEADERS = 2;
-        int[] headers = new int[2];
+        int[] headers;
         List<Node> children;
-        String[] metadata;
-        
+        int[] metadata;
+
         private Node (final int[] input) {
             System.out.println("Creating Node from " + Arrays.toString(input));
             this.headers = Arrays.copyOfRange(input, 0, NR_OF_HEADERS);
             this.children = new ArrayList<>();
-            this.metadata = new String[headers[1]];
-        }
-
-        private String[] initMetadata(String[] input) {
-            return new String[headers[1]];
+            this.metadata = new int[headers[1]];
         }
 
         public int sum() {
@@ -58,8 +54,7 @@ public class DayEight {
 
         private static int sum(Node node) {
             return Arrays.stream(node.metadata)
-                    .filter(s -> s != null)
-                    .mapToInt(Integer::valueOf).sum()
+                    .sum()
                     + node.children.stream()
                     .mapToInt(c -> sum(c)).sum();
         }
@@ -89,9 +84,7 @@ public class DayEight {
 //                System.out.println("p after children " + p + " metdadata " + Arrays.toString(
 //                        Arrays.copyOfRange(input, p, p + parent.headers[1])));
             }
-            parent.metadata = Arrays.stream(Arrays.copyOfRange(input, p, p + parent.headers[1]))
-                    .mapToObj(String::valueOf)
-                    .toArray(String[]::new);
+            parent.metadata = Arrays.copyOfRange(input, p, p + parent.headers[1]);
             p += parent.headers[1];
 //            System.out.println(parent.toString());
             return parent;
