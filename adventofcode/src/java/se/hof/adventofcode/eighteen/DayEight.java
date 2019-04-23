@@ -1,11 +1,11 @@
 package se.hof.adventofcode.eighteen;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 /**
  * Try to solve Day 8 with java, for comparision...
@@ -14,9 +14,15 @@ public class DayEight {
 
     public static void main(String[] args) {
 
-        Node n = Node.parse("0 1 99");
-        System.out.println("Nr of children: " + n.children.size() + " Expected: 0");
-        System.out.println("Metadata: " + n.sum() + " Expected: 99");
+        try {
+            String input = Files.readString(Paths.get("resources", "eighteen", "dayEight.txt"));
+            System.out.println("Input length: " + input.replace(" ", "").length());
+            Node root = Node.parse(input);
+            System.out.println("The total sum is: " + root.sum());
+        } catch (IOException e) {
+            System.out.println("Failed to read input data");
+            e.printStackTrace();
+        }
 
     }
 
@@ -25,22 +31,29 @@ public class DayEight {
         int[] headers = new int[2];
         List<Node> children;
         String[] metadata;
-
-        private Node(final String[] input) {
-            this.headers[0] = Integer.valueOf(input[0]);
-            this.headers[1] = Integer.valueOf(input[1]);
+        
+        private Node (final int[] input) {
+            System.out.println("Creating Node from " + Arrays.toString(input));
+            this.headers = Arrays.copyOfRange(input, 0, NR_OF_HEADERS);
             this.children = new ArrayList<>();
-            this.metadata = initMetadata(input);
+            this.metadata = new String[headers[1]];
         }
 
         private String[] initMetadata(String[] input) {
-            return input.length > 2
-                    ? Arrays.copyOfRange(input, input.length - this.headers[1], input.length)
-                    : new String[headers[1]];
+            return new String[headers[1]];
         }
 
         public int sum() {
             return sum(this);
+        }
+
+        @Override
+        public String toString() {
+            return "Node{" +
+                    "headers=" + Arrays.toString(headers) +
+                    ", children=" + children +
+                    ", metadata=" + Arrays.toString(metadata) +
+                    '}';
         }
 
         private static int sum(Node node) {
@@ -52,20 +65,35 @@ public class DayEight {
         }
 
         public static Node parse(String s) {
-            String[] input = s.split(" ");
-            Node parent = new Node(input);
+            String[] input = s.trim().split(" ");
+            int[] arg = Arrays.stream(input)
+                    .mapToInt(Integer::valueOf)
+                    .toArray();
+            Parser p = new Parser();
+            return p.parse(arg);
+        }
+    }
+
+    public static class Parser {
+
+        int p = 0;
+
+        Node parse(int[] input) {
+            Node parent = new Node(Arrays.copyOfRange(input, p, input.length));
+            p += Node.NR_OF_HEADERS;
             if (parent.headers[0] > 0) {
-                int p = NR_OF_HEADERS;
                 for (int i = 0; i < parent.headers[0]; i++) {
-                    Node child;
-                    int to = Integer.valueOf(input[p]) == 0
-                            ? p + Integer.valueOf(input[p + 1]) + NR_OF_HEADERS
-                            : input.length - parent.headers[1];
-                    child = parse(String.join(" ", Arrays.copyOfRange(input, p, to)));
-                    p = to;
+                    Node child = parse(input);
                     parent.children.add(child);
                 }
+//                System.out.println("p after children " + p + " metdadata " + Arrays.toString(
+//                        Arrays.copyOfRange(input, p, p + parent.headers[1])));
             }
+            parent.metadata = Arrays.stream(Arrays.copyOfRange(input, p, p + parent.headers[1]))
+                    .mapToObj(String::valueOf)
+                    .toArray(String[]::new);
+            p += parent.headers[1];
+//            System.out.println(parent.toString());
             return parent;
         }
     }

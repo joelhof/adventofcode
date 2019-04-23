@@ -35,24 +35,30 @@ public class DayEightTest {
     @Test
     public void parseNodeWithNChildren() {
         String s = "2 3 0 3 10 11 12 1 1 0 1 99 2 1 1 2";
-        DayEight.Node n = DayEight.Node.parse(s);
-        assertEquals(2, n.children.size());
-        assertEquals(138, n.sum());
+        verifyNode(s, 2, 138);
     }
 
     @Test
     public void parseNodeWithNoChildrenAndNoMetadata() {
         String s = "0 0";
-        DayEight.Node n = DayEight.Node.parse(s);
-        assertEquals(0, n.children.size());
-        assertEquals(0, n.sum());
+        verifyNode(s, 0, 0);
     }
 
     @Test
     public void parseNodeWith3Children() {
         String s = "3 3 0 3 10 11 12 0 1 2 0 1 99 1 1 2";
+        verifyNode(s, 3, 138);
+    }
+
+    private void verifyNode(String s, int expectedNrOfChildren, int expectedSum) {
         DayEight.Node n = DayEight.Node.parse(s);
-        assertEquals(3, n.children.size());
-        assertEquals(138, n.sum());
+        assertEquals(expectedNrOfChildren, n.children.size());
+        assertEquals(expectedSum, n.sum());
+    }
+
+    @Test
+    public void parseWeirdNode() {
+        String s = "0 3 10 11 12 0 1 2 0 1 99";
+        verifyNode(s, 0, 134);
     }
 }
