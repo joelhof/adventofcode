@@ -50,15 +50,45 @@ public class DayEightTest {
         verifyNode(s, 3, 138);
     }
 
-    private void verifyNode(String s, int expectedNrOfChildren, int expectedSum) {
+    public static void verifyNode(String s, int expectedNrOfChildren, int expectedSum) {
         DayEight.Node n = DayEight.Node.parse(s);
         assertEquals(expectedNrOfChildren, n.children.size());
         assertEquals(expectedSum, n.sum());
     }
 
     @Test
-    public void parseWeirdNode() {
-        String s = "0 3 10 11 12 0 1 2 0 1 99";
-        verifyNode(s, 0, 134);
+    public void valueNoChildrenTest() {
+        String input = "0 1 99";
+        DayEight.Node n = DayEight.Node.parse(input);
+
+        int expectedSum = 99;
+        assertEquals(expectedSum, n.value());
+    }
+
+    @Test
+    public void valueMetadatNoRefChildTest() {
+        String input = "1 1 0 1 99 2";
+        DayEight.Node n = DayEight.Node.parse(input);
+
+        int expectedSum = 0;
+        assertEquals(expectedSum, n.value());
+    }
+
+    @Test
+    public void valueMetadatRefChildTest() {
+        String input = "1 1 0 1 99 1";
+        DayEight.Node n = DayEight.Node.parse(input);
+
+        int expectedSum = 99;
+        assertEquals(expectedSum, n.value());
+    }
+
+    @Test
+    public void valueTest() {
+        String input = "2 3 0 3 10 11 12 1 1 0 1 99 2 1 1 2";
+        DayEight.Node n = DayEight.Node.parse(input);
+
+        int expectedSum = 66;
+        assertEquals(expectedSum, n.value());
     }
 }

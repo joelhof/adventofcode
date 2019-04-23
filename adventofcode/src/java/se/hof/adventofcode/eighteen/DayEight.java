@@ -19,6 +19,9 @@ public class DayEight {
             System.out.println("Input length: " + input.replace(" ", "").length());
             Node root = Node.parse(input);
             System.out.println("The total sum is: " + root.sum());
+            int complexSum = root.value();
+            System.out.println("The root node value is: " + complexSum);
+
         } catch (IOException e) {
             System.out.println("Failed to read input data");
             e.printStackTrace();
@@ -41,6 +44,17 @@ public class DayEight {
 
         public int sum() {
             return sum(this);
+        }
+
+        public int value() {
+            return children.size() > 0
+                    ? Arrays.stream(metadata)
+                    .map(i -> --i)
+                    .filter(i -> i < children.size())
+                    .mapToObj(i -> children.get(i))
+                    .mapToInt(n -> n.value())
+                    .sum()
+                    : Arrays.stream(metadata).sum();
         }
 
         @Override
