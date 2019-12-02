@@ -28,14 +28,20 @@
                            (reduce +)))
 
 (defn opcode-sum
-  [[i j k] data] (assoc data k (+ (nth data i) (nth data j))))
+  [[i j k] data]
+  (assoc data k (+ (nth data i) (nth data j))))
+
+(defn opcode-multiply
+  [[i j k] data]
+  (assoc data k (* (nth data i) (nth data j))))
 
 (defn int-code-step
   ([input] (int-code-step (take 4 input) input))
   ([instruction data] (case (first instruction)
-                        0 data
-                        1 (opcode-sum (rest instruction) data))))     
-                        
+                        99 data
+                        1 (opcode-sum (rest instruction) data)
+                        2 (opcode-multiply (rest instruction) data))))
+
 (defn int-code-computer
   [input] (take 4 input))
 
