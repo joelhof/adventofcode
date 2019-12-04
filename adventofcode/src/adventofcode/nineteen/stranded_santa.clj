@@ -61,3 +61,17 @@
 
 (defn day-two-part-one
   [] (first (int-code-step (prepare-input))))
+
+(defn digits [number] (rseq (mapv #(mod % 10) (take-while pos? (iterate #(quot % 10) number)))))
+
+(defn doubles? [digits] (> (count digits) (count (distinct digits))))
+
+(defn monotonic? [digits] (= (sort digits) digits))
+
+(defn day-four-part-one []
+	(->> (range 178416 676462)
+	(map digits ,,,)
+	(filter doubles? ,,,)
+	(filter monotonic? ,,,)
+	(count ,,,))
+)
