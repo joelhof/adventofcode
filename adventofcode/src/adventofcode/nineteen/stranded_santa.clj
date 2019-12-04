@@ -75,3 +75,13 @@
 	(filter monotonic? ,,,)
 	(count ,,,))
 )
+
+(defn strict-doubles? [digits] (contains? (set (vals (frequencies digits))) 2))
+
+(defn day-four-part-two []
+	(->> (range 178416 676462)
+	(map digits ,,,)
+	(filter strict-doubles? ,,,)
+	(filter monotonic? ,,,)
+	(count ,,,))
+)
