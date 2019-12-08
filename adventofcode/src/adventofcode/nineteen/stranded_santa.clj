@@ -111,3 +111,20 @@
        )
 )
 
+(defn pixel-value
+  [coll m n] 
+  (->> coll
+       (take-nth (* m n) ,,,)
+       (filter #(not (= 2 %) ,,,))
+       (first ,,,))
+  )
+
+(defn merge-layers [m n layers]
+  (->> (iterate rest layers)
+       (take (* m n) ,,,)
+       (map #(pixel-value % m n) ,,,)
+       (partition m ,,,))
+  )
+
+(defn display [image] 
+  (doseq [row image] (println row)))
