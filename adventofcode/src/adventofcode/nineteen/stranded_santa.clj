@@ -85,3 +85,19 @@
 	(filter monotonic? ,,,)
 	(count ,,,))
 )
+
+(defn image-checksum
+  [image]
+  (let [freqs (frequencies image)]
+    (* (get freqs 1 0) (get freqs 2 0)))
+  )
+
+(defn day-eight-part-one []
+  (->> (slurp "resources/nineteen/dayEight.txt")
+       (map #(Character/digit % 10) ,,,)
+       (partition (* 25 6) ,,,)
+       (sort-by #(get (frequencies %) 0 0) ,,,)
+       (first ,,,)
+       (image-checksum ,,,)
+       )
+)
