@@ -86,6 +86,15 @@
 	(count ,,,))
 )
 
+(defn to-int-seq
+  [file]
+  (->> file
+       (slurp ,,,)
+       (string/trim ,,,)
+       (map #(Character/digit % 10) ,,,)
+       )
+  )
+
 (defn image-checksum
   [image]
   (let [freqs (frequencies image)]
@@ -93,11 +102,12 @@
   )
 
 (defn day-eight-part-one []
-  (->> (slurp "resources/nineteen/dayEight.txt")
-       (map #(Character/digit % 10) ,,,)
+  (->>  "resources/nineteen/dayEight.txt"
+       (to-int-seq ,,,)
        (partition (* 25 6) ,,,)
        (sort-by #(get (frequencies %) 0 0) ,,,)
        (first ,,,)
        (image-checksum ,,,)
        )
 )
+
