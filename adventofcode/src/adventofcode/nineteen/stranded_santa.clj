@@ -128,3 +128,11 @@
 
 (defn display [image] 
   (doseq [row image] (println row)))
+
+(defn day-eight-part-two
+  []
+  (->> "resources/nineteen/dayEight.txt"
+       (to-int-seq ,,,)
+       (merge-layers  25 6 ,,,)
+       (display ,,,))
+  )
