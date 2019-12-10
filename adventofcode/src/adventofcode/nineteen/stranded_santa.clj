@@ -137,7 +137,55 @@
        (display ,,,))
   )
 
-(defn dayTenWIP [asteroid-str]
+
+(defn with-pos
+  [x row]
+  (map-indexed #(vector [x %1] %2) row))
+
+(defn asteroid-points
+  [asteroid-map]
+  (->> asteroid-map
+       (map-indexed with-pos ,,,)
+       (reduce concat ,,,)
+       (filter #(= \# (last %)) ,,,)))
+
+(defn vector-norm [v]
+  (->> v
+   (map #(* % %) ,,,)
+   (reduce + ,,,)
+   (Math/sqrt ,,,)))
+
+(defn direction-vec [p1 p2]
+  (let [v (map - p2 p1)
+        norm (bigdec (vector-norm v))]
+    (mapv #(if (zero? norm) 0 (with-precision 3 (/ % norm))) v))
+  )
+
+(defn count-visible-asteroids
+  [p points]
+  (->> points
+       (map #(direction-vec p %) ,,,)
+       (distinct ,,,)
+       (filter #(not (= '(0 0) %)) ,,,)
+       (count ,,,))
+  )
+
+(defn find-optimal-asteroid
+  [points]
+  (->> points
+   (map #(count-visible-asteroids % points) ,,,)
+   (apply max ,,,))
+  )
+
+(defn asteroid-count
+  [asteroid-str]
   (->> asteroid-str
        (string/split-lines)
-       (mapv vec)))
+       (mapv vec)
+       (asteroid-points)
+       (map first)
+       (find-optimal-asteroid)
+       ))
+
+(defn day-ten-part-one []
+  (println (asteroid-count (slurp "resources/nineteen/dayTen.txt")) "asteroids can be seen"))
