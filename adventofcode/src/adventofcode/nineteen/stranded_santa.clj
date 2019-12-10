@@ -133,6 +133,11 @@
   []
   (->> "resources/nineteen/dayEight.txt"
        (to-int-seq ,,,)
-       (merge-layers  25 6 ,,,)
+       (merge-layers  25 6 ,,,) 
        (display ,,,))
   )
+
+(defn dayTenWIP [asteroid-str]
+  (->> asteroid-str
+       (string/split-lines)
+       (mapv vec)))
