@@ -137,17 +137,29 @@
        (display ,,,))
   )
 
+(defn reverse-y [point]
+  (mapv * point [1 -1]))
+
+(defn transform [point origo]
+  (mapv - (reverse-y point) origo))
 
 (defn with-pos
-  [x row]
-  (map-indexed #(vector [x %1] %2) row))
+  ([y row]
+   (map-indexed #(vector [%1 y] %2) row))
+  ([y row translation]
+   (map-indexed #(vector (transform [%1 y] translation) %2) row)))
 
 (defn asteroid-points
-  [asteroid-map]
-  (->> asteroid-map
-       (map-indexed with-pos ,,,)
-       (reduce concat ,,,)
-       (filter #(= \# (last %)) ,,,)))
+  ([asteroid-map]
+   (->> asteroid-map
+        (map-indexed #(with-pos %1 %2) ,,,)
+        (reduce concat ,,,)
+        (filter #(= \# (last %))) ,,,))
+  ([translation asteroid-map]
+   (->> asteroid-map
+        (map-indexed #(with-pos %1 %2 translation) ,,,)
+        (reduce concat ,,,)
+        (filter #(= \# (last %))) ,,,)))
 
 (defn vector-norm [v]
   (->> v
@@ -189,3 +201,35 @@
 
 (defn day-ten-part-one []
   (println (asteroid-count (slurp "resources/nineteen/dayTen.txt")) "asteroids can be seen"))
+
+; Day 10, part 2: Shift origo to selected asteroid.
+; shift by changing sign of y-values.
+; then subtracting px from all x values.
+; then subtracting py from all y values.
+; sort visible asteroids by angle to y-axis.
+; caclulate theta, map all negative angles to 
+; pi/2 - theta
+; origo = [8 3]
+
+(defn phi [[x y]]
+  "The angle between a point and the y-axis. 0 <= phi < 2pi"
+  (let [phi (- (/ Math/PI 2) (Math/atan2 y x))]
+    (if (neg? phi) (+ (* 2 Math/PI) phi) phi)))
+
+(defn vaporize
+  "Get set of visible asteroids, sort according to phi,
+concat with already sorted remove visible from asteroid map"
+  [asteroids]
+  
+  )
+
+(defn transform-asteroid-map
+  [asteroid-str x y]
+  (->> asteroid-str
+       (string/split-lines ,,,)
+       (mapv vec ,,,)
+       (asteroid-points [x y] ,,,)
+       (map #(conj % (direction-vec [8 3] (first %))) ,,,)
+       (map #(hash-map (first %) (rest %)) ,,,)
+       (apply merge ,,,))
+  )
