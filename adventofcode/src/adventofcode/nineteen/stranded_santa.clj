@@ -220,16 +220,17 @@
   "Get set of visible asteroids, sort according to phi,
 concat with already sorted remove visible from asteroid map"
   [asteroids]
-  
   )
 
 (defn transform-asteroid-map
   [asteroid-str x y]
   (->> asteroid-str
-       (string/split-lines ,,,)
-       (mapv vec ,,,)
-       (asteroid-points [x y] ,,,)
-       (map #(conj % (direction-vec [8 3] (first %))) ,,,)
-       (map #(hash-map (first %) (rest %)) ,,,)
-       (apply merge ,,,))
+       (string/split-lines)
+       (mapv vec)
+       (asteroid-points [x y])
+       (map #(hash-map (first %) {:phi (phi (first %))
+                                  :r (vector-norm (first %))
+                                  :point (first %)}))
+       (apply merge ,,,)
+       )
   )
