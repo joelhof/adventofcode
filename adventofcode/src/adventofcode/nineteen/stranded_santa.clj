@@ -216,10 +216,14 @@
   (let [phi (- (/ Math/PI 2) (Math/atan2 y x))]
     (if (neg? phi) (+ (* 2 Math/PI) phi) phi)))
 
-(defn vaporize
-  "Get set of visible asteroids, sort according to phi,
-concat with already sorted remove visible from asteroid map"
+(defn visible
+  "Get set of visible asteroids, sorted according to phi, i.e vaporization order"
   [asteroids]
+  (->> (vals asteroids)
+       (group-by :phi ,,,)
+       (sort ,,,)
+       (map #(first (sort-by :r (val %))) ,,,)
+       (map :point ,,,))
   )
 
 (defn transform-asteroid-map
