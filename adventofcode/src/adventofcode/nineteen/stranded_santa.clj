@@ -185,8 +185,10 @@
 (defn find-optimal-asteroid
   [points]
   (->> points
-   (map #(count-visible-asteroids % points) ,,,)
-   (apply max ,,,))
+       (map #(hash-map (count-visible-asteroids % points) %) ,,,)
+       (apply merge ,,,)
+       (apply max-key key ,,,)
+       )
   )
 
 (defn asteroid-count
@@ -200,7 +202,8 @@
        ))
 
 (defn day-ten-part-one []
-  (println (asteroid-count (slurp "resources/nineteen/dayTen.txt")) "asteroids can be seen"))
+  (println "Optimal asteroid is:")
+  (asteroid-count (slurp "resources/nineteen/dayTen.txt")))
 
 ; Day 10, part 2: Shift origo to selected asteroid.
 ; shift by changing sign of y-values.
@@ -226,6 +229,20 @@
        (map :point ,,,))
   )
 
+(defn vaporize
+  [asteroids]
+  (loop [asteroids asteroids
+         vaporized []]
+    (if (empty? asteroids)
+      vaporized
+      (let [to-be-vaporized (visible asteroids)]
+        (recur
+         (reduce dissoc asteroids to-be-vaporized)
+         (concat vaporized to-be-vaporized)))
+      )
+    )
+  )
+
 (defn transform-asteroid-map
   [asteroid-str x y]
   (->> asteroid-str
@@ -238,3 +255,22 @@
        (apply merge ,,,)
        )
   )
+
+(defn score
+  [[x y]]
+  (+ (* x 100) y)
+  )
+
+(defn log [value & msg]
+  (do (println value msg) value))
+
+(defn day-ten-part-two []
+  (-> "resources/nineteen/dayTen.txt"
+      (slurp ,,,)
+      (transform-asteroid-map ,,, 22 -19)
+      (vaporize ,,,)
+      (nth ,,, 199)
+      (transform ,,, [-22 -19])
+      (log ,,, " is the last asteroid")
+      (score ,,,)
+      ))
