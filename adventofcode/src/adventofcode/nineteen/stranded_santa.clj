@@ -136,3 +136,47 @@
        (merge-layers  25 6 ,,,) 
        (display ,,,))
   )
+
+(defn parse-reaction
+  [reaction]
+  (->> (string/split reaction #",")
+       (map string/trim ,,,)
+       (map #(string/split % #" ") ,,,)
+       (map #(hash-map (keyword (second %)) (Integer. (first %))) ,,,)
+       )
+  )
+
+(defn parse-reaction-str
+  [input]
+  (->> (string/split-lines input)
+       (map #(string/split % #"=>") ,,,)
+       (map #(map parse-reaction %) ,,,)
+       (map #(hash-map :lhs (first %) :rhs (second %) :expr (first (keys (first (second %))))) ,,,)
+       (group-by :expr ,,,))
+  )
+; Sum up all 'primitive' reaction results,
+; i.e those directly converted from ORE.
+; i.e where LHS is 'X ORE' and RHS is 'Y PRIMITIVE'
+; Summing can be done recursively
+
+(defn multiplier
+  [base x resultant]
+  (* base (+ (quot x resultant) (if (= 0 (mod x resultant)) 0 1)))
+  )
+
+(defn expanded-multiplier
+  [x y]
+  (+ (quot x y) (if (= 0 (mod x y)) 0 1)))
+;noppannoppansson
+
+; Use breath first search to expand the expressions
+
+(defn expand-expr 
+  [lookup-table expand]
+  ; lookup expression
+  (let [expr-key (first (keys expand))
+        expr (lookup-table expr-key)
+        multiplier (expanded-multiplier
+                    (expand expr-key) (expr :increment))]
+    (map #(update % (first (keys %)) * multiplier) (expr :lhs)))
+  )
