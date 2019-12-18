@@ -142,7 +142,7 @@
   (->> (string/split reaction #",")
        (map string/trim ,,,)
        (map #(string/split % #" ") ,,,)
-       (map #(hash-map (keyword (second %)) (Integer. (first %))) ,,,)
+       (mapv #(hash-map (keyword (second %)) (Integer. (first %))) ,,,)
        )
   )
 
@@ -175,8 +175,9 @@
   [lookup-table expand]
   ; lookup expression
   (let [expr-key (first (keys expand))
-        expr (lookup-table expr-key)
+        expr (get-in lookup-table [expr-key 0])
         multiplier (expanded-multiplier
-                    (expand expr-key) (expr :increment))]
+                    (expand expr-key)
+                    (get-in expr [:rhs 0 expr-key]))]
     (map #(update % (first (keys %)) * multiplier) (expr :lhs)))
   )
