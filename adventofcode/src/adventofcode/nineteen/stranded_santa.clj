@@ -1,5 +1,6 @@
 (ns adventofcode.nineteen.stranded-santa
-  (:require [clojure.string :as string]))
+  (:require [clojure.string :as string])
+  (:use [adventofcode.nineteen.int-computer :as integer-computer :only (run)]))
 
 (defn module-fuel
   [mass] (- (Math/floor (/ mass 3)) 2))
@@ -60,7 +61,7 @@
       (assoc ,,, 2 2)))
 
 (defn day-two-part-one
-  [] (first (int-code-step (prepare-input))))
+  [] (first (integer-computer/run (prepare-input))))
 
 (defn digits [number] (rseq (mapv #(mod % 10) (take-while pos? (iterate #(quot % 10) number)))))
 
@@ -170,10 +171,12 @@
 ;noppannoppansson
 
 ; Use breath first search to expand the expressions
-
-(defn expand-expr 
-  [lookup-table expand]
-  ; lookup expression
+(defmulti expand-expr (fn [lookup-table expand] (first (keys expand))))
+(defmethod expand-expr :ORE [lookup-table expand]
+   (println "expanding :ORE" expand)
+   expand)
+(defmethod expand-expr :default [lookup-table expand]
+  (println "expanding" expand)
   (let [expr-key (first (keys expand))
         expr (get-in lookup-table [expr-key 0])
         multiplier (expanded-multiplier
@@ -181,3 +184,22 @@
                     (get-in expr [:rhs 0 expr-key]))]
     (map #(update % (first (keys %)) * multiplier) (expr :lhs)))
   )
+
+(defn expand [lookup-table key]
+  (->> (get-in lookup-table [key 0 :lhs])
+       (map #(expand-expr lookup-table %))
+       (flatten)
+       (apply merge-with +)
+       ;(mapv #(hash-map (key %) (val %)))
+       )
+  )
+
+(def lookup-table1 (parse-reaction-str "157 ORE => 5 NZVS
+165 ORE => 6 DCFZ
+44 XJWVT, 5 KHKGT, 1 QDVJ, 29 NZVS, 9 GPVTF, 48 HKGWZ => 1 FUEL
+12 HKGWZ, 1 GPVTF, 8 PSHF => 9 QDVJ
+179 ORE => 7 PSHF
+177 ORE => 5 HKGWZ
+7 DCFZ, 7 PSHF => 2 XJWVT
+165 ORE => 2 GPVTF
+3 DCFZ, 7 NZVS, 5 HKGWZ, 10 PSHF => 8 KHKGT"))
