@@ -4,8 +4,8 @@
   (rseq (mapv #(mod % 10) (take-while pos? (iterate #(quot % 10) number)))))
 
 (defmulti parameter-value (fn [mode & params] mode))
-(defmethod parameter-value 0 [_ i instructions] (nth instructions i))
-(defmethod parameter-value 1 [_ i] i)
+(defmethod parameter-value 0 [m i program] (nth program i))
+(defmethod parameter-value 1 [m i & program] i)
 
 ;(def pointer (atom 0))
 
@@ -22,25 +22,33 @@
 (defmethod pointer-instr 1 [pointer program]
   ;(println "+ pointer at:" pointer)
   (let [[i j k] (subvec program (inc pointer) (+ pointer 4))
-        new-pointer (+ pointer 4)]
-    [new-pointer (assoc program k (+ (nth program i) (nth program j)))])
+        new-pointer (+ pointer 4)
+        modes (reverse (drop-last 2 (digits (nth program pointer))))]
+    [new-pointer (assoc program k (+ (parameter-value (nth modes 0 0) i program)
+                                     (parameter-value (nth modes 1 0) j program)))])
   )
+
 (defmethod pointer-instr 2 [pointer program]
   ;(println "* pointer at:" pointer)
   (let [[i j k] (subvec program (inc pointer) (+ pointer 4))
-        new-pointer (+ pointer 4)]
-    [new-pointer (assoc program k (* (nth program i) (nth program j)))]
+        new-pointer (+ pointer 4)
+        modes (reverse (drop-last 2 (digits (nth program pointer))))]
+    [new-pointer (assoc program k (* (parameter-value (nth modes 0 0) i program)
+                                     (parameter-value (nth modes 1 0) j program)))]
     )
   )
+
 (defmethod pointer-instr 99 [pointer program]
   ; XXX think about how to signal program halt.
   (println "Halting! pointer at:" pointer)
   [pointer program])
+
 (defmethod pointer-instr 3 [pointer program]
   ; Store input in memory
   (let [i (nth program (inc pointer))]
     [(+ pointer 2) (assoc program i @input)])
   )
+
 (defmethod pointer-instr 4 [pointer program]
   ; Output value from memory
   (let [new-pointer (inc pointer)
@@ -49,6 +57,7 @@
     [(inc new-pointer) program]
     )
   )
+
 (defn run
   ([program] (run 0 program))
   ([pointer program]
