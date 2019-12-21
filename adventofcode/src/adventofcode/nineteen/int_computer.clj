@@ -26,6 +26,9 @@
 (println "Output: " (parameter-value 0 i instructions)))
 (defmethod opcode 99 [_ & args] "Program exited")
 
+(def input (atom 0))
+(def output (atom 0))
+
 (defmulti pointer-instr (fn [pointer program] (nth program pointer)))
 (defmethod pointer-instr 1 [pointer program]
   ;(println "+ pointer at:" pointer)
@@ -41,13 +44,26 @@
     )
   )
 (defmethod pointer-instr 99 [pointer program]
+  ; XXX think about how to signal program halt.
   (println "Halting! pointer at:" pointer)
   [pointer program])
-
+(defmethod pointer-instr 3 [pointer program]
+  ; Store input in memory
+  (let [i (nth program (inc pointer))]
+    [(+ pointer 2) (assoc program i @input)])
+  )
+(defmethod pointer-instr 4 [pointer program]
+  ; Output value from memory
+  (let [new-pointer (inc pointer)
+        i (nth program new-pointer)]
+    (reset! output (nth program i))
+    [(inc new-pointer) program]
+    )
+  )
 (defn run
   ([program] (run 0 program))
   ([pointer program]
-   ;(println pointer program)
+   (println pointer program)
    (let [[new-pointer new-prog] (pointer-instr pointer program)]
      (if (= pointer new-pointer)
        new-prog
