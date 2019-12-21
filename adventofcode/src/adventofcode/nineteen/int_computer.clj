@@ -1,10 +1,7 @@
 (ns adventofcode.nineteen.int-computer)
 
-; need an instruction pointer to keep track of where we are.
-
-; need an input ref/atom to allow input
-
-; need an output ref/atom to output
+(defn digits [number]
+  (rseq (mapv #(mod % 10) (take-while pos? (iterate #(quot % 10) number)))))
 
 (defmulti parameter-value (fn [mode & params] mode))
 (defmethod parameter-value 0 [_ i instructions] (nth instructions i))
@@ -12,24 +9,16 @@
 
 ;(def pointer (atom 0))
 
-(defmulti opcode (fn [[c & params] instructions] c))
-(defmethod opcode 1 [[c i j k] instructions]
-  (println "+ i:" i "j:" j "k:" k "program:" instructions)
-  ;(swap! pointer + 4)
-  (assoc instructions k (+ (nth instructions i) (nth instructions j))))
-(defmethod opcode 2 [[c i j k] instructions]
-   (assoc instructions k (* (nth instructions i) (nth instructions j))))
-(defmethod  opcode 3 [[c i k] instructions]
-   (assoc instructions k i))
-(defmethod opcode 4 [[c i] instructions]
-;"Outputs the value of parameter i"
-(println "Output: " (parameter-value 0 i instructions)))
-(defmethod opcode 99 [_ & args] "Program exited")
-
 (def input (atom 0))
 (def output (atom 0))
 
-(defmulti pointer-instr (fn [pointer program] (nth program pointer)))
+(defn get-opcode
+  [instr]
+  (last (digits instr))
+  )
+
+(defmulti pointer-instr (fn [pointer program] (get-opcode
+                                               (nth program pointer))))
 (defmethod pointer-instr 1 [pointer program]
   ;(println "+ pointer at:" pointer)
   (let [[i j k] (subvec program (inc pointer) (+ pointer 4))
