@@ -57,11 +57,35 @@
                               (slurp)
                               (string/trim)
                               (string/split ,,, #",")))
-      (assoc ,,, 1 12)
-      (assoc ,,, 2 2)))
+      ))
+
+(defn run-with-input
+  [input noun verb]
+  (first (integer-computer/run (-> input
+                                   (assoc ,,, 1 noun)
+                                   (assoc ,,, 2 verb)))))
 
 (defn day-two-part-one
-  [] (first (integer-computer/run (prepare-input))))
+  [] (run-with-input (prepare-input) 12 2)
+  )
+
+(def combos 
+  (->> (range 0 100)
+       (map (fn [x] (map #(vector x %) (range 0 100))) ,,,)
+       (flatten ,,,)
+       (partition 2 ,,,)
+       (shuffle ,,,) ; increases performance slightly.
+       ) 
+)
+
+(defn day-two-part-two []
+  (let [input-program (prepare-input)]
+    (println "Finding input noun and verb producing 19690720...")
+    (reduce (fn [previous [noun verb]]
+              (if (= (first previous) 19690720)
+                (reduced previous)
+                [(run-with-input input-program noun verb) (+ (* 100 noun) verb)])) [0 0] combos))
+  )
 
 (defn digits [number] (rseq (mapv #(mod % 10) (take-while pos? (iterate #(quot % 10) number)))))
 
