@@ -54,7 +54,7 @@
 
 (defmethod pointer-instr 4 [pointer program]
   ; Output value from memory
-  (println "output instruction...")
+  ;(println "output instruction...")
   (let [new-pointer (inc pointer)
         i (nth program new-pointer)]
     (reset! output (nth program i))
@@ -65,7 +65,7 @@
 (defn run
   ([program] (run 0 program))
   ([pointer program]
-   (println pointer program)
+   ;(println pointer program)
    (let [[new-pointer new-prog] (pointer-instr pointer program)]
      (if (= pointer new-pointer)
        new-prog
