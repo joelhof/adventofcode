@@ -14,7 +14,10 @@
 
 (defn get-opcode
   [instr]
-  (last (digits instr))
+  (->> (digits instr)
+       (take-last 2 ,,,)
+       (clojure.string/join ,,,)
+       (Integer/parseInt ,,,))
   )
 
 (defmulti pointer-instr (fn [pointer program] (get-opcode
@@ -51,6 +54,7 @@
 
 (defmethod pointer-instr 4 [pointer program]
   ; Output value from memory
+  (println "output instruction...")
   (let [new-pointer (inc pointer)
         i (nth program new-pointer)]
     (reset! output (nth program i))

@@ -52,8 +52,8 @@
            (int-code-step (+ instruction 4) ,,,))))) 
 
 (defn prepare-input
-  []
-  (-> (mapv #(Integer. %) (-> "resources/nineteen/dayTwo.txt"
+  [file]
+  (-> (mapv #(Integer. %) (-> file
                               (slurp)
                               (string/trim)
                               (string/split ,,, #",")))
@@ -66,7 +66,7 @@
                                    (assoc ,,, 2 verb)))))
 
 (defn day-two-part-one
-  [] (run-with-input (prepare-input) 12 2)
+  [] (run-with-input (prepare-input "resources/nineteen/dayTwo.txt") 12 2)
   )
 
 (def combos 
@@ -79,7 +79,7 @@
 )
 
 (defn day-two-part-two []
-  (let [input-program (prepare-input)]
+  (let [input-program (prepare-input "resources/nineteen/dayTwo.txt")]
     (println "Finding input noun and verb producing 19690720...")
     (reduce (fn [previous [noun verb]]
               (if (= (first previous) 19690720)
@@ -110,6 +110,16 @@
 	(filter monotonic? ,,,)
 	(count ,,,))
 )
+
+(defn day-five-part-one
+  []
+  (reset! integer-computer/input 1)
+  (add-watch integer-computer/output :print-output (fn [key atom old new] (println key new)))
+  (-> (prepare-input "resources/nineteen/dayFive.txt")
+      (integer-computer/run ,,,)
+      )
+  (println "Final output diagnostic code is: " @integer-computer/output)
+  )
 
 (defn to-int-seq
   [file]
