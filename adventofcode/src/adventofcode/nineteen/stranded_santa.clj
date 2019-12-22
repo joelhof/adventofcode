@@ -28,29 +28,6 @@
                            (map recursive-fuel)
                            (reduce +)))
 
-(defn opcode-sum
-  [[i j k] data]
-  (println "opcode-sum " i j k)
-  (assoc data k (+ (nth data i) (nth data j))))
-
-(defn opcode-multiply
-  [[i j k] data]
-  (println "opcode-multiply " i j k)
-  (assoc data k (* (nth data i) (nth data j))))
-
-(defn int-code-step
-  ([data] (int-code-step 0 data))
-  ([instruction data]
-   (println "next instruction " instruction)
-   (case (nth data instruction)
-     99 data
-     1 (->> data
-            (opcode-sum (subvec data (inc instruction) (+ instruction 4)) ,,,)
-            (int-code-step (+ instruction 4) ,,,))
-     2 (->> data
-           (opcode-multiply (subvec data (inc instruction) (+ instruction 4)) ,,,)
-           (int-code-step (+ instruction 4) ,,,))))) 
-
 (defn prepare-input
   [file]
   (-> (mapv #(Integer. %) (-> file
