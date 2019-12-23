@@ -40,7 +40,7 @@
   ;(println "+ pointer at:" pointer)
   (let [[i j k] (subvec program (inc pointer) (+ pointer 4))
         new-pointer (+ pointer 4)
-        modes (parameter-modes pointer program 4)]
+        modes (parameter-modes pointer program 3)]
     [new-pointer (assoc program k (+ (parameter-value (nth modes 0 0) i program)
                                      (parameter-value (nth modes 1 0) j program)))])
   )
@@ -49,7 +49,7 @@
   ;(println "* pointer at:" pointer)
   (let [[i j k] (subvec program (inc pointer) (+ pointer 4))
         new-pointer (+ pointer 4)
-        modes (parameter-modes pointer program 4)]
+        modes (parameter-modes pointer program 3)]
     [new-pointer (assoc program k (* (parameter-value (nth modes 0 0) i program)
                                      (parameter-value (nth modes 1 0) j program)))]
     )
@@ -71,8 +71,9 @@
   ; Output value from memory
   (println "output instruction...")
   (let [new-pointer (inc pointer)
+        modes (parameter-modes pointer program 1)
         i (nth program new-pointer)]
-    (reset! output (nth program i))
+    (reset! output (parameter-value (nth modes 0 0) i program))
     [(inc new-pointer) program]
     )
   )
@@ -80,7 +81,7 @@
 (defmethod pointer-instr 5 [pointer program]
   ; GOTO if non-zero
   (let [[i j] (subvec program (inc pointer) (+ 3 pointer))
-        modes (parameter-modes pointer program 3)
+        modes (parameter-modes pointer program 2)
         firstParam (parameter-value (nth modes 0 0) i program)
         new-pointer (if (not (zero? firstParam))
                       (parameter-value (nth modes 1 0) j program) (+ 3 pointer)) ]
@@ -90,7 +91,7 @@
 (defmethod pointer-instr 6 [pointer program]
   ; GOTO if non-zero
   (let [[i j] (subvec program (inc pointer) (+ 3 pointer))
-        modes (parameter-modes pointer program 3)
+        modes (parameter-modes pointer program 2)
         firstParam (parameter-value (nth modes 0 0) i program)
         new-pointer (if (zero? firstParam)
                       (parameter-value (nth modes 1 0) j program) (+ 3 pointer))]
@@ -111,10 +112,12 @@
 
 (defmethod pointer-instr 7 [pointer program]
   ; LESS THAN
+  (println "LESS THAN instruction")
   (predicate < pointer program))
 
 (defmethod pointer-instr 8 [pointer program]
   ; EQUALS
+  (println "EQUALS instruction")
   (predicate = pointer program))
 
 (defn run
@@ -128,9 +131,7 @@
      )
    ))
 
-(map #(hash-map :mode %1, :value %2) [4 3 4] [1 0])
-({:value 1, :mode 4} {:value 0, :mode 3}) 
-
+(def test-program [3,21,1008,21,8,20,1005,20,22,107,8,21,20,1006,20,31,1106,0,36,98,0,0,1002,21,125,20,4,20,1105,1,46,104,999,1105,1,46,1101,1000,1,20,4,20,1105,1,46,98,99])
 
 ; (defprotocol Opcode
 ;   (params [this])
