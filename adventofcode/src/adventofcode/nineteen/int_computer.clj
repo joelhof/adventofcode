@@ -7,6 +7,11 @@
 (defmethod parameter-value 0 [m i program] (nth program i))
 (defmethod parameter-value 1 [m i & program] i)
 
+(defn parameter-modes
+  [pointer program]
+  (reverse (drop-last 2 (digits (nth program pointer))))
+  )
+
 ;(def pointer (atom 0))
 
 (def input (atom 0))
@@ -26,7 +31,7 @@
   ;(println "+ pointer at:" pointer)
   (let [[i j k] (subvec program (inc pointer) (+ pointer 4))
         new-pointer (+ pointer 4)
-        modes (reverse (drop-last 2 (digits (nth program pointer))))]
+        modes (parameter-modes pointer program)]
     [new-pointer (assoc program k (+ (parameter-value (nth modes 0 0) i program)
                                      (parameter-value (nth modes 1 0) j program)))])
   )
@@ -35,7 +40,7 @@
   ;(println "* pointer at:" pointer)
   (let [[i j k] (subvec program (inc pointer) (+ pointer 4))
         new-pointer (+ pointer 4)
-        modes (reverse (drop-last 2 (digits (nth program pointer))))]
+        modes (parameter-modes pointer program)]
     [new-pointer (assoc program k (* (parameter-value (nth modes 0 0) i program)
                                      (parameter-value (nth modes 1 0) j program)))]
     )
@@ -48,13 +53,14 @@
 
 (defmethod pointer-instr 3 [pointer program]
   ; Store input in memory
+  (println "Storing " @input "@ pos " pointer)
   (let [i (nth program (inc pointer))]
     [(+ pointer 2) (assoc program i @input)])
   )
 
 (defmethod pointer-instr 4 [pointer program]
   ; Output value from memory
-  ;(println "output instruction...")
+  (println "output instruction...")
   (let [new-pointer (inc pointer)
         i (nth program new-pointer)]
     (reset! output (nth program i))
@@ -62,10 +68,29 @@
     )
   )
 
+(defmethod pointer-instr 5 [pointer program]
+  ; GOTO if non-zero
+  (let [[i j] (subvec program (inc pointer) (+ 3 pointer))
+        modes (parameter-modes pointer program)
+        firstParam (parameter-value (nth modes 0 0) i program)
+        new-pointer (if (not (zero? firstParam))
+                      (parameter-value (nth modes 1 0) j program) (+ 3 pointer)) ]
+    [new-pointer program])
+  )
+
+(defmethod pointer-instr 6 [pointer program]
+  ; GOTO if non-zero
+  (let [[i j] (subvec program (inc pointer) (+ 3 pointer))
+        modes (parameter-modes pointer program)
+        firstParam (parameter-value (nth modes 0 0) i program)
+        new-pointer (if (zero? firstParam)
+                      (parameter-value (nth modes 1 0) j program) (+ 3 pointer))]
+    [new-pointer program]))
+
 (defn run
   ([program] (run 0 program))
   ([pointer program]
-   ;(println pointer program)
+   (println pointer program)
    (let [[new-pointer new-prog] (pointer-instr pointer program)]
      (if (= pointer new-pointer)
        new-prog
