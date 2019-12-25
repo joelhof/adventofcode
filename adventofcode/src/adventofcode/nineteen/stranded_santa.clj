@@ -107,6 +107,31 @@
   (println "Final output diagnostic code is: " @integer-computer/output)
   )
 
+(defn swap-phases
+  [i j phases]
+  (assoc phases i (phases j) j (phases i))
+  )
+
+(defn cycle-phases
+  [phases]
+  (map #(subvec (vec (take (* 2 (count phases))
+                           (cycle phases))) % (+ % (count phases))) phases))
+
+(defn generate-phases
+  [phase]
+  (->> (repeatedly 5 #(vec (range 0 5)))
+       (map-indexed #(swap-phases phase %1 %2))
+       (map cycle-phases)
+       (reduce concat))
+  )
+
+(def phase-combinations
+  (->> (range 0 5)
+       (map generate-phases ,,,)
+       (apply concat ,,,)
+       (distinct ,,,))
+  )
+
 (defn to-int-seq
   [file]
   (->> file
