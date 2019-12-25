@@ -60,8 +60,10 @@
 (defmethod pointer-instr 3 [pointer program]
   ; Store input in memory
   ;(println "Storing " @input "@ pos " pointer)
-  (let [i (nth program (inc pointer))]
-    [(+ pointer 2) (assoc program i @input)])
+  (let [i (nth program (inc pointer))
+        input-value (peek @input)]
+    (swap! input pop)
+    [(+ pointer 2) (assoc program i input-value)])
   )
 
 (defmethod pointer-instr 4 [pointer program]
@@ -127,6 +129,13 @@
        (recur new-pointer new-prog))
      )
    ))
+
+(defn amplify!
+  [phase input-value program]
+  (reset! input (list phase input-value))
+  (run program)
+  @output
+  )
 
 (def test-program [3,21,1008,21,8,20,1005,20,22,107,8,21,20,1006,20,31,1106,0,36,98,0,0,1002,21,125,20,4,20,1105,1,46,104,999,1105,1,46,1101,1000,1,20,4,20,1105,1,46,98,99])
 
