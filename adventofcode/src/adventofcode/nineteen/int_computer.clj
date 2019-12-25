@@ -28,10 +28,7 @@
 
 (defn get-opcode
   [instr]
-  (->> (digits instr)
-       (take-last 2 ,,,)
-       (clojure.string/join ,,,)
-       (Integer/parseInt ,,,))
+  (mod instr 100)
   )
 
 (defmulti pointer-instr (fn [pointer program] (get-opcode
@@ -57,19 +54,19 @@
 
 (defmethod pointer-instr 99 [pointer program]
   ; XXX think about how to signal program halt.
-  (println "Halting! pointer at:" pointer)
+  ;(println "Halting! pointer at:" pointer)
   [pointer program])
 
 (defmethod pointer-instr 3 [pointer program]
   ; Store input in memory
-  (println "Storing " @input "@ pos " pointer)
+  ;(println "Storing " @input "@ pos " pointer)
   (let [i (nth program (inc pointer))]
     [(+ pointer 2) (assoc program i @input)])
   )
 
 (defmethod pointer-instr 4 [pointer program]
   ; Output value from memory
-  (println "output instruction...")
+  ;(println "output instruction...")
   (let [new-pointer (inc pointer)
         modes (parameter-modes pointer program 1)
         i (nth program new-pointer)]
@@ -112,18 +109,18 @@
 
 (defmethod pointer-instr 7 [pointer program]
   ; LESS THAN
-  (println "LESS THAN instruction")
+  ;(println "LESS THAN instruction")
   (predicate < pointer program))
 
 (defmethod pointer-instr 8 [pointer program]
   ; EQUALS
-  (println "EQUALS instruction")
+  ;(println "EQUALS instruction")
   (predicate = pointer program))
 
 (defn run
   ([program] (run 0 program))
   ([pointer program]
-   (println pointer program)
+   ;(println pointer program)
    (let [[new-pointer new-prog] (pointer-instr pointer program)]
      (if (= pointer new-pointer)
        new-prog
