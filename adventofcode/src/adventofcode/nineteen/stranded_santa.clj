@@ -133,10 +133,10 @@
   )
 
 (defn amplify
-  [phase-settings program]
+  [program phase-settings]
   (loop [phase-settings phase-settings
          input 0]
-    (prn phase-settings input)
+    ;(prn phase-settings input)
     (if (empty? phase-settings)
       input
       (recur (rest phase-settings)
@@ -144,6 +144,16 @@
               (first phase-settings) input program))
       )
     )
+  )
+
+(defn day-seven-part-one []
+  (println "Finding optimial thruster phase settings...")
+  (->> phase-combinations
+       (map (juxt identity (partial amplify (prepare-input "resources/nineteen/daySeven.txt"))) ,,,)
+       (sort-by second ,,,)
+       (reverse ,,,)
+       (first ,,,)
+       )
   )
 
 (defn to-int-seq
