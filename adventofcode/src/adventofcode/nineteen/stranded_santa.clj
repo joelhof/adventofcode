@@ -132,6 +132,20 @@
        (distinct ,,,))
   )
 
+(defn amplify
+  [phase-settings program]
+  (loop [phase-settings phase-settings
+         input 0]
+    (prn phase-settings input)
+    (if (empty? phase-settings)
+      input
+      (recur (rest phase-settings)
+             (integer-computer/amplify!
+              (first phase-settings) input program))
+      )
+    )
+  )
+
 (defn to-int-seq
   [file]
   (->> file
