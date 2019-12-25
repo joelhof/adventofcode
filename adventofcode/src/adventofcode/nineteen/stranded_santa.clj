@@ -98,6 +98,15 @@
   (println "Final output diagnostic code is: " @integer-computer/output)
   )
 
+(defn day-five-part-two []
+  (reset! integer-computer/input 5)
+  (add-watch integer-computer/output :print-output (fn [key atom old new] (println key new)))
+  (-> (prepare-input "resources/nineteen/dayFive.txt")
+      (integer-computer/run ,,,)
+      )
+  (println "Final output diagnostic code is: " @integer-computer/output)
+  )
+
 (defn to-int-seq
   [file]
   (->> file
