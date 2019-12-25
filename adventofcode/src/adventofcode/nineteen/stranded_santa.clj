@@ -115,19 +115,20 @@
 (defn cycle-phases
   [phases]
   (map #(subvec (vec (take (* 2 (count phases))
-                           (cycle phases))) % (+ % (count phases))) phases))
+                            (cycle phases))) % (+ % (count phases))) (range 0 (count phases))))
 
 (defn generate-phases
-  [phase]
-  (->> (repeatedly 5 #(vec (range 0 5)))
-       (map-indexed #(swap-phases phase %1 %2))
-       (map cycle-phases)
-       (reduce concat))
+  [phase phase-set]
+  (->> (repeatedly (count phase-set) #(vec phase-set))
+       (map-indexed #(swap-phases (.indexOf %2 phase) %1 %2) ,,,)
+       (map cycle-phases ,,,)
+       (reduce concat ,,,))
   )
 
-(def phase-combinations
-  (->> (range 0 5)
-       (map generate-phases ,,,)
+(defn phase-settings
+  [m n]
+  (->> (range m n)
+       (map #(generate-phases % (range m n)) ,,,)
        (apply concat ,,,)
        (distinct ,,,))
   )
@@ -148,7 +149,7 @@
 
 (defn day-seven-part-one []
   (println "Finding optimial thruster phase settings...")
-  (->> phase-combinations
+  (->> (phase-settings 0 5)
        (map (juxt identity (partial amplify (prepare-input "resources/nineteen/daySeven.txt"))) ,,,)
        (sort-by second ,,,)
        (reverse ,,,)
