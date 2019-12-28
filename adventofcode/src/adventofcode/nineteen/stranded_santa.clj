@@ -1,5 +1,6 @@
 (ns adventofcode.nineteen.stranded-santa
   (:require [clojure.string :as string])
+  (:require [clojure.core.async :as async])
   (:use [adventofcode.nineteen.int-computer :as integer-computer :only (run)]))
 
 (defn module-fuel
@@ -88,23 +89,31 @@
 	(count ,,,))
 )
 
+(defn print-watcher [channel]
+  (async/go-loop []
+    (when-let [value (async/<! channel)]
+      (println "LOG:" value) (recur)
+      )
+    ))
+
 (defn day-five-part-one
   []
-  (reset! integer-computer/input 1)
-  (add-watch integer-computer/output :print-output (fn [key atom old new] (println key new)))
-  (-> (prepare-input "resources/nineteen/dayFive.txt")
-      (integer-computer/run ,,,)
-      )
-  (println "Final output diagnostic code is: " @integer-computer/output)
+  (let [in-chan (async/chan 1)
+        out-chan (async/chan 20)]
+    (async/>!! in-chan 1)
+    (print-watcher out-chan)
+    (-> (prepare-input "resources/nineteen/dayFive.txt")
+        (integer-computer/run in-chan out-chan))
+    )
   )
 
 (defn day-five-part-two []
-  (reset! integer-computer/input 5)
-  (add-watch integer-computer/output :print-output (fn [key atom old new] (println key new)))
-  (-> (prepare-input "resources/nineteen/dayFive.txt")
-      (integer-computer/run ,,,)
-      )
-  (println "Final output diagnostic code is: " @integer-computer/output)
+  (let [in-chan (async/chan 1)
+        out-chan (async/chan 20)]
+    (async/>!! in-chan 5)
+    (print-watcher out-chan)
+    (-> (prepare-input "resources/nineteen/dayFive.txt")
+        (integer-computer/run in-chan out-chan)))
   )
 
 (defn swap-phases
