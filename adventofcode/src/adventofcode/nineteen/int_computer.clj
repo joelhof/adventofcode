@@ -1,6 +1,11 @@
 (ns adventofcode.nineteen.int-computer
   (:require [clojure.core.async :as async]))
 
+(def LOG (atom false))
+
+(defn to-log [& more]
+  (.write *out* (str (clojure.string/join " " more) "\n")))
+
 (defn digits [number]
   (rseq (mapv #(mod % 10) (take-while pos? (iterate #(quot % 10) number)))))
 
@@ -22,11 +27,6 @@
   (map #(parameter-value (first %) (second %) program)
        (partition 2 (interleave modes params))))
 
-;(def pointer (atom 0))
-
-(def input (atom 0))
-(def output (atom 0))
-
 (def input-chan (async/chan 2))
 (def output-chan (async/chan 1))
 
@@ -43,7 +43,7 @@
 (defmulti pointer-instr (fn [{:keys [pointer program]}] (get-opcode
                                                (nth program pointer))))
 (defmethod pointer-instr 1 [{:keys [pointer program] :as m}]
-  (println "+ pointer at:" pointer)
+  (when @LOG (to-log (:host m) "+ pointer at:" pointer))
   (let [[i j k] (subvec program (inc pointer) (+ pointer 4))
         new-pointer (+ pointer 4)
         modes (parameter-modes pointer program 3)]
@@ -53,7 +53,7 @@
   )
 
 (defmethod pointer-instr 2 [{:keys [pointer program] :as m}]
-  (println "* pointer at:" pointer)
+  (when @LOG (to-log (:host m) "* pointer at:" pointer))
   (let [[i j k] (subvec program (inc pointer) (+ pointer 4))
         new-pointer (+ pointer 4)
         modes (parameter-modes pointer program 3)]
@@ -63,24 +63,25 @@
   )
 
 (defmethod pointer-instr 99 [{:keys [pointer out-chan] :as m}]
-  ; XXX think about how to signal program halt.
-  (println "Halting! pointer at:" pointer)
+  (to-log (:host m) "Halting! pointer at:" pointer)
   (async/close! out-chan)
   (assoc m :exit true)
   )
 
 (defmethod pointer-instr 3 [{:keys [pointer program in-chan] :as m}]
   ; Store input in memory
-  (println "Reading input..." pointer)
+  (when @LOG (to-log (:host m) "Reading input..." pointer))
   (let [i (nth program (inc pointer))
         input-value (async/<!! in-chan)]
-    (println "Input" input-value "recieved. Proceeding...")
+    (to-log (:host m) "Input" input-value "recieved. Proceeding...")
     (update-state m (+ pointer 2) i input-value)
     ))
 
 (defmethod pointer-instr 4 [{:keys [pointer program out-chan] :as m}]
   ; Output value from memory
-  (println "output instruction..." pointer)
+  ;(when @LOG 
+    (to-log (:host m) "output instruction..." pointer)
+   ; )
   (let [new-pointer (inc pointer)
         modes (parameter-modes pointer program 1)
         i (nth program new-pointer)]
@@ -90,6 +91,7 @@
 
 (defmethod pointer-instr 5 [{:keys [pointer program] :as m}]
   ; GOTO if non-zero
+  (when @LOG (to-log (:host m) "GOTO if not zero" pointer))
   (let [[i j] (subvec program (inc pointer) (+ 3 pointer))
         modes (parameter-modes pointer program 2)
         firstParam (parameter-value (nth modes 0 0) i program)
@@ -100,7 +102,8 @@
   )
 
 (defmethod pointer-instr 6 [{:keys [pointer program] :as m}]
-  ; GOTO if non-zero
+  ; GOTO if zero
+  (when @LOG (to-log (:host m) "GOTO if zero" pointer))
   (let [[i j] (subvec program (inc pointer) (+ 3 pointer))
         modes (parameter-modes pointer program 2)
         firstParam (parameter-value (nth modes 0 0) i program)
@@ -119,31 +122,28 @@
                                                      (first values) (second values))
                                                   1
                                                   0)))
-   ;  [(+ 4 pointer) (assoc program (last params)
-   ;                        (if (f (first values) (second values))
-   ;                          1
-   ;                          0))])
     )
 
 (defmethod pointer-instr 7 [state]
   ; LESS THAN
-  ;(println "LESS THAN instruction")
+  (when @LOG (to-log (:host state) "LESS THAN" (:pointer state)))
   (predicate < state))
 
 (defmethod pointer-instr 8 [state]
   ; EQUALS
-  ;(println "EQUALS instruction")
+  (when @LOG (to-log (:host state) "EQUALS" (:pointer state)))
   (predicate = state))
 
 (defn run
-  ([program] (run 0 {:pointer 0 :program program} ))
-  ([program input< output>] (run 0 {
-                                    :pointer 0
-                                    :program program 
-                                    :in-chan input< 
-                                    :out-chan output>}))
+  ([program] (run 0 {:pointer 0 :program program :host :localhost} ))
+  ([program input< output> name] (run 0 {
+                                         :pointer 0
+                                         :program program 
+                                         :in-chan input< 
+                                         :out-chan output>
+                                         :host name}))
   ([pointer program]
-   ;(println pointer program)
+   (to-log pointer program)
    (let [new-prog (pointer-instr program)]
      (if (:exit new-prog)
        new-prog
@@ -157,7 +157,7 @@
         out-chan (async/chan 1)]
     (async/>!! in-chan phase)
     (async/>!! in-chan input-value)
-    (run program in-chan out-chan)
+    (run program in-chan out-chan :localhost)
     (async/<!! out-chan))
   ;(reset! input (list phase input-value))
   
