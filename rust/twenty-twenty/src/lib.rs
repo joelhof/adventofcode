@@ -7,4 +7,4 @@ mod tests {
     }
 }
 
-mod dayOne;
+pub mod dayOne;
