@@ -2,9 +2,11 @@
 pub fn day_one(input: &str) -> i64 {
     let parseResult: Result<Vec<i64>, _> = input.split("\n")
             .map(|line| line.trim())
+            .filter(|line| !line.is_empty())
             .map(|line| line.parse::<i64>())
             .collect();
     let numbers = parseResult.unwrap();
+    println!("{:?}", numbers);
     let sumsToTwenty: i64 = numbers.clone()
         .into_iter()
         .filter(|n| sum_vector(n, &numbers)
@@ -28,6 +30,19 @@ mod tests {
             979
             366
             299
+            675
+            1456";
+        let result = day_one(INPUT);
+        assert_eq!(result, 514579i64);
+    }
+
+    #[test]
+    fn ignoreBlankLines() {
+        const INPUT: &str = "1721
+            979
+            366
+            299
+
             675
             1456";
         let result = day_one(INPUT);
