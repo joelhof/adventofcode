@@ -1,5 +1,7 @@
 #![allow(non_snake_case)]
 
+use std::collections::HashMap;
+
 pub fn solve(input: &str) -> u32 {
     return input.split("\n")
             .map(|line| line.trim())
@@ -11,17 +13,27 @@ pub fn solve(input: &str) -> u32 {
 fn validPassword(input: &str) -> u32 {
     let tmp: Vec<&str> = input.split(":").collect();
     let policy = Policy::new(tmp[0]);
-    let password = tmp[1];
+    let password = tmp[1].trim();
     println!("policy {:?} password {:2}", policy, password);
-
-    return 0;
+    let mut frequencies = HashMap::new();
+    for character in password.chars() {
+        let count = frequencies.entry(character).or_insert(0);
+        *count += 1;
+    }
+    println!("frequencies {:?}", frequencies);
+    println!("{:?}", frequencies.get(&policy.key));
+    return match frequencies.get(&policy.key) {
+        None => 0,
+        Some(x) if x >= &policy.min && x <= &policy.max => 1,
+        Some(_) => 0
+    };
 }
 
 #[derive(Debug, Clone, PartialEq)]
 struct Policy {
     min: u32,
     max: u32,
-    key: String
+    key: char
 }
 
 impl Policy {
@@ -29,7 +41,7 @@ impl Policy {
         return Policy {
             min: input[0..1].parse().unwrap(),
             max: input[2..3].parse().unwrap(),
-            key: input[4..].to_string()
+            key: input.chars().nth(4).unwrap()
         };
     }
 }
@@ -42,7 +54,7 @@ mod tests {
     fn exampleTest() {
         const INPUT: &str = "1-3 a: abcde
         1-3 b: cdefg
-        2-9 c: ccccccccc";
+        2-9 c: ccccccccc" ;
         let result = solve(INPUT);
         assert_eq!(result, 2);
     }
