@@ -10,6 +10,14 @@ pub fn solve(input: &str) -> u32 {
             .sum();
 }
 
+pub fn partTwo(input: &str) -> u32 {
+    return input.split("\n")
+            .map(|line| line.trim())
+            .filter(|line| !line.is_empty())
+            .map(|line| officialTobogganCorporatePassword(line))
+            .sum();
+}
+
 fn validPassword(input: &str) -> u32 {
     let tmp: Vec<&str> = input.split(":").collect();
     let policy = Policy::new(tmp[0]);
@@ -24,6 +32,21 @@ fn validPassword(input: &str) -> u32 {
         Some(x) if x >= &policy.min && x <= &policy.max => 1,
         Some(_) => 0
     };
+}
+
+fn officialTobogganCorporatePassword(input: &str) -> u32 {
+    let tmp: Vec<&str> = input.split(":").collect();
+    let policy = Policy::new(tmp[0]);
+    let password = tmp[1].trim();
+    let firstChar = password.chars().nth((policy.min-1) as usize).unwrap();
+    let secondChar = password.chars().nth((policy.max-1) as usize).unwrap();
+    if firstChar == policy.key && secondChar != policy.key {
+        return 1;
+    } else if secondChar == policy.key && firstChar != policy.key {
+        return 1;
+    } else {
+        return 0;
+    }
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -67,6 +90,15 @@ mod tests {
         1-3 b: cdefg
         2-9 c: ccccccccc" ;
         let result = solve(INPUT);
+        assert_eq!(result, 1);
+    }
+
+    #[test]
+    fn partTwoExample() {
+        const INPUT: &str = "1-3 a: abcde
+        1-3 b: cdefg
+        2-9 c: ccccccccc" ;
+        let result = partTwo(INPUT);
         assert_eq!(result, 1);
     }
 }
