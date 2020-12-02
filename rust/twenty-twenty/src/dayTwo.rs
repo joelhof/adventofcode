@@ -14,14 +14,11 @@ fn validPassword(input: &str) -> u32 {
     let tmp: Vec<&str> = input.split(":").collect();
     let policy = Policy::new(tmp[0]);
     let password = tmp[1].trim();
-    println!("policy {:?} password {:2}", policy, password);
     let mut frequencies = HashMap::new();
     for character in password.chars() {
         let count = frequencies.entry(character).or_insert(0);
         *count += 1;
     }
-    println!("frequencies {:?}", frequencies);
-    println!("{:?}", frequencies.get(&policy.key));
     return match frequencies.get(&policy.key) {
         None => 0,
         Some(x) if x >= &policy.min && x <= &policy.max => 1,
@@ -38,10 +35,15 @@ struct Policy {
 
 impl Policy {
     pub fn new(input: &str) -> Policy {
+        let tmp: Vec<_> = input.split(" ").collect();
+        let tmp2: Result<Vec<u32>, _> = tmp[0].split("-")
+                .map(|s| s.parse())
+                .collect();
+        let minMax = tmp2.unwrap();
         return Policy {
-            min: input[0..1].parse().unwrap(),
-            max: input[2..3].parse().unwrap(),
-            key: input.chars().nth(4).unwrap()
+            min: minMax[0],
+            max: minMax[1],
+            key: tmp[1].trim().chars().nth(0).unwrap()
         };
     }
 }
@@ -57,5 +59,14 @@ mod tests {
         2-9 c: ccccccccc" ;
         let result = solve(INPUT);
         assert_eq!(result, 2);
+    }
+
+    #[test]
+    fn multidigitPolicytidsTest() {
+        const INPUT: &str = "11-311 a: abcde
+        1-3 b: cdefg
+        2-9 c: ccccccccc" ;
+        let result = solve(INPUT);
+        assert_eq!(result, 1);
     }
 }
