@@ -28,4 +28,7 @@ fn dayTwo() {
     let day_two_input = fs::read_to_string(d).unwrap();
     let result = dayTwo::solve(&day_two_input[..]);
     println!("Day Two, part 1: {:?}", result);
+
+    let result = dayTwo::partTwo(&day_two_input[..]);
+    println!("Day Two, part 2: {:?}", result);
 }
