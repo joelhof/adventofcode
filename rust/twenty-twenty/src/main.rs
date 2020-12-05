@@ -54,6 +54,10 @@ fn dayFive() {
     d.push("resources");
     d.push("dayFive.txt");
     let input = fs::read_to_string(d).unwrap();
-    let result = dayFive::DayFive::new(&input[..]).partOne();
+    let dayFive = dayFive::DayFive::new(&input[..]);
+    let result = dayFive.partOne();
     println!("Day Five, part 1: {:?}", result);
+
+    let result = dayFive.partTwo();
+    println!("Day Five, part 2: {:?}", result);
 }
