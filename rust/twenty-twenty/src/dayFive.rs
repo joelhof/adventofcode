@@ -16,6 +16,10 @@ impl DayFive {
             input: input.into(),
         }
     }
+
+    fn findSeat(&self, seat: &str) -> (u32, u32) {
+        return (1,1);
+    }
 }
 
 impl AdventOfCodeProblem for DayFive {
@@ -23,7 +27,11 @@ impl AdventOfCodeProblem for DayFive {
     fn partOne(&self) -> u32 {
         return match self.input.split("\n")
             .map(|line| line.trim())
-            .map(|seat| seat.chars().count())
+            .map(|seat| self.findSeat(seat))
+            .map(|seatNr| {
+                let (row, column) = seatNr;
+                return 44 * row + column;
+            })
             .max() {
                 Some(x) => x as u32,
                 None => 0
