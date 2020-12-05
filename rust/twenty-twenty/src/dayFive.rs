@@ -1,18 +1,30 @@
 #![allow(non_snake_case)]
 
-trait AdventOfCodeProblem {
+pub trait AdventOfCodeProblem {
     fn partOne(&self) -> u32;
     fn partTwo(&self) -> u32;
 }
 
-struct DayFive {
-    input: String
+pub struct DayFive {
+    input: String,
+    rowRange: [u32; 128],
+    columnRange: [u32; 8]
 }
 
 impl DayFive {
     pub fn new(input: &str) -> DayFive {
+        let mut seatRange =  [0; 128];
+        for i in 0..128 {
+            seatRange[i] = i as u32;
+        }
+        let mut columnRange =  [0; 8];
+        for i in 0..8 {
+            columnRange[i] = i as u32;
+        }
         return DayFive {
             input: input.into(),
+            rowRange: seatRange,
+            columnRange: columnRange
         }
     }
 
@@ -35,17 +47,10 @@ impl DayFive {
 impl AdventOfCodeProblem for DayFive {
 
     fn partOne(&self) -> u32 {
-        let mut seatRange =  [0; 128];
-        for i in 0..128 {
-            seatRange[i] = i as u32;
-        }
-        let mut columnRange =  [0; 8];
-        for i in 0..8 {
-            columnRange[i] = i as u32;
-        }
+        
         return match self.input.split("\n")
             .map(|line| line.trim())
-            .map(|seat| self.findSeat(seat, &seatRange, &columnRange))
+            .map(|seat| self.findSeat(seat, &self.rowRange, &self.columnRange))
             .map(|seatNr| {
                 let (row, column) = seatNr;
                 return 8 * row + column;

@@ -2,6 +2,7 @@
 use twentytwenty::dayOne;
 use twentytwenty::dayTwo;
 use twentytwenty::*;
+use twentytwenty::dayFive::*;
 use std::path::PathBuf;
 use std::fs;
 
@@ -9,6 +10,7 @@ fn main() {
     dayOne();
     dayTwo();
     dayThree();
+    dayFive();
 }
 
 fn dayOne() {
@@ -45,4 +47,13 @@ fn dayThree() {
 
     let result = dayThree::partTwo(&input[..]);
     println!("Day Three, part 2: {:?}", result);
+}
+
+fn dayFive() {
+    let mut d = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+    d.push("resources");
+    d.push("dayFive.txt");
+    let input = fs::read_to_string(d).unwrap();
+    let result = dayFive::DayFive::new(&input[..]).partOne();
+    println!("Day Five, part 1: {:?}", result);
 }
