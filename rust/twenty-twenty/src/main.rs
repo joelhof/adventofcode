@@ -42,4 +42,7 @@ fn dayThree() {
     let input = fs::read_to_string(d).unwrap();
     let result = dayThree::partOne(&input[..]);
     println!("Day Three, part 1: {:?}", result);
+
+    let result = dayThree::partTwo(&input[..]);
+    println!("Day Three, part 2: {:?}", result);
 }
