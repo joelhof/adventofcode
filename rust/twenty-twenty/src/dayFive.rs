@@ -1,4 +1,8 @@
 #![allow(non_snake_case)]
+extern crate itertools;
+
+use std::collections::HashSet;
+use itertools::Itertools;
 
 pub trait AdventOfCodeProblem {
     fn partOne(&self) -> u32;
@@ -47,7 +51,6 @@ impl DayFive {
 impl AdventOfCodeProblem for DayFive {
 
     fn partOne(&self) -> u32 {
-        
         return match self.input.split("\n")
             .map(|line| line.trim())
             .map(|seat| self.findSeat(seat, &self.rowRange, &self.columnRange))
@@ -62,7 +65,34 @@ impl AdventOfCodeProblem for DayFive {
     }
 
     fn partTwo(&self) -> u32 {
-        return 0;
+        let seats: Vec<(u32, u32)> = self.input.split("\n")
+            .map(|line| line.trim())
+            .map(|seat| self.findSeat(seat, &self.rowRange, &self.columnRange))
+            .collect();
+        let takenSeatIds: HashSet<u32> = seats.iter().map(|seatNr| {
+            let (row, column) = seatNr;
+            return 8 * (row) + (column);
+        }).collect();
+        let mut takenSeats = HashSet::new();
+        for s in seats.iter() {
+            takenSeats.insert((&s.0, &s.1));
+        }
+        let allSeats: HashSet<_> = self.rowRange[1..127].iter()
+            .cartesian_product(self.columnRange.iter())
+            .collect();
+        let freeSeats: Vec<_> = allSeats.difference(&takenSeats).collect();
+        let freeSeatIds: Option<(u32, u32, u32)> = freeSeats.iter()
+            .map(|seatNr| {
+                let (row, column) = seatNr;
+                return 8 * *row + *column;
+            })
+            .map(|seatId| (seatId, seatId + 1, seatId - 1))
+            .find(|seatId| takenSeatIds.contains(&seatId.1) && takenSeatIds.contains(&seatId.2));
+        println!("{:?}", freeSeatIds);
+        return match freeSeatIds {
+            Some((id, _, _)) => id,
+            None => 0
+        };
     }
 }
 
