@@ -6,3 +6,4 @@ pub mod dayTwo;
 pub mod dayThree;
 
 pub mod dayFive;
+pub mod daySix;
