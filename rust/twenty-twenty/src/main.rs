@@ -11,6 +11,7 @@ fn main() {
     dayTwo();
     dayThree();
     dayFive();
+    daySix();
 }
 
 fn dayOne() {
@@ -48,6 +49,16 @@ fn dayFive() {
 
     let result = dayFive.partTwo();
     println!("Day Five, part 2: {:?}", result);
+}
+
+fn daySix() {
+    let input = loadInput("Six");
+    let daySix = daySix::DaySix::new(&input[..]);
+    let result = daySix.partOne();
+    println!("Day Six, part 1: {:?}", result);
+
+    let result = daySix.partTwo();
+    println!("Day Six, part 2: {:?}", result);
 }
 
 fn loadInput(day: &str) -> String {

@@ -20,9 +20,7 @@ impl AdventOfCodeProblem for DaySix {
         let groups: Vec<String> = self.input.split("\n")
             .map(|line| line.trim())
             .fold(Vec::new(), |mut acc, line| {
-                println!("line {}", line);
                 if line.is_empty() {
-                    println!("empty line, new group");
                     acc.push("".to_string());
                 } else {
                     let group = match acc.pop() {
@@ -30,7 +28,6 @@ impl AdventOfCodeProblem for DaySix {
                         None => "".to_string(),
                     };
                     let newGroup = format!("{}{}\n", group, line);
-                    println!("group: {}", newGroup);
                     acc.push(newGroup);    
                 }
                 return acc;
