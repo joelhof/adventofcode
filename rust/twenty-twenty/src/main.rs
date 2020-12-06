@@ -14,10 +14,7 @@ fn main() {
 }
 
 fn dayOne() {
-    let mut d = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
-    d.push("resources");
-    d.push("dayOne.txt");
-    let day_one_input = fs::read_to_string(d).unwrap();
+    let day_one_input = loadInput("One");
     let result = dayOne::day_one(&day_one_input[..]);
     println!("Day One, part 1: {:?}", result);
 
@@ -26,10 +23,7 @@ fn dayOne() {
 }
 
 fn dayTwo() {
-    let mut d = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
-    d.push("resources");
-    d.push("dayTwo.txt");
-    let day_two_input = fs::read_to_string(d).unwrap();
+    let day_two_input = loadInput("Two");
     let result = dayTwo::solve(&day_two_input[..]);
     println!("Day Two, part 1: {:?}", result);
 
@@ -38,10 +32,7 @@ fn dayTwo() {
 }
 
 fn dayThree() {
-    let mut d = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
-    d.push("resources");
-    d.push("dayThree.txt");
-    let input = fs::read_to_string(d).unwrap();
+    let input = loadInput("Three");
     let result = dayThree::partOne(&input[..]);
     println!("Day Three, part 1: {:?}", result);
 
@@ -50,14 +41,19 @@ fn dayThree() {
 }
 
 fn dayFive() {
-    let mut d = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
-    d.push("resources");
-    d.push("dayFive.txt");
-    let input = fs::read_to_string(d).unwrap();
+    let input = loadInput("Five");
     let dayFive = dayFive::DayFive::new(&input[..]);
     let result = dayFive.partOne();
     println!("Day Five, part 1: {:?}", result);
 
     let result = dayFive.partTwo();
     println!("Day Five, part 2: {:?}", result);
+}
+
+fn loadInput(day: &str) -> String {
+    let mut d = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+    d.push("resources");
+    d.push(format!("day{}.txt", day));
+    let input = fs::read_to_string(d).unwrap();
+    return input;
 }
