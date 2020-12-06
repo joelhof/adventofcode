@@ -1,6 +1,7 @@
 #![allow(non_snake_case)]
 
 use crate::core::AdventOfCodeProblem;
+use std::collections::HashSet;
 
 pub struct DaySix {
     input: String
@@ -34,15 +35,24 @@ impl AdventOfCodeProblem for DaySix {
                 }
                 return acc;
             });
-        groups.iter()
-            .for_each(|g| g.split("\n").for_each(|group| println!("person {}", group)));
-        println!("{:?}", groups);
-        return groups.len() as u32;
+        let answerCount: u32 = groups.iter()
+            .map(|group| answeredQuestions(group))
+            .map(|answers| answers.len() as u32)
+            .sum();
+        println!("{:?}", answerCount);
+        return answerCount;
     }
 
     fn partTwo(&self) -> u32 {
         return 0;
     }
+}
+
+fn answeredQuestions(group: &str) -> HashSet<String> {
+    return group.chars()
+        .filter(|c| !c.is_whitespace())
+        .map(|c| c.to_string())
+        .collect();
 }
 
 #[cfg(test)]
