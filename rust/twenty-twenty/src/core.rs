@@ -3,9 +3,10 @@
 use std::path::PathBuf;
 use std::fs;
 
-pub trait AdventOfCodeProblem {
+pub trait AdventOfCodeSolver {
     fn partOne(&self) -> u32;
     fn partTwo(&self) -> u32;
+    fn day(&self) -> &str;
 }
 
 pub fn loadInput(day: &str) -> String {

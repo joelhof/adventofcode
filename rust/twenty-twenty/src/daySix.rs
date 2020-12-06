@@ -40,10 +40,10 @@ impl DaySix {
     }
 }
 
-impl AdventOfCodeProblem for DaySix {
+impl AdventOfCodeSolver for DaySix {
     fn partOne(&self) -> u32 {
         return self.getCustomDeclarations().iter()
-            .map(|group| answeredQuestions(group))
+            .map(|group| uniqueAnswers(group))
             .map(|answers| answers.len() as u32)
             .sum();
     }
@@ -54,9 +54,13 @@ impl AdventOfCodeProblem for DaySix {
             .map(|answers| answers.len() as u32)
             .sum();
     }
+
+    fn day(&self) -> &str {
+        return "Six";
+    }
 }
 
-fn answeredQuestions(group: &str) -> HashSet<String> {
+fn uniqueAnswers(group: &str) -> HashSet<String> {
     return group.chars()
         .filter(|c| !c.is_whitespace())
         .map(|c| c.to_string())
@@ -66,7 +70,7 @@ fn answeredQuestions(group: &str) -> HashSet<String> {
 fn everyoneAnswered(group: &str) -> HashSet<String> {
     let answers: Vec<HashSet<_>> = group.split("\n")
         .filter(|passenger| !passenger.is_empty())
-        .map(|passenger| answeredQuestions(passenger))
+        .map(|passenger| uniqueAnswers(passenger))
         .collect();
     let mut result: HashSet<String> = match answers.get(0) {
         Some(a) => a.iter().cloned().collect(),

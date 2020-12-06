@@ -3,7 +3,7 @@ extern crate itertools;
 
 use std::collections::HashSet;
 use itertools::Itertools;
-use crate::core::AdventOfCodeProblem;
+use crate::core::*;
 
 pub struct DayFive {
     input: String,
@@ -44,7 +44,10 @@ impl DayFive {
     }
 }
 
-impl AdventOfCodeProblem for DayFive {
+impl AdventOfCodeSolver for DayFive {
+    fn day(&self) -> &str {
+        return "Five";
+    }
 
     fn partOne(&self) -> u32 {
         return match self.input.split("\n")

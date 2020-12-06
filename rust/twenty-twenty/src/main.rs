@@ -44,20 +44,12 @@ fn dayThree() {
 fn dayFive() {
     let input = loadInput("Five");
     let dayFive = dayFive::DayFive::new(&input[..]);
-    let result = dayFive.partOne();
-    println!("Day Five, part 1: {:?}", result);
-
-    let result = dayFive.partTwo();
-    println!("Day Five, part 2: {:?}", result);
+    adventOfCodeProblem(&dayFive);
 }
 
 fn daySix() {
     let daySix = daySix::DaySix::new();
-    let result = daySix.partOne();
-    println!("Day Six, part 1: {:?}", result);
-
-    let result = daySix.partTwo();
-    println!("Day Six, part 2: {:?}", result);
+    adventOfCodeProblem(&daySix);
 }
 
 fn loadInput(day: &str) -> String {
@@ -65,4 +57,10 @@ fn loadInput(day: &str) -> String {
     d.push("resources");
     d.push(format!("day{}.txt", day));
     return fs::read_to_string(d).unwrap();
+}
+
+fn adventOfCodeProblem<>(day: &dyn AdventOfCodeSolver) {
+    println!("-----------------------------------");
+    println!("Day {}, part 1: {:?}", day.day(), day.partOne());
+    println!("Day {}, part 2: {:?}", day.day(), day.partTwo());
 }
