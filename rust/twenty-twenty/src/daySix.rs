@@ -14,11 +14,15 @@ impl DaySix {
             input: loadInput("Six")
         }
     }
-}
 
-impl AdventOfCodeProblem for DaySix {
-    fn partOne(&self) -> u32 {
-        let groups: Vec<String> = self.input.split("\n")
+    pub fn test(input: &str) -> DaySix {
+        return DaySix {
+            input: input.to_string()
+        }
+    }
+
+    fn getCustomDeclarations(&self) -> Vec<String> {
+        return self.input.split("\n")
             .map(|line| line.trim())
             .fold(Vec::new(), |mut acc, line| {
                 if line.is_empty() {
@@ -32,13 +36,16 @@ impl AdventOfCodeProblem for DaySix {
                     acc.push(newGroup);    
                 }
                 return acc;
-            });
-        let answerCount: u32 = groups.iter()
+        });
+    }
+}
+
+impl AdventOfCodeProblem for DaySix {
+    fn partOne(&self) -> u32 {
+        return self.getCustomDeclarations().iter()
             .map(|group| answeredQuestions(group))
             .map(|answers| answers.len() as u32)
             .sum();
-        println!("{:?}", answerCount);
-        return answerCount;
     }
 
     fn partTwo(&self) -> u32 {
@@ -74,7 +81,7 @@ a
 a
         
 b" ;
-        let result = DaySix::new(INPUT).partOne();
+        let result = DaySix::test(INPUT).partOne();
         assert_eq!(result, 11);
     }
 }
