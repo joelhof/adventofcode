@@ -109,13 +109,4 @@ mod tests {
         let result = DayFive::new(INPUT).partOne();
         assert_eq!(result, 820);
     }
-
-    #[test]
-    fn partTwoexampleTest() {
-        const INPUT: &str = "BFFFBBFRRR
-        FFFBBBFRRR
-        BBFFBBFRLL" ;
-        let result = DayFive::new(INPUT).partTwo();
-        assert_eq!(result, 0);
-    }
 }
