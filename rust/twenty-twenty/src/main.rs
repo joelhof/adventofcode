@@ -34,11 +34,8 @@ fn dayTwo() {
 
 fn dayThree() {
     let input = loadInput("Three");
-    let result = dayThree::partOne(&input[..]);
-    println!("Day Three, part 1: {:?}", result);
-
-    let result = dayThree::partTwo(&input[..]);
-    println!("Day Three, part 2: {:?}", result);
+    let dayThree = dayThree::DayThree::new(&input[..]);
+    adventOfCodeProblem(&dayThree);
 }
 
 fn dayFive() {
