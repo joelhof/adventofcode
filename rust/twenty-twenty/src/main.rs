@@ -52,8 +52,7 @@ fn dayFive() {
 }
 
 fn daySix() {
-    let input = loadInput("Six");
-    let daySix = daySix::DaySix::new(&input[..]);
+    let daySix = daySix::DaySix::new();
     let result = daySix.partOne();
     println!("Day Six, part 1: {:?}", result);
 

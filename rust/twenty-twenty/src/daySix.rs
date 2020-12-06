@@ -1,6 +1,7 @@
 #![allow(non_snake_case)]
 
-use crate::core::AdventOfCodeProblem;
+use crate::core::*;
+
 use std::collections::HashSet;
 
 pub struct DaySix {
@@ -8,9 +9,9 @@ pub struct DaySix {
 }
 
 impl DaySix {
-    pub fn new(input: &str) -> DaySix {
+    pub fn new() -> DaySix {
         return DaySix {
-            input: input.to_string()
+            input: loadInput("Six")
         }
     }
 }
