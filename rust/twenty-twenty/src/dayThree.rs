@@ -3,7 +3,7 @@
 use std::collections::HashMap;
 use crate::core::*;
 
-struct DayThree {
+pub struct DayThree {
     treeMap: Vec<HashMap<usize, u32>>,
     length: usize
 }
@@ -44,22 +44,7 @@ impl AdventOfCodeSolver for DayThree {
     }
 
     fn partOne(&self) -> u32 {
-        //println!("{:?}", treeMap);
-        let mut pos: usize = 0;
-        let mut sum: u32 = 0;
-        for row in &self.treeMap {
-            sum = sum + match row.get(&pos) {
-                Some(tree) => tree,
-                None => &0
-            };
-            if pos + 3 >= self.length {
-                pos = (pos + 3) - self.length;
-            } else {
-                pos = pos + 3;
-            }
-            //println!("pos {}", pos);
-        }
-        return sum;
+        return self.countTrees(3, 1);
     }
 
     fn partTwo(&self) -> u32 {
