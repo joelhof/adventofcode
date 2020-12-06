@@ -49,7 +49,10 @@ impl AdventOfCodeProblem for DaySix {
     }
 
     fn partTwo(&self) -> u32 {
-        return 0;
+        return self.getCustomDeclarations().iter()
+            .map(|group| everyoneAnswered(group))
+            .map(|answers| answers.len() as u32)
+            .sum();
     }
 }
 
@@ -58,6 +61,21 @@ fn answeredQuestions(group: &str) -> HashSet<String> {
         .filter(|c| !c.is_whitespace())
         .map(|c| c.to_string())
         .collect();
+}
+
+fn everyoneAnswered(group: &str) -> HashSet<String> {
+    let answers: Vec<HashSet<_>> = group.split("\n")
+        .filter(|passenger| !passenger.is_empty())
+        .map(|passenger| answeredQuestions(passenger))
+        .collect();
+    let mut result: HashSet<String> = match answers.get(0) {
+        Some(a) => a.iter().cloned().collect(),
+        None => HashSet::new()
+    };
+    for answer in answers {
+        result = result.intersection(&answer).into_iter().cloned().collect();
+    }
+    return result;
 }
 
 #[cfg(test)]
@@ -83,5 +101,26 @@ a
 b" ;
         let result = DaySix::test(INPUT).partOne();
         assert_eq!(result, 11);
+    }
+
+    #[test]
+    fn partTwoExampleTest() {
+        const INPUT: &str = "abc
+        
+        a
+        b
+        c
+
+        ab
+        ac
+
+        a
+        a   
+        a
+        a
+
+        b" ;
+        let result = DaySix::test(INPUT).partTwo();
+        assert_eq!(result, 6);
     }
 }
