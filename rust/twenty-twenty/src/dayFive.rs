@@ -3,11 +3,7 @@ extern crate itertools;
 
 use std::collections::HashSet;
 use itertools::Itertools;
-
-pub trait AdventOfCodeProblem {
-    fn partOne(&self) -> u32;
-    fn partTwo(&self) -> u32;
-}
+use crate::core::AdventOfCodeProblem;
 
 pub struct DayFive {
     input: String,
@@ -71,7 +67,7 @@ impl AdventOfCodeProblem for DayFive {
             .collect();
         let takenSeatIds: HashSet<u32> = seats.iter().map(|seatNr| {
             let (row, column) = seatNr;
-            return 8 * (row) + (column);
+            return 8 * row + column;
         }).collect();
         let mut takenSeats = HashSet::new();
         for s in seats.iter() {
@@ -88,7 +84,6 @@ impl AdventOfCodeProblem for DayFive {
             })
             .map(|seatId| (seatId, seatId + 1, seatId - 1))
             .find(|seatId| takenSeatIds.contains(&seatId.1) && takenSeatIds.contains(&seatId.2));
-        println!("{:?}", freeSeatIds);
         return match freeSeatIds {
             Some((id, _, _)) => id,
             None => 0

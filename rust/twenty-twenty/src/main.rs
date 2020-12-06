@@ -2,7 +2,7 @@
 use twentytwenty::dayOne;
 use twentytwenty::dayTwo;
 use twentytwenty::*;
-use twentytwenty::dayFive::*;
+use twentytwenty::core::*;
 use std::path::PathBuf;
 use std::fs;
 
@@ -54,6 +54,5 @@ fn loadInput(day: &str) -> String {
     let mut d = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
     d.push("resources");
     d.push(format!("day{}.txt", day));
-    let input = fs::read_to_string(d).unwrap();
-    return input;
+    return fs::read_to_string(d).unwrap();
 }
