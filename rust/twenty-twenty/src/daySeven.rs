@@ -7,9 +7,9 @@ use std::collections::HashSet;
 use regex::Regex;
 
 pub struct DaySeven {
-    bagGraph: HashMap<String, Vec<String>>,
-
+    bagGraph: HashMap<String, Vec<(u32, String)>>,
 }
+
 
 impl DaySeven {
     pub fn new() -> DaySeven {
@@ -45,7 +45,7 @@ impl DaySeven {
         let children = self.bagGraph.get(source).unwrap();
         visited.insert(source.to_string());
         children.iter()
-            .for_each(|c| self.dfs(c, target, visited));
+            .for_each(|(i, c)| self.dfs(c, target, visited));
     }
 }
 
@@ -60,11 +60,12 @@ impl AdventOfCodeSolver for DaySeven {
     }
 
     fn partTwo(&self) -> u32 {
+        let target = "shiny gold";
         return 0;
     }
 }
 
-fn constructGraph(input: &str) -> HashMap<String, Vec<String>> {
+fn constructGraph(input: &str) -> HashMap<String, Vec<(u32, String)>> {
     let bag = Regex::new(r" bag[s]?").unwrap();
     return bag.replace_all(input, "")
         .split("\n")
@@ -78,19 +79,24 @@ fn constructGraph(input: &str) -> HashMap<String, Vec<String>> {
         .collect();
 }
 
-fn getChildren(childOpt: Option<&&str>) -> Vec<String> {
+fn getChildren(childOpt: Option<&&str>) -> Vec<(u32, String)> {
     let childString: String = match childOpt {
         Some(s) => s.to_string(),
         None => String::from("")
     };
-    let numbers = Regex::new(r"[0-9]").unwrap();
-    let children: Vec<String> = childString.split(",")
-        .map(|child| numbers.replace_all(child, "")
+    let children: Vec<(u32, String)> = childString.split(",")
+        .map(|child| child
                 .replace(".", "")
                 .replace("no other", "")
                 .trim()
                 .to_string())
         .filter(|child| !child.is_empty())
+        .map(|c| {
+            let mut tmp = c.splitn(2, " ");
+            let qty: u32 = tmp.next().unwrap().parse().unwrap();
+            let node = tmp.next().unwrap();
+            return (qty, node.to_string());
+        })
         .collect();
     return children;
 }
@@ -112,5 +118,18 @@ mod tests {
         dotted black bags contain no other bags." ;
         let result = DaySeven::test(INPUT).partOne();
         assert_eq!(result, 4);
+    }
+
+    #[test]
+    fn partTwoExampleTest() {
+        const INPUT: &str = "shiny gold bags contain 2 dark red bags.
+        dark red bags contain 2 dark orange bags.
+        dark orange bags contain 2 dark yellow bags.
+        dark yellow bags contain 2 dark green bags.
+        dark green bags contain 2 dark blue bags.
+        dark blue bags contain 2 dark violet bags.
+        dark violet bags contain no other bags." ;
+        let result = DaySeven::test(INPUT).partTwo();
+        assert_eq!(result, 126);
     }
 }
