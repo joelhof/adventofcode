@@ -31,9 +31,9 @@ impl DaySeven {
             if target == node {
                 continue;
             }
-            let mut visited: HashSet<String> = HashSet::new();
-            self.dfs(node, target, &mut visited);
-            if visited.iter().any(|child| child == target) {
+            let mut visited: HashSet<(u32, String)> = HashSet::new();
+            self.dfs(&(0, node.to_string()), &mut visited);
+            if visited.iter().any(|(i, child)| child == target) {
                 reachesTarget.insert(String::from(node));
             }
         }
@@ -41,11 +41,27 @@ impl DaySeven {
         return reachesTarget;
     }
 
-    fn dfs(&self, source: &str, target: &str, visited: &mut HashSet<String>) {
+    fn dfs(&self, (qty, source): &(u32, String), visited: &mut HashSet<(u32, String)>) {
         let children = self.bagGraph.get(source).unwrap();
-        visited.insert(source.to_string());
+        visited.insert((*qty, source.to_string()));
         children.iter()
-            .for_each(|(i, c)| self.dfs(c, target, visited));
+            .for_each(|c| self.dfs(c, visited));
+    }
+
+    fn dfsPartTwo(&self, (qty, source): &(u32, String)) -> u32 {
+        let children = self.bagGraph.get(source).unwrap();
+        if children.len() < 1 {
+            println!("found leaf {} {}", qty, source);
+            return 1;
+        }
+        let childSum: u32 = children.into_iter()
+            .map(|(qty, c)| {
+                println!("{} contains {} * {}", source, qty, c);
+                let res = qty * self.dfsPartTwo(&(*qty, c.to_string()));
+                println!("{} * {} = {}, + qty = {}", qty, c, res, (if res != *qty {res + qty} else {res}));
+                return if res != *qty { res + qty } else { res };
+            }).sum();
+        return childSum;
     }
 }
 
@@ -60,8 +76,9 @@ impl AdventOfCodeSolver for DaySeven {
     }
 
     fn partTwo(&self) -> u32 {
-        let target = "shiny gold";
-        return 0;
+        
+        return self.dfsPartTwo(&(1, "shiny gold".to_string()));
+        
     }
 }
 
@@ -118,6 +135,21 @@ mod tests {
         dotted black bags contain no other bags." ;
         let result = DaySeven::test(INPUT).partOne();
         assert_eq!(result, 4);
+    }
+
+    #[test]
+    fn partTwoExampleTest1() {
+        const INPUT: &str = "light red bags contain 1 bright white bag, 2 muted yellow bags.
+        dark orange bags contain 3 bright white bags, 4 muted yellow bags.
+        bright white bags contain 1 shiny gold bag.
+        muted yellow bags contain 2 shiny gold bags, 9 faded blue bags.
+        shiny gold bags contain 1 dark olive bag, 2 vibrant plum bags.
+        dark olive bags contain 3 faded blue bags, 4 dotted black bags.
+        vibrant plum bags contain 5 faded blue bags, 6 dotted black bags.
+        faded blue bags contain no other bags.
+        dotted black bags contain no other bags." ;
+        let result = DaySeven::test(INPUT).partTwo();
+        assert_eq!(result, 32);
     }
 
     #[test]
