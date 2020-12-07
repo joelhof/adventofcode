@@ -37,7 +37,6 @@ impl DaySeven {
                 reachesTarget.insert(String::from(node));
             }
         }
-        //println!("{:?}", reachesTarget);
         return reachesTarget;
     }
 
@@ -48,20 +47,16 @@ impl DaySeven {
             .for_each(|c| self.dfs(c, visited));
     }
 
-    fn dfsPartTwo(&self, (qty, source): &(u32, String)) -> u32 {
+    fn dfsPartTwo(&self, (_qty, source): &(u32, String)) -> u32 {
         let children = self.bagGraph.get(source).unwrap();
         if children.len() < 1 {
-            println!("found leaf {} {}", qty, source);
             return 1;
         }
-        let childSum: u32 = children.into_iter()
+        return children.into_iter()
             .map(|(qty, c)| {
-                println!("{} contains {} * {}", source, qty, c);
                 let res = qty * self.dfsPartTwo(&(*qty, c.to_string()));
-                println!("{} * {} = {}, + qty = {}", qty, c, res, (if res != *qty {res + qty} else {res}));
                 return if res != *qty { res + qty } else { res };
             }).sum();
-        return childSum;
     }
 }
 
