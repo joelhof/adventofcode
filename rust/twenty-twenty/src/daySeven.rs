@@ -1,11 +1,11 @@
 #![allow(non_snake_case)]
+extern crate regex;
 
 use crate::core::*;
-
 use std::collections::HashMap;
-
+use regex::Regex;
 pub struct DaySeven {
-    bagGraph: HashMap<String, String>
+    bagGraph: HashMap<String, Vec<String>>
 }
 
 impl DaySeven {
@@ -16,8 +16,8 @@ impl DaySeven {
     }
 }
 
-fn constructGraph(input: &str) -> HashMap<String, String> {
-    let graph: HashMap<String, String> = input.split("\n")
+fn constructGraph(input: &str) -> HashMap<String, Vec<String>> {
+    let graph: HashMap<String, Vec<String>> = input.split("\n")
         .map(|line| {
             let n: Vec<_> = line.split("contain").collect();
             return (match n.get(0) {
@@ -30,14 +30,21 @@ fn constructGraph(input: &str) -> HashMap<String, String> {
     return graph;
 }
 
-fn getChildren(childOpt: Option<&&str>) -> String {
+fn getChildren(childOpt: Option<&&str>) -> Vec<String> {
     let childString: String = match childOpt {
-        Some(s) if *s == "no other bags." => String::from(""),
         Some(s) => s.to_string(),
         None => String::from("")
-
     };
-    return childString;
+    let re = Regex::new(r"[0-9]").unwrap();
+    let children: Vec<String> = childString.split(",")
+        .map(|child| re.replace_all(child, "")
+                .replace(".", "")
+                .replace("no other bags", "")
+                .trim()
+                .to_string())
+        .filter(|child| !child.is_empty())
+        .collect();
+    return children;
 }
 
 impl AdventOfCodeSolver for DaySeven {
