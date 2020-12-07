@@ -5,13 +5,20 @@ use crate::core::*;
 use std::collections::HashMap;
 use std::collections::HashSet;
 use regex::Regex;
+
 pub struct DaySeven {
     bagGraph: HashMap<String, Vec<String>>,
 
 }
 
 impl DaySeven {
-    fn test(input: &str) -> DaySeven {
+    pub fn new() -> DaySeven {
+        return DaySeven {
+            bagGraph: constructGraph(&loadInput("Seven"))
+        }
+    }
+
+    pub fn test(input: &str) -> DaySeven {
         return DaySeven {
             bagGraph: constructGraph(input)
         }
@@ -20,7 +27,7 @@ impl DaySeven {
     fn depthFirstSearch(&self, target: &str) -> HashSet<String> {
         let mut reachesTarget: HashSet<String> = HashSet::new();
         for (node, _) in &self.bagGraph {
-            println!("node {}", node);
+            //println!("node {}", node);
             if target == node {
                 continue;
             }
@@ -30,17 +37,13 @@ impl DaySeven {
                 reachesTarget.insert(String::from(node));
             }
         }
-        println!("{:?}", reachesTarget);
+        //println!("{:?}", reachesTarget);
         return reachesTarget;
     }
 
     fn dfs(&self, source: &str, target: &str, visited: &mut HashSet<String>) {
-        println!("node {}", source);
         let children = self.bagGraph.get(source).unwrap();
-        //if children.iter().any(|child| child == target) {
-        //println!("found {} from source {}", target, source);
         visited.insert(source.to_string());
-        //}
         children.iter()
             .for_each(|c| self.dfs(c, target, visited));
     }
@@ -63,7 +66,7 @@ impl AdventOfCodeSolver for DaySeven {
 
 fn constructGraph(input: &str) -> HashMap<String, Vec<String>> {
     let bag = Regex::new(r" bag[s]?").unwrap();
-    let graph: HashMap<String, Vec<String>> = bag.replace_all(input, "")
+    return bag.replace_all(input, "")
         .split("\n")
         .map(|line| {
             let n: Vec<_> = line.split("contain").collect();
@@ -73,8 +76,6 @@ fn constructGraph(input: &str) -> HashMap<String, Vec<String>> {
                 }, getChildren(n.get(1)))
         })
         .collect();
-        graph.iter().for_each(|n| println!("{:?}", n));
-    return graph;
 }
 
 fn getChildren(childOpt: Option<&&str>) -> Vec<String> {
