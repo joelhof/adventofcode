@@ -34,24 +34,17 @@ impl AdventOfCodeSolver for DayEight {
     }
 
     fn partOne(&self) -> u32 {
-        let mut executed: HashSet<&Instruction> = HashSet::new();
-        let mut index: usize = 0;
-        let mut instruction: &Instruction = self.program.get(index).unwrap();
-        let mut acc: i32 = 0;
-        while !executed.contains(&instruction) {
-            index = match &instruction.opCode[..] {
-                "nop" => index + 1,
-                "acc" => index + 1,
-                "jmp" => (index as i32 + instruction.arg) as usize,
-                _ => index 
-            };
-            if instruction.opCode == "acc" {
-                acc += instruction.arg;
-            };
-            executed.insert(instruction);
-            instruction = match self.program.get(index) { Some(inst) => inst, None => instruction };
-        }
-        return acc as u32;
+        return match execute(&self.program) {
+            Ok(res) => res as u32,
+            Err(res) => res as u32
+        };
+    }
+
+    fn partTwo(&self) -> u32 {
+        // self.program.iter()
+        //     .filter(|inst| inst.opCode == "nop" || inst.opCode == "jmp")
+        //     .map(||);
+        return 0;
     }
 }
 
@@ -65,6 +58,31 @@ impl Instruction {
         }
     }
 }
+
+fn execute(program: &Vec<Instruction>) -> Result<i32, i32> {
+    let mut executed: HashSet<&Instruction> = HashSet::new();
+    let mut index: usize = 0;
+    let mut instruction: &Instruction = program.get(index).unwrap();
+    let mut acc: i32 = 0;
+    while !executed.contains(&instruction) {
+        if instruction.opCode == "acc" {
+            acc += instruction.arg;
+        };
+        index = match &instruction.opCode[..] {
+            "nop" => index + 1,
+            "acc" => index + 1,
+            "jmp" => (index as i32 + instruction.arg) as usize,
+            _ => index 
+        };
+        executed.insert(instruction);
+        if index > program.len() {
+            println!("Exit program successfully");
+            return Ok(acc);
+        }
+        instruction = match program.get(index) { Some(inst) => inst, None => instruction };
+    }
+    return Err(acc);
+} 
 
 fn parseInput(input: &str) -> Vec<Instruction> {
     return input.split("\n")
@@ -91,5 +109,20 @@ mod tests {
         acc +6";
         let result = DayEight::test(INPUT).partOne();
         assert_eq!(result, 5);
+    }
+
+    #[test]
+    fn partTwoExampleTest() {
+        const INPUT: &str = "nop +0
+        acc +1
+        jmp +4
+        acc +3
+        jmp -3
+        acc -99
+        acc +1
+        jmp -4
+        acc +6";
+        let result = DayEight::test(INPUT).partTwo();
+        assert_eq!(result, 6);
     }
 }
