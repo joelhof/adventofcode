@@ -33,7 +33,7 @@ impl DaySeven {
             }
             let mut visited: HashSet<(u32, String)> = HashSet::new();
             self.dfs(&(0, node.to_string()), &mut visited);
-            if visited.iter().any(|(i, child)| child == target) {
+            if visited.iter().any(|(_i, child)| child == target) {
                 reachesTarget.insert(String::from(node));
             }
         }
