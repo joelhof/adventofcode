@@ -26,6 +26,13 @@ impl DayEight {
             program: parseInput(&loadInput("Eight"))
         }
     }
+
+    fn replace(&self, instruction: Instruction) -> Vec<Instruction> {
+        let mut copy = self.program.clone();
+        copy.remove(instruction.id);
+        copy.insert(instruction.id, instruction);
+        return copy;
+    }
 }
 
 impl AdventOfCodeSolver for DayEight {
@@ -41,10 +48,27 @@ impl AdventOfCodeSolver for DayEight {
     }
 
     fn partTwo(&self) -> u32 {
-        // self.program.iter()
-        //     .filter(|inst| inst.opCode == "nop" || inst.opCode == "jmp")
-        //     .map(||);
-        return 0;
+        return self.program.iter()
+            .enumerate()
+            .filter(|(_i, inst)| inst.opCode == "nop" || inst.opCode == "jmp")
+            .map(|(i, inst)| if inst.opCode == "nop" {
+                Instruction {
+                    id: i,
+                    opCode: "jmp".to_string(),
+                    arg: inst.arg
+                }
+                } else {
+                    Instruction {
+                        id: i,
+                        opCode: "nop".to_string(),
+                        arg: inst.arg
+                    }
+                }
+            )
+            .map(|instr| execute(&self.replace(instr)))
+            .filter(|res| res.is_ok())
+            .map(|ok| ok.unwrap() as u32)
+            .sum();
     }
 }
 
@@ -60,6 +84,7 @@ impl Instruction {
 }
 
 fn execute(program: &Vec<Instruction>) -> Result<i32, i32> {
+    println!("executing...");
     let mut executed: HashSet<&Instruction> = HashSet::new();
     let mut index: usize = 0;
     let mut instruction: &Instruction = program.get(index).unwrap();
@@ -75,7 +100,7 @@ fn execute(program: &Vec<Instruction>) -> Result<i32, i32> {
             _ => index 
         };
         executed.insert(instruction);
-        if index > program.len() {
+        if index >= program.len() {
             println!("Exit program successfully");
             return Ok(acc);
         }
@@ -123,6 +148,6 @@ mod tests {
         jmp -4
         acc +6";
         let result = DayEight::test(INPUT).partTwo();
-        assert_eq!(result, 6);
+        assert_eq!(result, 8);
     }
 }
