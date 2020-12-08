@@ -20,6 +20,12 @@ impl DayEight {
             program: parseInput(input)
         };
     }
+
+    pub fn new() -> DayEight {
+        return DayEight {
+            program: parseInput(&loadInput("Eight"))
+        }
+    }
 }
 
 impl AdventOfCodeSolver for DayEight {
@@ -28,28 +34,22 @@ impl AdventOfCodeSolver for DayEight {
     }
 
     fn partOne(&self) -> u32 {
-        self.program.iter().for_each(|instruction| println!("{:?}", instruction));
         let mut executed: HashSet<&Instruction> = HashSet::new();
         let mut index: usize = 0;
         let mut instruction: &Instruction = self.program.get(index).unwrap();
         let mut acc: i32 = 0;
-        println!("first instruction to be executed: {:?}", instruction);
         while !executed.contains(&instruction) {
-            println!("executed {:?}", executed);
             index = match &instruction.opCode[..] {
                 "nop" => index + 1,
                 "acc" => index + 1,
                 "jmp" => (index as i32 + instruction.arg) as usize,
                 _ => index 
             };
-            println!("next index {}", index);
             if instruction.opCode == "acc" {
                 acc += instruction.arg;
             };
             executed.insert(instruction);
-            println!("{}", acc);
             instruction = match self.program.get(index) { Some(inst) => inst, None => instruction };
-            println!("next instruction to be executed: {:?}", instruction);
         }
         return acc as u32;
     }
@@ -69,6 +69,7 @@ impl Instruction {
 fn parseInput(input: &str) -> Vec<Instruction> {
     return input.split("\n")
         .enumerate()
+        .filter(|(_i, line)| !line.trim().is_empty())
         .map(|(i, line)| Instruction::from(line, i))
         .collect();
 }
