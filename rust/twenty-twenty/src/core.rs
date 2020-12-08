@@ -4,8 +4,12 @@ use std::path::PathBuf;
 use std::fs;
 
 pub trait AdventOfCodeSolver {
-    fn partOne(&self) -> u32;
-    fn partTwo(&self) -> u32;
+    fn partOne(&self) -> u32 {
+        return 0;
+    }
+    fn partTwo(&self) -> u32 {
+        return 0;
+    }
     fn day(&self) -> &str;
 }
 
