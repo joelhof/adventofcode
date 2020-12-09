@@ -66,9 +66,8 @@ impl AdventOfCodeSolver for DayEight {
                 }
             )
             .map(|instr| execute(&self.replace(instr)))
-            .filter(|res| res.is_ok())
-            .map(|ok| ok.unwrap() as u32)
-            .sum();
+            .find_map(|res| res.ok())
+            .unwrap() as u32;
     }
 }
 
@@ -84,7 +83,6 @@ impl Instruction {
 }
 
 fn execute(program: &Vec<Instruction>) -> Result<i32, i32> {
-    println!("executing...");
     let mut executed: HashSet<&Instruction> = HashSet::new();
     let mut index: usize = 0;
     let mut instruction: &Instruction = program.get(index).unwrap();
@@ -101,7 +99,7 @@ fn execute(program: &Vec<Instruction>) -> Result<i32, i32> {
         };
         executed.insert(instruction);
         if index >= program.len() {
-            println!("Exit program successfully");
+            //println!("Exit program successfully");
             return Ok(acc);
         }
         instruction = match program.get(index) { Some(inst) => inst, None => instruction };
