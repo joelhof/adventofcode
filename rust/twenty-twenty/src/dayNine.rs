@@ -1,6 +1,9 @@
 #![allow(non_snake_case)]
+extern crate itertools;
 
 use crate::core::*;
+use itertools::Itertools;
+use std::collections::HashSet;
 
 pub struct DayNine {
     preamble: usize,
@@ -17,11 +20,16 @@ impl DayNine {
         }
     }
 
-    fn isValid(&self, number: &u32, index: &usize) -> bool {
+    fn isInValid(&self, number: &u32, index: &usize) -> bool {
         let start: usize = match index.checked_sub(self.preamble) { Some(i) => i, None => 0};
         let preambleSeq = &self.seq[start..*index];
         println!("index {}, start {} {:?}", index, start, preambleSeq);
-        return false;
+        let sums: HashSet<u32> = preambleSeq.iter()
+            .combinations(2)
+            .map(|pair| pair.into_iter().sum())
+            .collect();
+        println!("{:?}", sums);
+        return !sums.contains(number);
     }
 }
 
@@ -35,7 +43,7 @@ impl AdventOfCodeSolver for DayNine {
         return match self.seq.iter()
             .enumerate()
             .skip(self.preamble)
-            .find(|(i, x)| self.isValid(x, i)) {
+            .find(|(i, x)| self.isInValid(x, i)) {
                 Some((_, invalidNumber)) => *invalidNumber,
                 None => 0
             };
