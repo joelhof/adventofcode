@@ -9,19 +9,31 @@ pub struct DayNine {
 
 impl DayNine {
     fn test(input: &str, preamble: usize) -> DayNine {
-        let tmp: Vec<u32> = input.split("\n")
-            .map(|line| line.trim().parse::<u32>().unwrap())
-            .collect();
         return DayNine {
             preamble: preamble,
-            seq: tmp
+            seq: input.split("\n")
+                .map(|line| line.trim().parse::<u32>().unwrap())
+                .collect()
         }
+    }
+
+    fn isValid(&self, number: &u32) -> bool {
+        return false;
     }
 }
 
 impl AdventOfCodeSolver for DayNine {
     fn day(&self) -> &str {
         return "Nine";
+    }
+
+    fn partOne(&self) -> u32 {
+        println!("{:?}", self.seq);
+        return match self.seq[self.preamble..].iter()
+            .find(|x| self.isValid(x)) {
+                Some(invalidNumber) => *invalidNumber,
+                None => 0
+            };
     }
 }
 
