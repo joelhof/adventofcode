@@ -17,7 +17,10 @@ impl DayNine {
         }
     }
 
-    fn isValid(&self, number: &u32) -> bool {
+    fn isValid(&self, number: &u32, index: &usize) -> bool {
+        let start: usize = match index.checked_sub(self.preamble) { Some(i) => i, None => 0};
+        let preambleSeq = &self.seq[start..*index];
+        println!("index {}, start {} {:?}", index, start, preambleSeq);
         return false;
     }
 }
@@ -28,10 +31,12 @@ impl AdventOfCodeSolver for DayNine {
     }
 
     fn partOne(&self) -> u32 {
-        println!("{:?}", self.seq);
-        return match self.seq[self.preamble..].iter()
-            .find(|x| self.isValid(x)) {
-                Some(invalidNumber) => *invalidNumber,
+        println!("{:?}", &self.seq);
+        return match self.seq.iter()
+            .enumerate()
+            .skip(self.preamble)
+            .find(|(i, x)| self.isValid(x, i)) {
+                Some((_, invalidNumber)) => *invalidNumber,
                 None => 0
             };
     }
