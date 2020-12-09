@@ -10,10 +10,12 @@ fn main() {
     dayOne();
     dayTwo();
     dayThree();
+
     dayFive();
     daySix();
     daySeven();
     dayEight();
+    dayNine();
 }
 
 fn dayOne() {
@@ -58,6 +60,12 @@ fn daySeven() {
 
 fn dayEight() {
     adventOfCodeProblem(&dayEight::DayEight::new());
+}
+
+fn dayNine() {
+    //adventOfCodeProblem(&dayNine::DayNine::new());
+    let day = dayNine::DayNine::new();
+    println!("Day {}, part 1: {:?}", day.day(), day.partOne());
 }
 
 fn loadInput(day: &str) -> String {

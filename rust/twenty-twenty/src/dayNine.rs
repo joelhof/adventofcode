@@ -7,7 +7,7 @@ use std::collections::HashSet;
 
 pub struct DayNine {
     preamble: usize,
-    seq: Vec<u32>
+    seq: Vec<u64>
 }
 
 impl DayNine {
@@ -15,31 +15,38 @@ impl DayNine {
         return DayNine {
             preamble: preamble,
             seq: input.split("\n")
-                .map(|line| line.trim().parse::<u32>().unwrap())
+                .map(|line| line.trim().parse::<u64>().unwrap())
                 .collect()
         }
     }
+    pub fn new() -> DayNine {
+        return DayNine {
+            preamble: 25,
+            seq: loadInput("Nine").split("\n")
+                .filter(|line| !line.trim().is_empty())
+                .map(|line| match line.trim().parse::<u64>() {Ok(i) => i, Err(_) => handleError(line) })
+                .collect()
+            };
+    }
 
-    fn isInValid(&self, number: &u32, index: &usize) -> bool {
+    fn isInValid(&self, number: &u64, index: &usize) -> bool {
         let start: usize = match index.checked_sub(self.preamble) { Some(i) => i, None => 0};
         let preambleSeq = &self.seq[start..*index];
-        println!("index {}, start {} {:?}", index, start, preambleSeq);
-        let sums: HashSet<u32> = preambleSeq.iter()
+        //println!("index {}, start {} {:?}", index, start, preambleSeq);
+        let sums: HashSet<u64> = preambleSeq.iter()
             .combinations(2)
             .map(|pair| pair.into_iter().sum())
             .collect();
-        println!("{:?}", sums);
+        //println!("{:?}", sums);
         return !sums.contains(number);
     }
-}
 
-impl AdventOfCodeSolver for DayNine {
-    fn day(&self) -> &str {
+    pub fn day(&self) -> &str {
         return "Nine";
     }
 
-    fn partOne(&self) -> u32 {
-        println!("{:?}", &self.seq);
+    pub fn partOne(&self) -> u64 {
+        //println!("{:?}", &self.seq);
         return match self.seq.iter()
             .enumerate()
             .skip(self.preamble)
@@ -49,6 +56,15 @@ impl AdventOfCodeSolver for DayNine {
             };
     }
 }
+
+fn handleError(err: &str) -> u64 {
+    println!("error parsing line {}", err);
+    return 0;
+}
+
+//impl AdventOfCodeSolver for DayNine {
+  
+//}
 
 #[cfg(test)]
 mod tests {
