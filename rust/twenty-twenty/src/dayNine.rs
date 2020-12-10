@@ -64,7 +64,7 @@ impl DayNine {
 
     pub fn partTwo(&self) -> u64 {
         let invalidNumber = self.partOne();
-        println!("invalid nr {}", invalidNumber);
+        //println!("invalid nr {}", invalidNumber);
         /* let sum: &Vec<&u64> = self.seq.iter()
             .fold_while(&Vec::new(), |mut acc, nr| {
                 acc.push(nr);
@@ -85,7 +85,7 @@ impl DayNine {
             }
         }
         
-        println!("{:?}", partialSeq);
+        //println!("{:?}", partialSeq);
         let sum: u64 = partialSeq[..].into_iter().sum();
 
         let min = match partialSeq[..].into_iter().min() {
@@ -96,7 +96,7 @@ impl DayNine {
              Some(max) => max,
              None => &0
         };
-        println!("sum {:?} max {:?} min {:?}", sum, min, max);
+        //println!("sum {:?} max {:?} min {:?}", sum, min, max);
         return min + max;
     }
 }
