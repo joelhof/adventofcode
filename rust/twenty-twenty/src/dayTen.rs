@@ -7,7 +7,17 @@ pub struct Day {
 }
 
 impl Day {
-    fn test(input: &str) -> Day {
+    pub fn new() -> Day {
+        return Day {
+            adapters: loadInput("Ten")
+                .split("\n")
+                .filter(|line| !line.trim().is_empty())
+                .map(|line| line.trim().parse().unwrap())
+                .collect()
+        };
+    }
+
+    pub fn test(input: &str) -> Day {
         return Day {
             adapters: input.split("\n")
                 .map(|line| line.trim().parse().unwrap())
@@ -34,8 +44,6 @@ impl AdventOfCodeSolver for Day {
             .zip(reference)
             .map(|(adapter, jolt)| (*adapter, adapter - jolt))
             .collect();
-        joltageDiff.iter().for_each(|(adapter, diff)|
-            println!("adapter joltage {} joltage diff {}", adapter, diff));
         let oneJoltDiffs: usize = joltageDiff.iter()
             .filter(|(_adapter, diff)| *diff == 1)
             .map(|(_adapter, diff)| diff)
