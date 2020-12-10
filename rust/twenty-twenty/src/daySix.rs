@@ -41,17 +41,17 @@ impl DaySix {
 }
 
 impl AdventOfCodeSolver for DaySix {
-    fn partOne(&self) -> u32 {
+    fn partOne(&self) -> u64 {
         return self.getCustomDeclarations().iter()
             .map(|group| uniqueAnswers(group))
-            .map(|answers| answers.len() as u32)
+            .map(|answers| answers.len() as u64)
             .sum();
     }
 
-    fn partTwo(&self) -> u32 {
+    fn partTwo(&self) -> u64 {
         return self.getCustomDeclarations().iter()
             .map(|group| everyoneAnswered(group))
-            .map(|answers| answers.len() as u32)
+            .map(|answers| answers.len() as u64)
             .sum();
     }
 

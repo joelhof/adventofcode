@@ -49,7 +49,7 @@ impl AdventOfCodeSolver for DayFive {
         return "Five";
     }
 
-    fn partOne(&self) -> u32 {
+    fn partOne(&self) -> u64 {
         return match self.input.split("\n")
             .map(|line| line.trim())
             .map(|seat| self.findSeat(seat, &self.rowRange, &self.columnRange))
@@ -58,12 +58,12 @@ impl AdventOfCodeSolver for DayFive {
                 return 8 * row + column;
             })
             .max() {
-                Some(x) => x as u32,
+                Some(x) => x as u64,
                 None => 0
             }
     }
 
-    fn partTwo(&self) -> u32 {
+    fn partTwo(&self) -> u64 {
         let seats: Vec<(u32, u32)> = self.input.split("\n")
             .map(|line| line.trim())
             .map(|seat| self.findSeat(seat, &self.rowRange, &self.columnRange))
@@ -88,7 +88,7 @@ impl AdventOfCodeSolver for DayFive {
             .map(|seatId| (seatId, seatId + 1, seatId - 1))
             .find(|seatId| takenSeatIds.contains(&seatId.1) && takenSeatIds.contains(&seatId.2));
         return match freeSeatIds {
-            Some((id, _, _)) => id,
+            Some((id, _, _)) => id as u64,
             None => 0
         };
     }

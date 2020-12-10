@@ -40,14 +40,14 @@ impl AdventOfCodeSolver for DayEight {
         return "Eight";
     }
 
-    fn partOne(&self) -> u32 {
+    fn partOne(&self) -> u64 {
         return match execute(&self.program) {
-            Ok(res) => res as u32,
-            Err(res) => res as u32
+            Ok(res) => res as u64,
+            Err(res) => res as u64
         };
     }
 
-    fn partTwo(&self) -> u32 {
+    fn partTwo(&self) -> u64 {
         return self.program.iter()
             .enumerate()
             .filter(|(_i, inst)| inst.opCode == "nop" || inst.opCode == "jmp")
@@ -67,7 +67,7 @@ impl AdventOfCodeSolver for DayEight {
             )
             .map(|instr| execute(&self.replace(instr)))
             .find_map(|res| res.ok())
-            .unwrap() as u32;
+            .unwrap() as u64;
     }
 }
 

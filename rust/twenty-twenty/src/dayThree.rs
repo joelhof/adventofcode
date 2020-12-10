@@ -43,15 +43,15 @@ impl AdventOfCodeSolver for DayThree {
         return "Three";
     }
 
-    fn partOne(&self) -> u32 {
-        return self.countTrees(3, 1);
+    fn partOne(&self) -> u64 {
+        return self.countTrees(3, 1) as u64;
     }
 
-    fn partTwo(&self) -> u32 {
+    fn partTwo(&self) -> u64 {
         let directions = [[1,1],[3,1],[5,1],[7,1],[1,2]];
         return directions.iter()
             .map(|direction| self.countTrees(direction[0], direction[1]))
-            .fold(1, |acc, x| acc * x);
+            .fold(1, |acc, x| acc * x) as u64;
     }
 }
 

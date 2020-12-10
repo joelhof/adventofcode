@@ -65,15 +65,13 @@ impl AdventOfCodeSolver for DaySeven {
         return "Seven";
     }
 
-    fn partOne(&self) -> u32 {
+    fn partOne(&self) -> u64 {
         let target = "shiny gold";
-        return self.depthFirstSearch(target).len() as u32;
+        return self.depthFirstSearch(target).len() as u64;
     }
 
-    fn partTwo(&self) -> u32 {
-        
-        return self.dfsPartTwo(&(1, "shiny gold".to_string()));
-        
+    fn partTwo(&self) -> u64 {
+        return self.dfsPartTwo(&(1, "shiny gold".to_string())) as u64;
     }
 }
 
