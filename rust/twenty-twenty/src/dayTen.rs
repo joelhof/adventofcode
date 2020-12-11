@@ -55,6 +55,28 @@ impl AdventOfCodeSolver for Day {
         
         return (oneJoltDiffs * (threeJoltDiffs + 1)) as u64;
     }
+
+    fn partTwo(&self) -> u64 {
+        let mut adapterChain: Vec<u64> = self.adapters.iter().cloned().collect();
+        adapterChain.sort();
+        return adapterChain[..].into_iter()
+            .enumerate()
+            .map(|(i, x)| (x, nrOfPossibleMoves(*x, &adapterChain[(i+1)..])))
+            .fold(1, |acc, (_x, possibleMoves)| acc + possibleMoves);
+    }
+}
+
+fn nrOfPossibleMoves(index: u64, adapters: &[u64]) -> u64 {
+    //println!("nr of possible moves from {}", index);
+    //let source = adapters[index];
+    let nrOfpossibleMoves = adapters.iter()
+        .filter(|joltage| {
+            //println!("joltage {}", joltage);
+            *joltage - index <= 3
+        })
+        .count();
+    //println!("nr of possible moves from {} is {}", index, nrOfpossibleMoves);
+    return nrOfpossibleMoves as u64;
 }
 
 #[cfg(test)]
@@ -115,8 +137,22 @@ mod tests {
         assert_eq!(result, 22 * 10);
     }
 
-
-   
+    #[test]
+    fn tenPartTwoSmallExampleTest() {
+        const INPUT: &str = "16
+        10
+        15
+        5
+        1
+        11
+        7
+        19
+        6
+        12
+        4";
+        let result = Day::test(INPUT).partTwo();
+        assert_eq!(result, 8);
+    }
 }
 
 

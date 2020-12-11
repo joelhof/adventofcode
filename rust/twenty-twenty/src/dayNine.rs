@@ -3,7 +3,6 @@ extern crate itertools;
 
 use crate::core::*;
 use itertools::Itertools;
-use itertools::FoldWhile::{Continue, Done};
 use std::collections::HashSet;
 
 pub struct DayNine {
@@ -12,7 +11,7 @@ pub struct DayNine {
 }
 
 impl DayNine {
-    fn test(input: &str, preamble: usize) -> DayNine {
+    pub fn test(input: &str, preamble: usize) -> DayNine {
         return DayNine {
             preamble: preamble,
             seq: input.split("\n")
@@ -47,11 +46,13 @@ impl DayNine {
             .collect();
     }
 
-    pub fn day(&self) -> &str {
+}
+impl AdventOfCodeSolver for DayNine {
+    fn day(&self) -> &str {
         return "Nine";
     }
-
-    pub fn partOne(&self) -> u64 {
+    
+    fn partOne(&self) -> u64 {
         //println!("{:?}", &self.seq);
         return match self.seq.iter()
             .enumerate()
@@ -61,21 +62,9 @@ impl DayNine {
                 None => 0
             };
     }
-
-    pub fn partTwo(&self) -> u64 {
+    
+    fn partTwo(&self) -> u64 {
         let invalidNumber = self.partOne();
-        //println!("invalid nr {}", invalidNumber);
-        /* let sum: &Vec<&u64> = self.seq.iter()
-            .fold_while(&Vec::new(), |mut acc, nr| {
-                acc.push(nr);
-                let currentSum: u64 = acc.into_iter().map(|x| *x).sum();
-                if currentSum == invalidNumber {
-                    return Done(acc);
-                 } 
-                else if currentSum > invalidNumber { Done(&Vec::new()) }
-                else { Continue(acc) }
-            }
-        ).into_inner(); */
         let mut partialSeq: Vec<u64> = Vec::new();
         for (i, _nr) in self.seq.iter().enumerate() {
             let res: Option<Vec<u64>> = sumWhile(&self.seq[i..], invalidNumber);
@@ -84,9 +73,6 @@ impl DayNine {
                 None => continue
             }
         }
-        
-        //println!("{:?}", partialSeq);
-        let sum: u64 = partialSeq[..].into_iter().sum();
 
         let min = match partialSeq[..].into_iter().min() {
             Some(min) => min,
@@ -96,16 +82,13 @@ impl DayNine {
              Some(max) => max,
              None => &0
         };
-        //println!("sum {:?} max {:?} min {:?}", sum, min, max);
         return min + max;
     }
 }
 
 fn sumWhile(seq: &[u64], target: u64) -> Option<Vec<u64>> {
     let mut result: Vec<u64> = Vec::new();
-    //let mut sum: u64 = 0;
     for nr in seq {
-        println!("{}", nr);
         result.push(*nr);
         let sum: u64 = result.iter().sum();
         if sum == target {
@@ -121,10 +104,6 @@ fn handleError(err: &str) -> u64 {
     println!("error parsing line {}", err);
     return 0;
 }
-
-//impl AdventOfCodeSolver for DayNine {
-  
-//}
 
 #[cfg(test)]
 mod tests {
