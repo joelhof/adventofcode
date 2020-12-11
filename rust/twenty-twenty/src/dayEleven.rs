@@ -2,7 +2,7 @@
 
 use crate::core::*;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 enum Layout {
     Floor(String), 
     Seat(String),
@@ -20,12 +20,30 @@ impl Day {
     }
 
     fn nextGeneration(&self) -> Vec<Vec<Layout>> {
-        let mut next: Vec<Vec<Layout>> = Vec::new();
-        let mut row: Vec<Layout> = Vec::new();
-        row.push(Layout::Seat("#".to_string()));
+        let mut next: Vec<Vec<Layout>> = vec![vec![Layout::Floor(".".to_string()); self.seats[0].len()]; self.seats.len()];
+        
+        for i in 0..self.seats.len() {
+            for j in 0..self.seats[0].len() {
+                //println!("{:?}", self.seats[i][j]);
+                match &self.seats[i][j] {
+                    Layout::Floor(_) => (),
+                    Layout::Seat(occupied) if occupied == "L" && self.countOccupiedAdjecent(i, j) == 0 => next[i][j] = Layout::Seat("#".to_string()),
+                    Layout::Seat(occupied) if occupied == "#" => (),
+                    Layout::Seat(_) => ()
+                }
+            }
+        }
 
-        next.push(row);
+        // self.seats.iter()
+        //     .enumerate()
+        //     .map(|(i, row)| row.iter()
+        //                         .enumerate()
+        //                         .map(|(j, seat)| nextSeatState()))
         return next;
+    }
+
+    fn countOccupiedAdjecent(&self, i: usize, j: usize) -> u32 {
+        return 0;
     }
 }
 
@@ -35,11 +53,15 @@ impl AdventOfCodeSolver for Day {
     }
 
     fn partOne(&self) -> u64 {
-        self.seats.iter()
-            .for_each(|seat| println!("{:?}", seat));
-
+        let sum: u64 = self.seats[..].into_iter()
+            .map(|seatRow| seatRow.iter().cloned()
+                        .filter(|seat| *seat == Layout::Seat("L".to_string()))
+                        .count() as u64
+            ).sum();
+        println!("Nr of empty seats {}", sum);
         let nextGen = self.nextGeneration();
         nextGen.iter().for_each(|seat| println!("{:?}", seat));
+
         return nextGen.into_iter()
             .map(|seatRow| seatRow.into_iter()
                             .filter(|seat| *seat == Layout::Seat("#".to_string()))
@@ -82,6 +104,6 @@ mod tests {
         L.LLLLLL.L
         L.LLLLL.LL";
         let result = Day::test(INPUT).partOne();
-        assert_eq!(result, 37);
+        assert_eq!(result, 71);
     }
 }
