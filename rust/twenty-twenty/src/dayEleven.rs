@@ -2,7 +2,7 @@
 
 use crate::core::*;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 enum Layout {
     Floor(String), 
     Seat(String),
@@ -18,6 +18,15 @@ impl Day {
             seats: parseInput(input)
         }
     }
+
+    fn nextGeneration(&self) -> Vec<Vec<Layout>> {
+        let mut next: Vec<Vec<Layout>> = Vec::new();
+        let mut row: Vec<Layout> = Vec::new();
+        row.push(Layout::Seat("#".to_string()));
+
+        next.push(row);
+        return next;
+    }
 }
 
 impl AdventOfCodeSolver for Day {
@@ -28,7 +37,14 @@ impl AdventOfCodeSolver for Day {
     fn partOne(&self) -> u64 {
         self.seats.iter()
             .for_each(|seat| println!("{:?}", seat));
-        return 0;
+
+        let nextGen = self.nextGeneration();
+        nextGen.iter().for_each(|seat| println!("{:?}", seat));
+        return nextGen.into_iter()
+            .map(|seatRow| seatRow.into_iter()
+                            .filter(|seat| *seat == Layout::Seat("#".to_string()))
+                            .count() as u64
+                ).sum();
     }
 }
 
