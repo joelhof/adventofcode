@@ -55,6 +55,20 @@ impl AdventOfCodeSolver for Day {
 
     fn partOne(&self) -> u64 {
         println!("{:?}", self);
+        for instruction in self.instructions.iter() {
+            self.ship.set(self.ship.get().execute(instruction));
+        }
+
+        return self.ship.get().manhattanDistance();
+    }
+}
+
+impl Ship {
+    fn execute(&self, instruction: &Instruction) -> Ship {
+        return Ship(Coordinate(0,0), Instruction::East(0));
+    }
+
+    fn manhattanDistance(&self) -> u64 {
         return 0;
     }
 }
