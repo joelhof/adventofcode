@@ -17,6 +17,7 @@ fn main() {
     dayEight();
     dayNine();
     dayTen();
+    dayEleven();
 }
 
 fn dayOne() {
@@ -69,6 +70,14 @@ fn dayNine() {
 
 fn dayTen() {
     adventOfCodeProblem(&dayTen::Day::new());
+}
+
+fn dayEleven() {
+    let mut day = dayEleven::Day::new();
+    let result = day.partOne();
+    println!("-----------------------------------");
+    println!("Day {}, part 1: {:?}", day.day(), result);
+    //println!("Day {}, part 2: {:?}", day.day(), day.partTwo());
 }
 
 fn loadInput(day: &str) -> String {
