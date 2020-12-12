@@ -13,6 +13,9 @@ pub trait AdventOfCodeSolver {
     fn day(&self) -> &str;
 }
 
+#[derive(Debug, Copy, Clone, PartialEq)]
+pub struct Coordinate(pub usize, pub usize);
+
 pub fn loadInput(day: &str) -> String {
     let mut d = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
     d.push("resources");

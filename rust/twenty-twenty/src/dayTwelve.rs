@@ -2,14 +2,46 @@
 
 use crate::core::*;
 
-pub struct Day {
-
+#[derive(Debug, Copy, Clone, PartialEq)]
+enum Instruction {
+    North(usize),
+    South(usize),
+    East(usize),
+    West(usize),
+    Left(usize),
+    Right(usize),
+    Forward(usize)
 }
+
+pub struct Day {
+    //instructions: Vec<Instruction>,
+    //ship: Ship
+}
+
+#[derive(Debug, Copy, Clone, PartialEq)]
+struct Ship(pub Coordinate, pub Instruction);
 
 impl Day {
     fn test(input: &str) -> Day {
+        let instructions: Vec<Instruction> = input.split("\n")
+            .map(|line| line.trim())
+            .filter(|line| !line.is_empty())
+            .filter_map(|line| match line.chars().nth(0) {
+                Some('S') => Some(Instruction::South(line[1..].parse::<usize>().unwrap())),
+                Some('N') => Some(Instruction::North(line[1..].parse::<usize>().unwrap())),
+                Some('E') => Some(Instruction::East(line[1..].parse::<usize>().unwrap())),
+                Some('W') => Some(Instruction::West(line[1..].parse::<usize>().unwrap())),
+                Some('F') => Some(Instruction::Forward(line[1..].parse::<usize>().unwrap())),
+                Some('L') => Some(Instruction::Left(line[1..].parse::<usize>().unwrap())),
+                Some('R') => Some(Instruction::Right(line[1..].parse::<usize>().unwrap())),
+                Some(_i) => panic!("Unexpected instruction: {}", line),
+                None => panic!("Unexpected instruction: {}", line)
+            })
+            .collect();
+        println!("{:?}", instructions);
         return Day {
-
+            //instructions: instructions,
+            //heading: Instruction::North(0),
         };
     }
 }
