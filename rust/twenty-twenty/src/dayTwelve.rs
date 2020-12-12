@@ -37,25 +37,18 @@ pub struct Day {
 struct Ship(pub Coordinate, pub Instruction);
 
 impl Day {
-    fn test(input: &str) -> Day {
-        let instructions: Vec<Instruction> = input.split("\n")
-            .map(|line| line.trim())
-            .filter(|line| !line.is_empty())
-            .filter_map(|line| match line.chars().nth(0) {
-                Some('S') => Some(Instruction::South(line[1..].parse::<usize>().unwrap())),
-                Some('N') => Some(Instruction::North(line[1..].parse::<usize>().unwrap())),
-                Some('E') => Some(Instruction::East(line[1..].parse::<usize>().unwrap())),
-                Some('W') => Some(Instruction::West(line[1..].parse::<usize>().unwrap())),
-                Some('F') => Some(Instruction::Forward(line[1..].parse::<usize>().unwrap())),
-                Some('L') => Some(Instruction::Left(line[1..].parse::<usize>().unwrap())),
-                Some('R') => Some(Instruction::Right(line[1..].parse::<usize>().unwrap())),
-                Some(_i) => panic!("Unexpected instruction: {}", line),
-                None => panic!("Unexpected instruction: {}", line)
-            })
-            .collect();
+    pub fn test(input: &str) -> Day {
+        let instructions: Vec<Instruction> = parseInput(input);
         println!("{:?}", instructions);
         return Day {
             instructions: instructions,
+            ship: Cell::new(Ship(Coordinate(0, 0), Instruction::East(0))),
+        };
+    }
+
+    pub fn new() -> Day {
+        return Day {
+            instructions: parseInput(&loadInput("Twelve")),
             ship: Cell::new(Ship(Coordinate(0, 0), Instruction::East(0))),
         };
     }
@@ -67,12 +60,9 @@ impl AdventOfCodeSolver for Day {
     }
 
     fn partOne(&self) -> u64 {
-        println!("{:?}", self);
         for instruction in self.instructions.iter() {
             self.ship.set(self.ship.get().execute(instruction));
-            println!("{:?}", self.ship);
         }
-
         return self.ship.get().manhattanDistance();
     }
 }
@@ -86,7 +76,6 @@ impl Ship {
             Instruction::Right(x) => self.turn((*x).try_into().unwrap()),
             heading => self.heading(*heading)
         }
-        //return Ship(Coordinate(1,1), Instruction::East(0));
     }
 
     fn heading(&self, heading: Instruction) -> Ship {
@@ -103,7 +92,7 @@ impl Ship {
 
     fn turn(&self, degrees: isize) -> Ship {
         let mut h = self.1.getHeading() + degrees;
-        if h > 360 {
+        if h >= 360 {
             h = h - 360;
         } else if h < 0 {
             h += 360;
@@ -133,6 +122,24 @@ impl Ship {
     fn manhattanDistance(&self) -> u64 {
         return (self.0.0.abs() + self.0.1.abs()) as u64;
     }
+}
+
+fn parseInput(input: &str) -> Vec<Instruction> {
+    return input.split("\n")
+    .map(|line| line.trim())
+    .filter(|line| !line.is_empty())
+    .filter_map(|line| match line.chars().nth(0) {
+        Some('S') => Some(Instruction::South(line[1..].parse::<usize>().unwrap())),
+        Some('N') => Some(Instruction::North(line[1..].parse::<usize>().unwrap())),
+        Some('E') => Some(Instruction::East(line[1..].parse::<usize>().unwrap())),
+        Some('W') => Some(Instruction::West(line[1..].parse::<usize>().unwrap())),
+        Some('F') => Some(Instruction::Forward(line[1..].parse::<usize>().unwrap())),
+        Some('L') => Some(Instruction::Left(line[1..].parse::<usize>().unwrap())),
+        Some('R') => Some(Instruction::Right(line[1..].parse::<usize>().unwrap())),
+        Some(_i) => panic!("Unexpected instruction: {}", line),
+        None => panic!("Unexpected instruction: {}", line)
+    })
+    .collect();
 }
 
 #[cfg(test)]

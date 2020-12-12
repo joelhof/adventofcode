@@ -18,6 +18,7 @@ fn main() {
     dayNine();
     dayTen();
     dayEleven();
+    dayTwelve();
 }
 
 fn dayOne() {
@@ -78,6 +79,10 @@ fn dayEleven() {
     println!("-----------------------------------");
     println!("Day {}, part 1: {:?}", day.day(), result);
     //println!("Day {}, part 2: {:?}", day.day(), day.partTwo());
+}
+
+fn dayTwelve() {
+    adventOfCodeProblem(&dayTwelve::Day::new());
 }
 
 fn loadInput(day: &str) -> String {
