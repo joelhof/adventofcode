@@ -2,6 +2,7 @@
 
 use crate::core::*;
 use std::cell::Cell;
+use std::convert::TryInto;
 
 #[derive(Debug, Copy, Clone, PartialEq)]
 enum Instruction {
@@ -12,6 +13,18 @@ enum Instruction {
     Left(usize),
     Right(usize),
     Forward(usize)
+}
+
+impl Instruction {
+    fn getHeading(&self) -> isize {
+        return match self {
+            Instruction::North(_) => 0,
+            Instruction::East(_) => 90,
+            Instruction::South(_) => 180,
+            Instruction::West(_) => 270,
+            _ => 0
+        };
+    }
 }
 
 #[derive(Debug)]
@@ -57,6 +70,7 @@ impl AdventOfCodeSolver for Day {
         println!("{:?}", self);
         for instruction in self.instructions.iter() {
             self.ship.set(self.ship.get().execute(instruction));
+            println!("{:?}", self.ship);
         }
 
         return self.ship.get().manhattanDistance();
@@ -65,11 +79,59 @@ impl AdventOfCodeSolver for Day {
 
 impl Ship {
     fn execute(&self, instruction: &Instruction) -> Ship {
-        return Ship(Coordinate(0,0), Instruction::East(0));
+        let Coordinate(x,y) = self.0;
+        return match instruction {
+            Instruction::Forward(x) => self.forward(*x),
+            Instruction::Left(x) => self.turn(0isize.checked_sub((*x).try_into().unwrap()).unwrap()),
+            Instruction::Right(x) => self.turn((*x).try_into().unwrap()),
+            heading => self.heading(*heading)
+        }
+        //return Ship(Coordinate(1,1), Instruction::East(0));
+    }
+
+    fn heading(&self, heading: Instruction) -> Ship {
+        let Coordinate(x,y) = self.0;
+        let newPosition = match heading {
+            Instruction::South(d) => Coordinate(x - (d as isize), y),
+            Instruction::North(d) => Coordinate(x + (d as isize), y),
+            Instruction::East(d) => Coordinate(x, y + (d as isize)),
+            Instruction::West(d) => Coordinate(x, y - (d as isize)),
+            h => panic!("Unknown heading {:?}", h),
+        };
+        return Ship(newPosition, self.1);
+    }
+
+    fn turn(&self, degrees: isize) -> Ship {
+        let mut h = self.1.getHeading() + degrees;
+        if h > 360 {
+            h = h - 360;
+        } else if h < 0 {
+            h += 360;
+        }
+        let newHeading = match h {
+            0 => Instruction::North(0),
+            90 => Instruction::East(0),
+            180 => Instruction::South(0),
+            270 => Instruction::West(0),
+            _ => panic!("Heading is wrong! {}", h)
+        };
+        return Ship(self.0, newHeading);
+    }
+
+    fn forward(&self, forward: usize) -> Ship {
+        let Coordinate(x,y) = self.0;
+        let newPosition = match self.1 {
+            Instruction::South(_) => Coordinate(x - (forward as isize), y),
+            Instruction::North(_) => Coordinate(x + (forward as isize), y),
+            Instruction::East(_) => Coordinate(x, y + (forward as isize)),
+            Instruction::West(_) => Coordinate(x, y - (forward as isize)),
+            h => panic!("Unknown heading {:?}", h),
+        };
+        return Ship(newPosition, self.1);
     }
 
     fn manhattanDistance(&self) -> u64 {
-        return 0;
+        return (self.0.0.abs() + self.0.1.abs()) as u64;
     }
 }
 
