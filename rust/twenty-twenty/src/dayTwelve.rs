@@ -1,6 +1,7 @@
 #![allow(non_snake_case)]
 
 use crate::core::*;
+use std::cell::Cell;
 
 #[derive(Debug, Copy, Clone, PartialEq)]
 enum Instruction {
@@ -13,9 +14,10 @@ enum Instruction {
     Forward(usize)
 }
 
+#[derive(Debug)]
 pub struct Day {
-    //instructions: Vec<Instruction>,
-    //ship: Ship
+    instructions: Vec<Instruction>,
+    ship: Cell<Ship>
 }
 
 #[derive(Debug, Copy, Clone, PartialEq)]
@@ -40,8 +42,8 @@ impl Day {
             .collect();
         println!("{:?}", instructions);
         return Day {
-            //instructions: instructions,
-            //heading: Instruction::North(0),
+            instructions: instructions,
+            ship: Cell::new(Ship(Coordinate(0, 0), Instruction::East(0))),
         };
     }
 }
@@ -49,6 +51,11 @@ impl Day {
 impl AdventOfCodeSolver for Day {
     fn day(&self) -> &str {
         return "Twelve";
+    }
+
+    fn partOne(&self) -> u64 {
+        println!("{:?}", self);
+        return 0;
     }
 }
 
