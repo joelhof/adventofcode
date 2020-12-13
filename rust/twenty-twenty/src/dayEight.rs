@@ -15,16 +15,14 @@ struct Instruction {
 }
 
 impl DayEight {
-    fn test(input: &str) -> DayEight {
+    fn init(input: &str) -> DayEight {
         return DayEight {
             program: parseInput(input)
         };
     }
 
     pub fn new() -> DayEight {
-        return DayEight {
-            program: parseInput(&loadInput("Eight"))
-        }
+        return DayEight::init(&loadInput("Eight"));
     }
 
     fn replace(&self, instruction: Instruction) -> Vec<Instruction> {
@@ -130,7 +128,7 @@ mod tests {
         acc +1
         jmp -4
         acc +6";
-        let result = DayEight::test(INPUT).partOne();
+        let result = DayEight::init(INPUT).partOne();
         assert_eq!(result, 5);
     }
 
@@ -145,7 +143,7 @@ mod tests {
         acc +1
         jmp -4
         acc +6";
-        let result = DayEight::test(INPUT).partTwo();
+        let result = DayEight::init(INPUT).partTwo();
         assert_eq!(result, 8);
     }
 }
