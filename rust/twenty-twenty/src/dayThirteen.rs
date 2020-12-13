@@ -9,9 +9,19 @@ pub struct Day {
 
 impl Day {
     fn init(input: &str) -> Day {
+        let mut lines = input.split("\n")
+            .map(|line| line.trim());
+        let a: u64 = lines.next().unwrap().parse().unwrap();
+        let schedule: Vec<u64> = lines.next().unwrap()
+            .replace("x", "")
+            .split(",")
+            .filter_map(|s| Some(s.parse()))
+            .filter_map(Result::ok)
+            .collect();
+            
         return Day {
-            arrival: 0,
-            schedule: Vec::new()
+            arrival: a,
+            schedule: schedule
         };
     }
 }
@@ -19,6 +29,30 @@ impl Day {
 impl AdventOfCodeSolver for Day {
     fn day(&self) -> &str {
         return "Thirteen";
+    }
+
+    fn partOne(&self) -> u64 {
+        println!("{:?}", self.schedule);
+        println!("{:?}", self.arrival);
+        let mut ratios: Vec<(u64, u64)> = self.schedule[..].into_iter()
+            .map(|freq| (freq, self.arrival / freq, self.arrival % freq))
+            .map(|(f, n, m)| (multiple((*f, n, m)) - self.arrival, *f))
+            .collect();
+        ratios.sort_by(|(wait1, _id1), (wait2, _id2)| wait1.cmp(&wait2));
+        println!("{:?}", ratios);
+        return match ratios.first() {
+            Some((departure, id)) => departure * id,
+            None => 0
+        };
+    }
+ }
+
+fn multiple(input: (u64, u64, u64)) -> u64 {
+    let (f, n, m) = input;
+    if m > 0 {
+        return f * (n + 1);
+    } else {
+        return f * n;
     }
 }
 
