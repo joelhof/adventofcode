@@ -24,6 +24,10 @@ impl Day {
             schedule: schedule
         };
     }
+
+    pub fn new() -> Day {
+        return Day::init(&loadInput("Thirteen"));
+    }
 }
 
 impl AdventOfCodeSolver for Day {
@@ -32,14 +36,14 @@ impl AdventOfCodeSolver for Day {
     }
 
     fn partOne(&self) -> u64 {
-        println!("{:?}", self.schedule);
-        println!("{:?}", self.arrival);
+        //println!("{:?}", self.schedule);
+        //println!("{:?}", self.arrival);
         let mut ratios: Vec<(u64, u64)> = self.schedule[..].into_iter()
             .map(|freq| (freq, self.arrival / freq, self.arrival % freq))
             .map(|(f, n, m)| (multiple((*f, n, m)) - self.arrival, *f))
             .collect();
         ratios.sort_by(|(wait1, _id1), (wait2, _id2)| wait1.cmp(&wait2));
-        println!("{:?}", ratios);
+        //println!("{:?}", ratios);
         return match ratios.first() {
             Some((departure, id)) => departure * id,
             None => 0
