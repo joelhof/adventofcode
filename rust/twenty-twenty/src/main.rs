@@ -20,6 +20,7 @@ fn main() {
     dayEleven();
     dayTwelve();
     dayThirteen();
+    dayFourteen();
 }
 
 fn dayOne() {
@@ -87,7 +88,11 @@ fn dayTwelve() {
 }
 
 fn dayThirteen() {
-    adventOfCodeProblem(&dayThirteen::Day::new());
+    adventOfCodeProblem(&dayThirteen::PartOne::new());
+}
+
+fn dayFourteen() {
+    adventOfCodeProblem(&dayFourteen::PartOne::new());
 }
 
 fn loadInput(day: &str) -> String {

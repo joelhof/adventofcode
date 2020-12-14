@@ -49,7 +49,7 @@ impl AdventOfCodeSolver for PartOne {
 
     fn partTwo(&self) -> u64 {
         let part2 = PartTwo::new();
-        return part2.solve();
+        return 0;//part2.solve();
     }
  }
 
@@ -62,8 +62,23 @@ fn multiple(input: (u64, u64, u64)) -> u64 {
     }
 }
 
+#[derive(Debug, Clone, PartialEq)]
+struct Constraint {
+    offset: u64,
+    id: Result<u64, std::num::ParseIntError>
+}
+
+impl Constraint {
+    fn checkCandidate(&self, candidate: u64) -> bool {
+        return match self.id {
+            Ok(id) => (candidate + self.offset) % id == 0,
+            Err(_) => true
+        }
+    }
+}
+
 pub struct PartTwo {
-    constraints: Vec<Result<u64,  std::num::ParseIntError>>
+    constraints: Vec<Constraint>
 }
 
 impl PartTwo {
@@ -71,11 +86,25 @@ impl PartTwo {
         let mut lines = input.split("\n")
             .map(|line| line.trim());
         lines.next();
-        let schedule: Vec<Result<u64, _>> = lines.next().unwrap()
+        let mut schedule: Vec<Constraint> = lines.next().unwrap()
             .split(",")
-            .map(|s| s.parse())
+            .enumerate()
+            .map(|(i, s)| Constraint {
+                offset: i as u64,
+                id: s.parse()
+            })
             .collect();
-            
+        schedule.sort_by(|a, b| {
+            let idA = match &a.id {
+                Ok(x) => *x as i64,
+                Err(_e) => -1
+            };
+            let idB = match &b.id {
+                Ok(x) => *x as i64,
+                Err(_e) => -1
+            };
+            return idA.cmp(&idB);
+        });
         return PartTwo {
             constraints: schedule
         };
@@ -113,19 +142,48 @@ impl PartTwo {
             7|                              19                  | x8
         */
 
-        let check = self.checkCandidate(1068781);
-        println!("is {} acceptable {}", 1068781, check);
+        let mut constraints: Vec<Constraint> = self.constraints.iter()
+            .cloned()
+            .filter(|condition| condition.id.is_ok())
+            .collect();
+        
+        let mut n = 1;
+        println!("orignal length {}", constraints.len());
+        let constraint = match constraints.last() {
+            Some(c) => c,
+            None => return 0
+        };
+
+        
+        while n < u64::MAX {
+            let candidateT = constraint.id.as_ref().unwrap() * n - constraint.offset;
+            if self.checkCandidate(candidateT) {
+                return candidateT;
+            }
+            if n % 1000 == 0 {
+                println!("n={}", n);
+            }
+
+            n += 1;
+        }
         return 0;
+    }
+
+    fn recurseCheck(mut constraints: Vec<Constraint>, candidate: u64) -> Option<u64> {
+        match constraints.pop() {
+            Some(c) if c.checkCandidate(candidate) => PartTwo::recurseCheck(constraints, candidate),
+            Some(_) => None,
+            None => Some(candidate)
+        }
     }
 
     fn checkCandidate(&self, candidate: u64) -> bool {
         return self.constraints.iter()
-            .enumerate()
-            .filter(|(_i, v)| v.is_ok())
-            .map(|(i, v)| (i, v.as_ref().unwrap()))
+            .filter(|condition| condition.id.is_ok())
+            .map(|condition| (condition.offset, condition.id.as_ref().unwrap()))
             .map(|(i, v)| {
                 let res = (candidate + i as u64) % v;
-                println!("{} {}", v, res);
+                //println!("{} {}", v, res);
                 return res;
             })
             .all(|m| m == 0);
@@ -151,6 +209,38 @@ mod tests {
         const INPUT: &str = "939
         7,13,x,x,59,x,31,19";
         let result = PartTwo::init(INPUT).solve();
-        assert_eq!(result, 1068788);
+        assert_eq!(result, 1068781);
+    }
+
+    #[test]
+    fn thirteenPartTwoTest2() {
+        const INPUT: &str = "939
+        67,x,7,59,61";
+        let result = PartTwo::init(INPUT).solve();
+        assert_eq!(result, 779210);
+    }
+
+    #[test]
+    fn thirteenPartTwoTest3() {
+        const INPUT: &str = "939
+        67,7,59,61";
+        let result = PartTwo::init(INPUT).solve();
+        assert_eq!(result, 754018);
+    }
+
+    #[test]
+    fn thirteenPartTwoTest4() {
+        const INPUT: &str = "939
+        67,7,x,59,61";
+        let result = PartTwo::init(INPUT).solve();
+        assert_eq!(result, 1261476);
+    }
+
+    #[test]
+    fn thirteenPartTwoTest5() {
+        const INPUT: &str = "939
+        1789,37,47,1889";
+        let result = PartTwo::init(INPUT).solve();
+        assert_eq!(result, 1202161486);
     }
 }
