@@ -13,43 +13,52 @@ impl AdventOfCodeSolver for Day {
     }
 
     fn partOne(&self) -> u64 {
-        let mut spoken: HashMap<usize, Vec<usize>> = self.input.split(",")
-            .filter_map(|c| Some(c.parse::<usize>()))
-            .map(|r| r.unwrap())
-            .enumerate()
-            .map(|(i, r)| {
-                let mut v = Vec::new();
-                v.push(i);
-                (r, v)
-            })
-            .collect();
-        let mut previous = self.input.split(",")
-            .filter_map(|c| Some(c.parse::<usize>()))
-            .map(|r| r.unwrap())
-            .last()
-            .unwrap();
-        for i in spoken.len()..=2019 {
-            //println!("-------turn {} last spoken nr {}", i, previous);
-            let next = match isSpoken(&spoken, &previous, &i) {
-                false => 0,
-                true => diff(spoken.get(&previous))
-            };
-            let mut order = match spoken.get(&next) {
-                None => Vec::new(),
-                Some(v) => v.to_vec()
-            };
-            //println!("next number is {}", next);
-            order.push(i);
-            //println!("turns {} was spoken: {:?}", next, order);
-            spoken.insert(next, order);
-            previous = next;
-            //println!("---------------");
-        }
-        //println!("{}", previous);
-        return previous as u64;
+        return elvenMemory(&self.input, 2020);
+    }
+
+    fn partTwo(&self) -> u64 {
+        return elvenMemory(&self.input, 30000000);
     }
  }
 
+ fn elvenMemory(input: &str, iterations: usize) -> u64 {
+    let mut spoken: HashMap<usize, Vec<usize>> = input.split(",")
+    .filter_map(|c| Some(c.parse::<usize>()))
+    .map(|r| r.unwrap())
+    .enumerate()
+    .map(|(i, r)| {
+        let mut v = Vec::new();
+        v.push(i);
+        (r, v)
+    })
+    .collect();
+    let mut previous = input.split(",")
+        .filter_map(|c| Some(c.parse::<usize>()))
+        .map(|r| r.unwrap())
+        .last()
+        .unwrap();
+    for i in spoken.len()..iterations {
+        //println!("-------turn {} last spoken nr {}", i, previous);
+        let next = match isSpoken(&spoken, &previous, &i) {
+            false => 0,
+            true => diff(spoken.get(&previous))
+        };
+        let mut order = match spoken.get(&next) {
+            None => Vec::new(),
+            Some(v) => v.to_vec()
+        };
+        //println!("next number is {}", next);
+        order.push(i);
+        //println!("turns {} was spoken: {:?}", next, order);
+        spoken.insert(next, order.into_iter().rev().take(2).rev().collect());
+        previous = next;
+        //println!("---------------");
+    }
+    //println!("{}", previous);
+    return previous as u64;
+}
+
+ 
 fn isSpoken(spoken: &HashMap<usize, Vec<usize>>, word: &usize, currentTurn: &usize) -> bool {
     //println!("{:?} {}", spoken, word);
     return match spoken.get(word) {
@@ -108,4 +117,11 @@ mod tests {
         let result = Day::init(INPUT).partOne();
         assert_eq!(result, 1836);
     }
+
+    // #[test]
+    // fn fifteenPartTwoExampleTest() {
+    //     const INPUT: &str = "0,3,6";
+    //     let result = Day::init(INPUT).partTwo();
+    //     assert_eq!(result, 175594);
+    // }
 }
