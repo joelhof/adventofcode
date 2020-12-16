@@ -16,3 +16,4 @@ pub mod dayTwelve;
 pub mod dayThirteen;
 pub mod dayFourteen;
 pub mod dayFifteen;
+pub mod daySixteen;
