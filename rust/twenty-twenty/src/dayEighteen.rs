@@ -2,6 +2,8 @@
 
 use crate::core::*;
 use std::str::FromStr;
+use std::iter::FromIterator;
+use std::collections::LinkedList;
 use regex::Regex;
 
 struct Day {
@@ -28,15 +30,16 @@ impl AdventOfCodeSolver for Day {
     }
 
     fn partOne(&self) -> u64 {
-        let mut results: u64 = self.input.iter()
-            .map(|line| line.chars().collect::<Vec<char>>())
-            .map(|line| eval(&mut line.to_vec()))
+        println!("{:?}", self.input);
+        let mut stack: Vec<u64> = Vec::new();
+        let mut result: u64 = self.input.iter()
+            //.map(|line| line.chars().rev().collect::<Vec<char>>())
+            .map(|line| tokenize(line))
+            .map(|tokens| parse(&tokens[..]))
             .sum();
-        println!("{:?}", results);
-        // let evals: Vec<u64> = expressions.iter()
-        //     .map(|expr| eval(&mut expr.to_vec()))
-        //     .collect();
-        return results;
+        println!("{:?}", result);
+
+        return result;
     }
 }
 
@@ -46,40 +49,96 @@ struct Expr {
     rhs: u64
 }
 
-fn eval(expr: &mut Vec<char>) -> u64 {
-    //let mut lhs: u64;
-    let mut rhs: u64;
-    let mut res: u64 = 0;
-    let lhs = expr.pop();
-    println!("{:?}", lhs);
-    if lhs.is_some() {
-        if char::is_numeric(lhs.unwrap()) {
-            let lhsArg = lhs.unwrap().to_string().parse().unwrap();
-            match expr.pop() {
-                None => return lhsArg,
-                Some(op) if '+' == op => return lhsArg + eval(expr),
-                Some(op) if '*' == op => return lhsArg * eval(expr),
-                Some(_) => return eval(expr)
-            }
-        } else {
-            res = eval(expr);
+#[derive(Debug, Clone, PartialEq, Copy)]
+enum Token {
+    INT(u64),
+    OP(char),
+    START_PAR,
+    END_PAR
+}
+
+fn parse(tokens: &[Token]) -> u64 {
+    let mut stack = Vec::new();
+    println!("parse {:?}", tokens);
+    let mut res: Vec<Token> = Vec::new();
+    for t in tokens {
+        println!("token {:?}, stack {:?}", t, stack);
+        match t {
+            Token::INT(_) => res.push(*t),
+            Token::OP(_) => {
+                while match stack.last() {
+                    None => false,
+                    Some(_) => true
+                } {
+                    res.push(stack.pop().unwrap())
+                }
+                stack.push(*t);
+            },
+            Token::START_PAR => stack.push(*t),
+            Token::END_PAR => {
+                while match stack.last() {
+                    None => false,
+                    Some(Token::START_PAR) => false,
+                    _ => true
+                } {
+                    res.push(stack.pop().unwrap())
+                }
+                stack.pop();
+            },
+            _ => println!("unhandled")
         }
-    } else {
-        println!("end of line reached");
-        return res;
+        //println!("stack {:?}", stack);
+    }
+    while match stack.last() {
+        None => false,
+        Some(Token::START_PAR) => false,
+        _ => true
+    } {
+        res.push(stack.pop().unwrap())
+    }
+    let mut expression = res.into_iter().rev().collect::<Vec<Token>>();
+    println!("res {:?}", expression);
+    let mut token = expression.pop();
+    let mut evalStack: Vec<u64> = Vec::new();
+    while let Some(t) = token {
+        println!("evalstack {:?}", evalStack);
+        match t {
+            Token::INT(x) => evalStack.push(x),
+            Token::OP('+') => {
+                let lhs = evalStack.pop().unwrap();
+                let rhs = evalStack.pop().unwrap();
+                evalStack.push(lhs + rhs);
+            },
+            Token::OP('*') => {
+                let lhs = evalStack.pop().unwrap();
+                let rhs = evalStack.pop().unwrap();
+                evalStack.push(lhs * rhs);
+            }
+            _ => println!("not implemented")
+        }
+        token = expression.pop();
+    }
+
+    return evalStack.pop().unwrap();
+}
+
+fn tokenize(inputStr: &str) -> Vec<Token> {
+    let mut input = inputStr.chars();
+    println!("input {:?}", input);
+    let mut res =  Vec::new();
+    let mut current = input.next();
+    while let Some(x) = current {
+        match current {
+            Some(c) if char::is_numeric(c) => res.push(Token::INT(c.to_digit(10).unwrap() as u64)),
+            Some('+') => res.push(Token::OP('+')),
+            Some('*') => res.push(Token::OP('*')),
+            Some('(') => res.push(Token::START_PAR),
+            Some(')') => res.push(Token::END_PAR),
+            _ => panic!("Unkown character")
+        };
+        current = input.next();
     }
     return res;
-    // for c in expr.into_iter() {
-    //     match *c {
-    //         "(" => ,
-    //         "+" => lhs + eval(),
-    //         "*" => lhs * eval(),
-    //         _ => 0
-    // //         c if char::is_numeric => // then c is an argument
-    // //         "*" => , // then operator is '*'
-    // //         "+" => 
-    //     }
-    // }
 }
 
 #[cfg(test)]
@@ -97,6 +156,6 @@ mod tests {
     fn eighteenPartOneParTestExampleTest() {
         const INPUT: &str = "1 + (2 * 3) + (4 * (5 + 6))";
         let result = INPUT.parse::<Day>().unwrap().partOne();
-        assert_eq!(result, 71);
+        assert_eq!(result, 51);
     }
 }
