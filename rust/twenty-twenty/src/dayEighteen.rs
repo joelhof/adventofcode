@@ -58,17 +58,18 @@ enum Token {
 }
 
 fn parse(tokens: &[Token]) -> u64 {
-    let mut stack = Vec::new();
-    println!("parse {:?}", tokens);
+    let mut stack: Vec<Token> = Vec::new();
+    println!("convert to postfix {:?}", tokens);
     let mut res: Vec<Token> = Vec::new();
     for t in tokens {
-        println!("token {:?}, stack {:?}", t, stack);
+        //println!("token {:?}, stack {:?}", t, stack);
         match t {
             Token::INT(_) => res.push(*t),
             Token::OP(_) => {
                 while match stack.last() {
                     None => false,
-                    Some(_) => true
+                    Some(t2) if t.precedent() <= t2.precedent() => true,
+                    Some(_) => false
                 } {
                     res.push(stack.pop().unwrap())
                 }
@@ -96,14 +97,29 @@ fn parse(tokens: &[Token]) -> u64 {
     } {
         res.push(stack.pop().unwrap())
     }
-    let mut expression = res.into_iter().rev().collect::<Vec<Token>>();
+    println!("postfix: {:?}", res);
+    return eval(&res).unwrap();
+}
+
+impl Token {
+    fn precedent(&self) -> u8 {
+        return match self {
+            Token::START_PAR => 0,
+            Token::OP(_) => 1,
+            _ => 0
+        };
+    }
+}
+
+fn eval(postFixExpr: &Vec<Token>) -> Option<u64> {
+    let mut expression = postFixExpr.into_iter().rev().collect::<Vec<&Token>>();
     println!("res {:?}", expression);
     let mut token = expression.pop();
     let mut evalStack: Vec<u64> = Vec::new();
     while let Some(t) = token {
         println!("evalstack {:?}", evalStack);
         match t {
-            Token::INT(x) => evalStack.push(x),
+            Token::INT(x) => evalStack.push(*x),
             Token::OP('+') => {
                 let lhs = evalStack.pop().unwrap();
                 let rhs = evalStack.pop().unwrap();
@@ -113,13 +129,15 @@ fn parse(tokens: &[Token]) -> u64 {
                 let lhs = evalStack.pop().unwrap();
                 let rhs = evalStack.pop().unwrap();
                 evalStack.push(lhs * rhs);
+            },
+            Token::START_PAR => {
+
             }
             _ => println!("not implemented")
         }
         token = expression.pop();
     }
-
-    return evalStack.pop().unwrap();
+    return evalStack.pop();
 }
 
 fn tokenize(inputStr: &str) -> Vec<Token> {
@@ -157,5 +175,19 @@ mod tests {
         const INPUT: &str = "1 + (2 * 3) + (4 * (5 + 6))";
         let result = INPUT.parse::<Day>().unwrap().partOne();
         assert_eq!(result, 51);
+    }
+
+    #[test]
+    fn eighteenPartOneExampleTest2() {
+        const INPUT: &str = "5 + (8 * 3 + 9 + 3 * 4 * 3)";
+        let result = INPUT.parse::<Day>().unwrap().partOne();
+        assert_eq!(result, 437);
+    }
+
+    #[test]
+    fn eighteenPartOneExampleTest3() {
+        const INPUT: &str = "((2 + 4 * 9) * (6 + 9 * 8 + 6) + 6) + 2 + 4 * 2";
+        let result = INPUT.parse::<Day>().unwrap().partOne();
+        assert_eq!(result, 13632);
     }
 }
