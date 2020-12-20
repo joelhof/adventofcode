@@ -2,11 +2,8 @@
 
 use crate::core::*;
 use std::str::FromStr;
-use std::iter::FromIterator;
-use std::collections::LinkedList;
-use regex::Regex;
 
-struct Day {
+pub struct Day {
     input: Vec<String>
 }
 
@@ -30,23 +27,20 @@ impl AdventOfCodeSolver for Day {
     }
 
     fn partOne(&self) -> u64 {
-        println!("{:?}", self.input);
-        let mut stack: Vec<u64> = Vec::new();
-        let mut result: u64 = self.input.iter()
-            //.map(|line| line.chars().rev().collect::<Vec<char>>())
+        let result: u64 = self.input.iter()
             .map(|line| tokenize(line))
-            .map(|tokens| parse(&tokens[..]))
+            .map(|tokens| parse(&tokens[..], &equalPrecedent))
             .sum();
-        println!("{:?}", result);
-
         return result;
     }
-}
 
-struct Expr {
-    lhs: u64,
-    operator: String,
-    rhs: u64
+    fn partTwo(&self) -> u64 {
+        let result: u64 = self.input.iter()
+            .map(|line| tokenize(line))
+            .map(|tokens| parse(&tokens[..], &addPrecedent))
+            .sum();
+        return result;
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Copy)]
@@ -57,18 +51,16 @@ enum Token {
     END_PAR
 }
 
-fn parse(tokens: &[Token]) -> u64 {
+fn parse(tokens: &[Token], comparator: &dyn Fn(&Token, &Token) -> bool) -> u64 {
     let mut stack: Vec<Token> = Vec::new();
-    println!("convert to postfix {:?}", tokens);
     let mut res: Vec<Token> = Vec::new();
     for t in tokens {
-        //println!("token {:?}, stack {:?}", t, stack);
         match t {
             Token::INT(_) => res.push(*t),
             Token::OP(_) => {
                 while match stack.last() {
                     None => false,
-                    Some(t2) if t.precedent() <= t2.precedent() => true,
+                    Some(t2) if comparator(t, t2) => true,
                     Some(_) => false
                 } {
                     res.push(stack.pop().unwrap())
@@ -88,7 +80,6 @@ fn parse(tokens: &[Token]) -> u64 {
             },
             _ => println!("unhandled")
         }
-        //println!("stack {:?}", stack);
     }
     while match stack.last() {
         None => false,
@@ -97,7 +88,6 @@ fn parse(tokens: &[Token]) -> u64 {
     } {
         res.push(stack.pop().unwrap())
     }
-    println!("postfix: {:?}", res);
     return eval(&res).unwrap();
 }
 
@@ -109,15 +99,30 @@ impl Token {
             _ => 0
         };
     }
+
+    fn precedentPartTwo(&self) -> u8 {
+        return match self {
+            Token::START_PAR => 0,
+            Token::OP('+') => 2,
+            Token::OP('*') => 1,
+            _ => 0
+        };
+    }
+}
+
+fn equalPrecedent(t: &Token, t2: &Token) -> bool {
+    return t.precedent() <= t2.precedent();
+}
+
+fn addPrecedent(t: &Token, t2: &Token) -> bool {
+    return t.precedentPartTwo() <= t2.precedentPartTwo();
 }
 
 fn eval(postFixExpr: &Vec<Token>) -> Option<u64> {
     let mut expression = postFixExpr.into_iter().rev().collect::<Vec<&Token>>();
-    println!("res {:?}", expression);
     let mut token = expression.pop();
     let mut evalStack: Vec<u64> = Vec::new();
     while let Some(t) = token {
-        println!("evalstack {:?}", evalStack);
         match t {
             Token::INT(x) => evalStack.push(*x),
             Token::OP('+') => {
@@ -142,7 +147,6 @@ fn eval(postFixExpr: &Vec<Token>) -> Option<u64> {
 
 fn tokenize(inputStr: &str) -> Vec<Token> {
     let mut input = inputStr.chars();
-    println!("input {:?}", input);
     let mut res =  Vec::new();
     let mut current = input.next();
     while let Some(x) = current {
@@ -190,4 +194,33 @@ mod tests {
         let result = INPUT.parse::<Day>().unwrap().partOne();
         assert_eq!(result, 13632);
     }
+
+    #[test]
+    fn eighteenPartTwoExampleTest() {
+        const INPUT: &str = "((2 + 4 * 9) * (6 + 9 * 8 + 6) + 6) + 2 + 4 * 2";
+        let result = INPUT.parse::<Day>().unwrap().partTwo();
+        assert_eq!(result, 23340);
+    }
+
+    #[test]
+    fn eighteenPartTwoSimpleExampleTest() {
+        const INPUT: &str = "1 + 2 * 3 + 4 * 5 + 6";
+        let result = INPUT.parse::<Day>().unwrap().partTwo();
+        assert_eq!(result, 231);
+    }
+
+    #[test]
+    fn eighteenPartTwoParTestExampleTest() {
+        const INPUT: &str = "1 + (2 * 3) + (4 * (5 + 6))";
+        let result = INPUT.parse::<Day>().unwrap().partTwo();
+        assert_eq!(result, 51);
+    }
+
+    #[test]
+    fn eighteenPartTwoExampleTest2() {
+        const INPUT: &str = "5 + (8 * 3 + 9 + 3 * 4 * 3)";
+        let result = INPUT.parse::<Day>().unwrap().partTwo();
+        assert_eq!(result, 1445);
+    }
+
 }
