@@ -23,7 +23,7 @@ fn main() {
     dayFourteen();
     //dayFifteen();
     daySixteen();
-
+    daySeventeen();
     dayEighteen();
 }
 
@@ -105,6 +105,10 @@ fn dayFifteen() {
 
 fn daySixteen() {
     //adventOfCodeProblem(&daySixteen::Day::new());
+}
+
+fn daySeventeen() {
+    adventOfCodeProblem(&daySeventeen::Day::new());
 }
 
 fn dayEighteen() {

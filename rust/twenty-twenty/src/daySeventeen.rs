@@ -6,8 +6,13 @@ use std::collections::HashMap;
 use itertools::Itertools;
 
 pub struct Day {
-    input: String,
     cubeGrid: HashMap<(isize, isize, isize), u8>
+}
+
+impl Day {
+    pub fn new() -> Day {
+        return loadInput("Seventeen").parse().unwrap();
+    }
 }
 
 impl FromStr for Day {
@@ -16,6 +21,7 @@ impl FromStr for Day {
     fn from_str(input: &str) -> Result<Self, Self::Err> {
         let xSize = input.split("\n").count();
         let ySize = input.split("\n").next().unwrap().len();
+        //println!("{}", input);
         let init: HashMap<(isize, isize, isize), u8> = input.split("\n")
             .map(|line| line.trim())
             .enumerate()
@@ -27,7 +33,6 @@ impl FromStr for Day {
             )
             .collect();
         return Ok(Day {
-            input: input.to_string(),
             cubeGrid: init
         });
     }
@@ -39,7 +44,7 @@ impl AdventOfCodeSolver for Day {
     }
 
     fn partOne(&self) -> u64 {
-        println!("{:?}", self.cubeGrid);
+        //println!("{:?}", self.cubeGrid);
         let mut cubeGrid = self.cubeGrid.clone();
         for _i in 0..6 {
             cubeGrid = nextState(&cubeGrid, &partOneRule);
@@ -64,8 +69,8 @@ fn nextState(
         .map(|[x,y,z]| ((x,y,z), rule(&[x,y,z], grid)))
         .filter(|(_coordinate, state)| *state > 0)
         .collect();
-    println!("--------------");
-    println!("{:?}, grid size {}", result, result.len());
+    //println!("--------------");
+    //println!("{:?}, grid size {}", result, result.len());
     
     return result;
 }
@@ -77,7 +82,7 @@ fn partOneRule(coordinate: &[isize; 3], grid: &HashMap<(isize, isize, isize), u8
         .filter(|cube| cube != coordinate)
         .filter(|[x, y, z]| grid.contains_key(&(*x, *y, *z)))
         .count();
-    println!("current {:?}, active {}, active neighbours {}", coordinate, grid.contains_key(&current), activeNeighbours);
+    //println!("current {:?}, active {}, active neighbours {}", coordinate, grid.contains_key(&current), activeNeighbours);
     if grid.contains_key(&current) {
         return if activeNeighbours == 2 || activeNeighbours == 3 { 1 } else { 0 };
     } else {
