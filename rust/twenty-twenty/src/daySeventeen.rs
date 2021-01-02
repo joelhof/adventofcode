@@ -4,6 +4,7 @@ use crate::core::*;
 use std::str::FromStr;
 use std::collections::HashMap;
 use itertools::Itertools;
+use std::hash::Hash;
 
 pub struct Day {
     cubeGrid: HashMap<[isize; 3], u8>,
@@ -15,14 +16,92 @@ impl Day {
     }
 }
 
-trait GameOfLife {
-    type Coordinate;
+trait GameOfLife<T> where T: Sized + Eq + Clone + Copy + Hash {
+    fn getGrid(&self) -> &HashMap<T, u8>;
+    fn getNeighbours(coordinate: &T) -> Vec<T>;
+    
+    fn nextState(&self) -> HashMap<T, u8> {
+        // loop over each point that is neighbour to an active cube + all active cubes
+        // loop over all active cubes
+        let neighbours: Vec<T> = self.getGrid().keys()
+            .flat_map(|coordinate| Self::getNeighbours(coordinate))
+            .unique()
+            .collect();
+        //println!("{:?} size {}", neighbours, neighbours.len());
+        let result: HashMap<T, u8> = neighbours.into_iter()
+        // for each such cube set new state according to rule
+            .map(|cube| (cube, self.rule(&cube)))
+            .filter(|(_coordinate, state)| *state > 0)
+            .collect();
+        //println!("--------------");
+        //println!("{:?}, grid size {}", result, result.len());
+        return result;
+    }
 
-    fn nextState(&self) -> HashMap<Self::Coordinate, u8>;
+    fn rule(&self, coordinate: &T) -> u8 {
+        let neighbours = Self::getNeighbours(coordinate);
+        let activeNeighbours: usize = neighbours.into_iter()
+            .filter(|cube| cube != coordinate)
+            .filter(|cube| self.getGrid().contains_key(cube))
+            .count();
+        if self.getGrid().contains_key(coordinate) {
+            return if activeNeighbours == 2 || activeNeighbours == 3 { 1 } else { 0 };
+        } else {
+            return if activeNeighbours == 3 { 1 } else { 0 };
+        }
+    }
+}
 
-    fn getNeighbours(&self, coordinate: &Self::Coordinate) -> Vec<Self::Coordinate>;
+struct PartOne {
+    cubeGrid: HashMap<[isize; 3], u8>
+}
 
-    fn rule(&self, coordinate: &Self::Coordinate) -> u8;
+impl GameOfLife<[isize; 3]> for PartOne {
+    fn getGrid(&self) -> &HashMap<[isize; 3], u8> {
+        return &self.cubeGrid;
+    }
+
+    fn getNeighbours(coordinate: &[isize; 3]) -> Vec<[isize; 3]> {
+        let [x,y,z] = coordinate;
+        let r = -1isize..2;
+        let mut result: Vec<[isize; 3]> = Vec::new();
+        for deltaX in r.clone() {
+            for deltaY in r.clone() {
+                for deltaZ in r.clone() {
+                    let n = [(x + deltaX), (y + deltaY), (z + deltaZ)];
+                    result.push(n);
+                }
+            }
+        }
+        return result;
+    }
+}
+
+struct PartTwo {
+    cubeGrid:  HashMap<[isize; 4], u8>
+}
+
+impl GameOfLife<[isize; 4]> for PartTwo {
+    fn getGrid(&self) -> &HashMap<[isize; 4], u8> {
+        return &self.cubeGrid;
+    }
+
+    fn getNeighbours(coordinate: &[isize; 4]) -> Vec<[isize; 4]> {
+        let [x,y,z,w] = coordinate;
+        let r = -1isize..2;
+        let mut result: Vec<[isize; 4]> = Vec::new();
+        for deltaX in r.clone() {
+            for deltaY in r.clone() {
+                for deltaZ in r.clone() {
+                    for deltaW in r.clone() {
+                        let n = [(x + deltaX), (y + deltaY), (z + deltaZ), (w + deltaW)];
+                        result.push(n);
+                    }
+                }
+            }
+        }
+        return result;
+    }
 }
 
 impl FromStr for Day {
@@ -55,115 +134,26 @@ impl AdventOfCodeSolver for Day {
 
     fn partOne(&self) -> u64 {
         //println!("{:?}", self.cubeGrid);
-        let mut cubeGrid = self.cubeGrid.clone();
+        let mut conwayGrid = PartOne {
+            cubeGrid: self.cubeGrid.clone()
+        };
         for _i in 0..6 {
-            cubeGrid = nextState(&cubeGrid, &partOneRule);
+            conwayGrid.cubeGrid = conwayGrid.nextState();
         }
-        return cubeGrid.values().map(|x| *x as u64).sum::<u64>();
+        return conwayGrid.getGrid().values().map(|x| *x as u64).sum::<u64>();
     }
 
     fn partTwo(&self) -> u64 {
-        let mut cubeGrid: HashMap<[isize; 4], u8> = self.cubeGrid.clone().iter()
-            .map(|([x,y,z], v)| ([*x,*y,*z,0isize], *v))
-            .collect();
+        let mut conwayCubes4d = PartTwo {
+            cubeGrid : self.cubeGrid.clone().iter()
+                .map(|([x,y,z], v)| ([*x,*y,*z,0isize], *v))
+                .collect()
+        };
         for _i in 0..6 {
-            let neighbours: Vec<[isize; 4]> = cubeGrid.keys()
-                .flat_map(|coordinate| getNeighbours4d(coordinate))
-                .unique()
-                .collect();
-    //println!("{:?} size {}", neighbours, neighbours.len());
-            cubeGrid = neighbours.into_iter()
-    // for each such cube set new state according to rule
-                .map(|cube| (cube, partTwoRule(&cube, &cubeGrid)))
-                .filter(|(_coordinate, state)| *state > 0)
-                .collect();
+            conwayCubes4d.cubeGrid = conwayCubes4d.nextState();
         }
-        return cubeGrid.values().map(|x| *x as u64).sum::<u64>();
+        return conwayCubes4d.getGrid().values().map(|x| *x as u64).sum::<u64>();
     }
-}
-
-fn nextState(
-    grid: &HashMap<[isize; 3], u8>,
-    rule: &dyn Fn(&[isize; 3], &HashMap<[isize; 3], u8>) -> u8)
- -> HashMap<[isize; 3], u8> {
-    // loop over each point that is neighbour to an active cube + all active cubes
-    // loop over all active cubes
-    let neighbours: Vec<[isize; 3]> = grid.keys()
-        .flat_map(|coordinate| getNeighbours(coordinate))
-        .unique()
-        .collect();
-    //println!("{:?} size {}", neighbours, neighbours.len());
-    let result: HashMap<[isize; 3], u8> = neighbours.into_iter()
-    // for each such cube set new state according to rule
-        .map(|cube| (cube, rule(&cube, grid)))
-        .filter(|(_coordinate, state)| *state > 0)
-        .collect();
-    //println!("--------------");
-    //println!("{:?}, grid size {}", result, result.len());
-    
-    return result;
-}
-
-fn partOneRule(coordinate: &[isize; 3], grid: &HashMap<[isize; 3], u8>) -> u8 {
-    //let current = (coordinate[0], coordinate[1], coordinate[2]);
-    let neighbours = getNeighbours(&coordinate);
-    let activeNeighbours: usize = neighbours.into_iter()
-        .filter(|cube| cube != coordinate)
-        .filter(|cube| grid.contains_key(cube))
-        .count();
-    //println!("current {:?}, active {}, active neighbours {}", coordinate, grid.contains_key(&current), activeNeighbours);
-    if grid.contains_key(coordinate) {
-        return if activeNeighbours == 2 || activeNeighbours == 3 { 1 } else { 0 };
-    } else {
-        return if activeNeighbours == 3 { 1 } else { 0 };
-    }
-}
-
-fn getNeighbours(coordinate: &[isize; 3]) -> Vec<[isize; 3]> {
-    let [x,y,z] = coordinate;
-    let r = -1isize..2;
-    let mut result: Vec<[isize; 3]> = Vec::new();
-    for deltaX in r.clone() {
-        for deltaY in r.clone() {
-            for deltaZ in r.clone() {
-                let n = [(x + deltaX), (y + deltaY), (z + deltaZ)];
-                result.push(n);
-            }
-        }
-    }
-    return result;
-}
-
-fn partTwoRule(coordinate: &[isize; 4], grid: &HashMap<[isize; 4], u8>) -> u8 {
-    //let current = (coordinate[0], coordinate[1], coordinate[2]);
-    let neighbours = getNeighbours4d(&coordinate);
-    let activeNeighbours: usize = neighbours.into_iter()
-        .filter(|cube| cube != coordinate)
-        .filter(|cube| grid.contains_key(cube))
-        .count();
-    //println!("current {:?}, active {}, active neighbours {}", coordinate, grid.contains_key(&current), activeNeighbours);
-    if grid.contains_key(coordinate) {
-        return if activeNeighbours == 2 || activeNeighbours == 3 { 1 } else { 0 };
-    } else {
-        return if activeNeighbours == 3 { 1 } else { 0 };
-    }
-}
-
-fn getNeighbours4d(coordinate: &[isize; 4]) -> Vec<[isize; 4]> {
-    let [x,y,z,w] = coordinate;
-    let r = -1isize..2;
-    let mut result: Vec<[isize; 4]> = Vec::new();
-    for deltaX in r.clone() {
-        for deltaY in r.clone() {
-            for deltaZ in r.clone() {
-                for deltaW in r.clone() {
-                    let n = [(x + deltaX), (y + deltaY), (z + deltaZ), (w + deltaW)];
-                    result.push(n);
-                }
-            }
-        }
-    }
-    return result;
 }
 
 #[cfg(test)]
@@ -181,11 +171,11 @@ mod tests {
 
     #[test]
     fn getNeighboursTest() {
-        let result = getNeighbours(&[1, 2, 3]);
+        let result = PartOne::getNeighbours(&[1, 2, 3]);
         assert_eq!(27, result.len());
         let shouldContain222 = result.into_iter().any(|[x,y,z]| x == 2 && y == 2 && z == 2);
         assert_eq!(true, shouldContain222);
-        let shouldContain023 = getNeighbours(&[1, 2, 3]).into_iter().any(|[x,y,z]| x == 0 && y == 2 && z == 3);
+        let shouldContain023 = PartOne::getNeighbours(&[1, 2, 3]).into_iter().any(|[x,y,z]| x == 0 && y == 2 && z == 3);
         assert_eq!(true, shouldContain023);
     }
 
