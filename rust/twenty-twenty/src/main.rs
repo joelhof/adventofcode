@@ -88,7 +88,7 @@ fn dayEleven() {
     let result = day.partOne();
     println!("-----------------------------------");
     println!("Day {}, part 1: {:?}", day.day(), result);
-    //println!("Day {}, part 2: {:?}", day.day(), day.partTwo());
+    println!("Day {}, part 2: {:?}", day.day(), day.partTwo());
 }
 
 fn dayTwelve() {

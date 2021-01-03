@@ -1,6 +1,8 @@
 #![allow(non_snake_case)]
 
 use crate::core::*;
+use std::cmp::Ordering;
+use std::fmt;
 
 #[derive(Debug, PartialEq, Clone)]
 enum Layout {
@@ -102,7 +104,6 @@ impl Day {
         //     ).sum();
         //println!("Nr of empty seats {}", sum);
         let mut changed = true;
-        //let mut nextGen;
         while changed {
             let res = self.nextGeneration();
             self.seats = res.1;
@@ -117,11 +118,222 @@ impl Day {
                             .count() as u64
                 ).sum();
     }
+
+    pub fn partTwo(&self) -> u64 {
+        let init: Vec<Vec<State>> = self.seats.iter()
+            .map(move |seats| seats.into_iter()
+                .map(move |layout| match layout {
+                    Layout::Floor(_) => State::Floor,
+                    Layout::Seat(occupied) if occupied == "#" => State::Occupied,
+                    Layout::Seat(_) => State::Unoccupied
+                }).collect()
+            ).collect();
+        let mut conwayGrid = PartTwo {
+            grid: init
+        };
+        let mut changed = true;
+        let mut iteration = 0;
+        while changed {
+            let (res, grid) = conwayGrid.nextGeneration();
+            conwayGrid.grid = grid;
+            //changed = res;
+            iteration = iteration + 1;
+            //println!("iteration {} ", iteration);
+            println!("{}", conwayGrid);
+            if iteration > 6 {
+                changed = false;
+            }
+        }
+
+        println!("nr of iterations until steady state {}", iteration);
+        return conwayGrid.getGrid().iter()
+                .map(|seatRow| seatRow.into_iter()
+                    .filter(|seat| **seat == State::Occupied)
+                    .count() as u64
+                ).sum();
+    }
 }
 
-//impl AdventOfCodeSolver for Day {
- 
-//}
+// impl AdventOfCodeSolver for Day {
+//     fn day(&self) -> &str {
+//         return "Eleven";
+//     }
+
+//     fn partTwo(&self) -> u64 {
+//     }
+// }
+
+#[derive(Debug, PartialEq, Clone, Copy)]
+enum State {
+    Floor = 0,
+    Unoccupied = 1,
+    Occupied = 2
+}
+
+impl fmt::Display for State {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", match self {
+            State::Floor => ".",
+            State::Occupied => "#",
+            State::Unoccupied => "L"
+        })
+    }
+}
+
+struct PartTwo {
+    grid: Vec<Vec<State>>
+}
+
+impl fmt::Display for PartTwo {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        for row in self.getGrid() {
+            for state in row {
+                write!(f, "{}", state);
+            }
+            writeln!(f, "");
+        };
+        return write!(f, "");
+    }
+}
+
+
+impl PartTwo {
+    fn getGrid(&self) -> &Vec<Vec<State>> {
+        return &self.grid;
+    }
+
+    fn nextGeneration(&self) -> (bool, Vec<Vec<State>>) {
+        let mut next: Vec<Vec<State>> = vec![vec![State::Floor; self.grid[0].len()]; self.grid.len()];
+        let mut changed = false;
+        for i in 0..self.grid.len() {
+            for j in 0..self.grid[0].len() {
+                //println!("{},{}: {:?}", i, j, self.grid[i][j]);
+                match &self.grid[i][j] {
+                    State::Floor => (),
+                    State::Unoccupied if self.countVisible(&[i,j]) == 0 => {
+                        changed = true;
+                        next[i][j] = State::Occupied;
+                    },
+                    State::Occupied if self.countVisible(&[i,j]) >= 5 => {
+                        changed = true;
+                        next[i][j] = State::Unoccupied;
+                    },
+                    state => next[i][j] = *state
+                }
+            }
+        }
+        return (changed, next);
+    }
+
+    fn getNeighbours(&self, coordinate: &[usize; 2]) -> Vec<[usize; 2]> {
+        let mut n: Vec<[usize; 2]> = Vec::new();
+        let [x, y] = coordinate;
+        for deltaX in (-1 as i8)..=1 {
+            let newX;
+            if deltaX > 0 {
+                newX = x.checked_add(deltaX as usize);
+            } else {
+                newX = x.checked_sub(deltaX.abs() as usize);
+            }
+            for deltaY in (-1 as i64)..=1 {
+                let newY;
+                if deltaY > 0 {
+                    newY = y.checked_add(deltaY as usize);
+                } else {
+                    newY = y.checked_sub(deltaY.abs() as usize);
+                }
+                if newX.is_some() && newY.is_some() {
+                    n.push([newX.unwrap(), newY.unwrap()]);
+                }
+            }
+        }
+
+        return n.into_iter()
+            .filter(|[i1, j1]| !(x == i1 && y == j1)
+                             && *i1 < self.grid.len()
+                             && *j1 < self.grid[0].len()
+            ).collect();
+    }
+
+    fn countVisible(&self, coordinate: &[usize; 2]) -> usize {
+        let [x1, y1] = coordinate;
+        //println!("counting visible {:?}", coordinate);
+        let directions: Vec<[isize; 2]> = self.getNeighbours(coordinate).into_iter()
+                .map(|[x2, y2]| [
+                    x2 as isize - *x1 as isize,
+                    y2 as isize - *y1 as isize
+                    ]
+                )
+                .collect();
+        //let nr = directions.len();
+        //if nr == 3 {
+        //println!("neighbours {:?}", self.getNeighbours(coordinate));
+        //println!("directions {:?}", directions);
+        //}
+        let mut seats = self.getGrid().into_iter()
+            .enumerate()
+            .flat_map(|(row, seatRow)| seatRow.into_iter()
+                .enumerate()
+                .filter(|(_col, state)| **state == State::Occupied || **state == State::Unoccupied)
+                .map(move |(col, _state)| [row, col])
+            )
+            .collect::<Vec<[usize; 2]>>();
+        
+        seats.sort_by(|[x1, y1], [x2, y2]| {
+            let d1 = cartesianDistance(coordinate, &[*x1, *y1]);
+            let d2 = cartesianDistance(coordinate, &[*x2, *y2]);
+            if d1 == d2 {
+                Ordering::Equal
+            } else if d1 > d2 {
+                Ordering::Greater
+            } else {
+                Ordering::Less
+            }
+        });
+        
+        let res = directions.into_iter()
+                .filter(|dir| {
+                    let first = seats[..].into_iter()
+                        .filter(|point| point != &coordinate)
+                        .find(|point| onLine(dir, point, &coordinate));
+                    //println!("First hit {:?}", first);
+                    return match first {
+                        None => false,
+                        Some([x,y]) => self.grid[*x][*y] == State::Occupied
+                    };
+                }
+                )
+                .count();
+        // if nr == 3 {
+        //     println!("nr of visible {}", res);
+        // }
+        return res;
+    }
+}
+
+fn onLine(direction: &[isize; 2], point: &[usize; 2], origin: &[usize; 2]) -> bool {
+    //println!("is point {:?} on line {:?} with origin {:?}?", point, direction, origin);
+    let [deltaX, deltaY] = direction;
+    let [x, y] = *point;
+    let [x0, y0] = *origin;
+    
+    let crossProduct = deltaX * (y as isize - y0 as isize) - deltaY * (x as isize - x0 as isize);
+    //println!("p: {:?} is on line {:?}, {}", point, direction, crossProduct);
+    if crossProduct == 0 {
+        let sameX = deltaX.signum() == (x as isize - x0 as isize).signum();
+        let sameY = deltaY.signum() == (y as isize - y0 as isize).signum();
+        return sameX && sameY;
+    }
+    return false;
+}
+
+fn cartesianDistance(p1: &[usize; 2], p2: &[usize; 2]) -> isize {
+    //println!("distance between {:?} and {:?}", p1, p2);
+    return p1.into_iter()
+        .zip(p2.into_iter())
+        .map(|(p, q)| (*p as isize - *q as isize) * (*p as isize - *q as isize))
+        .sum();
+}
 
 fn parseInput(input: &str) -> Vec<Vec<Layout>> {
     let grid: Vec<Vec<Layout>> = input.split("\n")
@@ -158,5 +370,176 @@ mod tests {
         L.LLLLL.LL";
         let result = Day::test(INPUT).partOne();
         assert_eq!(result, 37);
+    }
+
+    #[test]
+    fn elevenPartTwoExampleTest() {
+        const INPUT: &str = "L.LL.LL.LL
+        LLLLLLL.LL
+        L.L.L..L..
+        LLLL.LL.LL
+        L.LL.LL.LL
+        L.LLLLL.LL
+        ..L.L.....
+        LLLLLLLLLL
+        L.LLLLLL.L
+        L.LLLLL.LL";
+        let result = Day::test(INPUT).partTwo();
+        assert_eq!(result, 27);
+    }
+    
+    #[test]
+    fn elevenCountVisible1ExampleTest() {
+        const INPUT: &str = ".......#.
+        ...#.....
+        .#.......
+        .........
+        ..#L....#
+        ....#....
+        .........
+        #........
+        ...#.....";
+        let init: Vec<Vec<State>> = Day::test(INPUT).seats.iter()
+            .map(move |seats| seats.into_iter()
+                .map(move |layout| match layout {
+                    Layout::Floor(_) => State::Floor,
+                    Layout::Seat(occupied) if occupied == "#" => State::Occupied,
+                    Layout::Seat(_) => State::Unoccupied
+                }).collect()
+            ).collect();
+        let conwayGrid = PartTwo {
+            grid: init
+        };
+        let result = conwayGrid.countVisible(&[4, 3]);
+        assert_eq!(result, 8);
+    }
+
+    #[test]
+    fn elevenCountVisible2ExampleTest() {
+        const INPUT: &str = ".##.##.
+        #.#.#.#
+        ##...##
+        ...L...
+        ##...##
+        #.#.#.#
+        .##.##.";
+        let init: Vec<Vec<State>> = Day::test(INPUT).seats.iter()
+            .map(move |seats| seats.into_iter()
+                .map(move |layout| match layout {
+                    Layout::Floor(_) => State::Floor,
+                    Layout::Seat(occupied) if occupied == "#" => State::Occupied,
+                    Layout::Seat(_) => State::Unoccupied
+                }).collect()
+            ).collect();
+        let conwayGrid = PartTwo {
+            grid: init
+        };
+        let result = conwayGrid.countVisible(&[3, 3]);
+        assert_eq!(result, 0);
+    }
+
+    #[test]
+    fn elevenCountVisible3ExampleTest() {
+        const INPUT: &str = "#.##.##.##
+        #######.##
+        #.#.#..#..
+        ####.##.##
+        #.##.##.##
+        #.#####.##
+        ..#.#.....
+        ##########
+        #.######.#
+        #.#####.##";
+        let init: Vec<Vec<State>> = Day::test(INPUT).seats.iter()
+            .map(move |seats| seats.into_iter()
+                .map(move |layout| match layout {
+                    Layout::Floor(_) => State::Floor,
+                    Layout::Seat(occupied) if occupied == "#" => State::Occupied,
+                    Layout::Seat(_) => State::Unoccupied
+                }).collect()
+            ).collect();
+        let conwayGrid = PartTwo {
+            grid: init
+        };
+        let result = conwayGrid.countVisible(&[1, 0]);
+        assert_eq!(result, 4);
+    }
+
+    #[test]
+    fn elevenCountVisible4ExampleTest() {
+        const INPUT: &str = "#.LL.LL.L#
+        #LLLLLL.LL
+        L.L.L..L..
+        LLLL.LL.LL
+        L.LL.LL.LL
+        L.LLLLL.LL
+        ..L.L.....
+        LLLLLLLLL#
+        #.LLLLLL.L
+        #.LLLLL.L#";
+        let init: Vec<Vec<State>> = Day::test(INPUT).seats.iter()
+            .map(move |seats| seats.into_iter()
+                .map(move |layout| match layout {
+                    Layout::Floor(_) => State::Floor,
+                    Layout::Seat(occupied) if occupied == "#" => State::Occupied,
+                    Layout::Seat(_) => State::Unoccupied
+                }).collect()
+            ).collect();
+        let conwayGrid = PartTwo {
+            grid: init
+        };
+        let result = conwayGrid.countVisible(&[0, 3]);
+        assert_eq!(result, 0);
+    }
+    
+    #[test]
+    fn elevenCountVisible5ExampleTest() {
+        const INPUT: &str = "#.LL.LL.L#
+        #LLLLLL.LL
+        L.L.L..L..
+        LLLL.LL.LL
+        L.LL.LL.LL
+        L.LLLLL.LL
+        ..L.L.....
+        LLLLLLLLL#
+        #.LLLLLL.L
+        #.LLLLL.L#";
+        let init: Vec<Vec<State>> = Day::test(INPUT).seats.iter()
+            .map(move |seats| seats.into_iter()
+                .map(move |layout| match layout {
+                    Layout::Floor(_) => State::Floor,
+                    Layout::Seat(occupied) if occupied == "#" => State::Occupied,
+                    Layout::Seat(_) => State::Unoccupied
+                }).collect()
+            ).collect();
+        let conwayGrid = PartTwo {
+            grid: init
+        };
+        let result = conwayGrid.countVisible(&[0, 2]);
+        assert_eq!(result, 1);
+    }
+
+    #[test]
+    fn elevenCountVisible6ExampleTest() {
+        const INPUT: &str = ".##.##.
+        #.#.#.#
+        ##...##
+        #L.L.L#
+        ##...##
+        #.#.#.#
+        .##.##.";
+        let init: Vec<Vec<State>> = Day::test(INPUT).seats.iter()
+            .map(move |seats| seats.into_iter()
+                .map(move |layout| match layout {
+                    Layout::Floor(_) => State::Floor,
+                    Layout::Seat(occupied) if occupied == "#" => State::Occupied,
+                    Layout::Seat(_) => State::Unoccupied
+                }).collect()
+            ).collect();
+        let conwayGrid = PartTwo {
+            grid: init
+        };
+        let result = conwayGrid.countVisible(&[3, 3]);
+        assert_eq!(result, 0);
     }
 }
