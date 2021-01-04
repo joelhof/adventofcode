@@ -95,12 +95,12 @@ impl Day {
     }
 
     pub fn partOne(&mut self) -> u64 {
-        let sum: u64 = self.seats[..].into_iter()
-            .map(|seatRow| seatRow.iter().cloned()
-                        .filter(|seat| *seat == Layout::Seat("L".to_string()))
-                        .count() as u64
-            ).sum();
-        println!("Nr of empty seats {}", sum);
+        // let sum: u64 = self.seats[..].into_iter()
+        //     .map(|seatRow| seatRow.iter().cloned()
+        //                 .filter(|seat| *seat == Layout::Seat("L".to_string()))
+        //                 .count() as u64
+        //     ).sum();
+        //println!("Nr of empty seats {}", sum);
         let mut changed = true;
         //let mut nextGen;
         while changed {
@@ -109,9 +109,7 @@ impl Day {
             changed = res.0;
         }
         
-
-        
-        &self.seats[..].iter().for_each(|seat| println!("{:?}", seat));
+        //&self.seats[..].iter().for_each(|seat| println!("{:?}", seat));
 
         return self.seats[..].iter().cloned()
             .map(|seatRow| seatRow.into_iter()
