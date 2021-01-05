@@ -10,7 +10,7 @@ fn main() {
     dayOne();
     dayTwo();
     dayThree();
-
+    dayFour();
     dayFive();
     daySix();
     daySeven();
@@ -49,6 +49,10 @@ fn dayThree() {
     let input = loadInput("Three");
     let dayThree = dayThree::DayThree::new(&input[..]);
     adventOfCodeProblem(&dayThree);
+}
+
+fn dayFour() {
+    adventOfCodeProblem(&dayFour::Day::new());
 }
 
 fn dayFive() {
