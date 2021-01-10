@@ -60,25 +60,35 @@ impl AdventOfCodeSolver for Day {
     fn partTwo(&self) -> u64 {
         let mut adapterChain: Vec<u64> = self.adapters.iter().cloned().collect();
         adapterChain.push(0);
-        adapterChain.sort();
-        let max = *adapterChain.last().unwrap() as usize;
-        let adjacencyMatrix = createAdjacencyMatrix(&adapterChain[..]);
-        let mut res = vec![0; max+1];
-        res[max] = 1;
-        for node in adapterChain.into_iter().rev().skip(1) {
-            let neighbours: u64 = adjacencyMatrix[node as usize]
-                .iter()
-                .enumerate()
-                .filter(|(_i, n)| **n > 0)
-                .map(|(i, _n)| {
-                    res[i as usize]
-                })
-                .sum();
-            res[node as usize] = neighbours;
-        }
-        //println!("After loop {:?}", res);
-        return res[0];
+        
+        let target = *adapterChain.iter().max().unwrap() as usize;
+        
+        return countPaths(&mut adapterChain, 0, target);
     }
+}
+
+fn countPaths(nodes: &mut Vec<u64>, source: usize, target: usize) -> u64 {
+    nodes.sort();
+    let adjacencyMatrix = createAdjacencyMatrix(&nodes[..]);
+    let max = *nodes.last().unwrap() as usize;
+    let mut res = vec![0; max+1];
+    let targetPos = match nodes.iter().position(|&t| t as usize == target) {
+        None => panic!("Target {} not in node list {:?}", target, nodes),
+        Some(p) => nodes.len() - p
+    };
+    res[max] = 1;
+    for node in nodes.into_iter().rev().skip(targetPos) {
+        let neighbours: u64 = adjacencyMatrix[*node as usize]
+            .iter()
+            .enumerate()
+            .filter(|(_i, n)| **n > 0)
+            .map(|(i, _n)| {
+                res[i as usize]
+            })
+            .sum();
+            res[*node as usize] = neighbours;
+        }
+    return res[source];
 }
 
 fn createAdjacencyMatrix(adapters: &[u64]) -> Vec<Vec<u8>> {
