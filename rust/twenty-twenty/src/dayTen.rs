@@ -1,6 +1,7 @@
 #![allow(non_snake_case)]
 
 use crate::core::*;
+use std::collections::HashSet;
 
 pub struct Day {
     adapters: Vec<u64>
@@ -58,25 +59,47 @@ impl AdventOfCodeSolver for Day {
 
     fn partTwo(&self) -> u64 {
         let mut adapterChain: Vec<u64> = self.adapters.iter().cloned().collect();
+        adapterChain.push(0);
         adapterChain.sort();
-        return adapterChain[..].into_iter()
-            .enumerate()
-            .map(|(i, x)| (x, nrOfPossibleMoves(*x, &adapterChain[(i+1)..])))
-            .fold(1, |acc, (_x, possibleMoves)| acc + possibleMoves);
+        let max = *adapterChain.last().unwrap() as usize;
+        let adjacencyMatrix = createAdjacencyMatrix(&adapterChain[..]);
+        let mut res = vec![0; max+1];
+        res[max] = 1;
+        for node in adapterChain.into_iter().rev().skip(1) {
+            let neighbours: u64 = adjacencyMatrix[node as usize]
+                .iter()
+                .enumerate()
+                .filter(|(_i, n)| **n > 0)
+                .map(|(i, _n)| {
+                    res[i as usize]
+                })
+                .sum();
+            res[node as usize] = neighbours;
+        }
+        //println!("After loop {:?}", res);
+        return res[0];
     }
 }
 
-fn nrOfPossibleMoves(index: u64, adapters: &[u64]) -> u64 {
-    //println!("nr of possible moves from {}", index);
-    //let source = adapters[index];
-    let nrOfpossibleMoves = adapters.iter()
-        .filter(|joltage| {
-            //println!("joltage {}", joltage);
-            *joltage - index <= 3
-        })
-        .count();
-    //println!("nr of possible moves from {} is {}", index, nrOfpossibleMoves);
-    return nrOfpossibleMoves as u64;
+fn createAdjacencyMatrix(adapters: &[u64]) -> Vec<Vec<u8>> {
+    // each adapter can connect to adapters with 1,2 or 3 jolt higher rating
+    // for each adapter, create entries in adjacency matrix for a +1, a+2, a+3 if 
+    // those adapters exist in the list of valid adapters.
+    let valid: HashSet<&u64> = adapters.iter().collect();
+    let max = *adapters.last().unwrap() as usize;
+    let length = max + 1;
+    let mut matrix = vec![vec![0; length]; length];
+    adapters.iter().for_each(|adapter| {
+        let neighbours: Vec<usize> = vec![1,2,3].iter()
+            .map(|n| adapter + n)
+            .filter(|edge| valid.contains(edge))
+            .map(|edge| edge as usize)
+            .collect();
+        //println!("{} -> {:?}", adapter, neighbours);
+        neighbours.into_iter().for_each(|edge| matrix[*adapter as usize][edge] = 1);
+    });
+    //println!("{:#?}", matrix);
+    return matrix;
 }
 
 #[cfg(test)]
@@ -153,6 +176,41 @@ mod tests {
         let result = Day::test(INPUT).partTwo();
         assert_eq!(result, 8);
     }
+
+    #[test]
+    fn tenPartTwoLargeExampleTest() {
+        const INPUT: &str = "28
+        33
+        18
+        42
+        31
+        14
+        46
+        20
+        48
+        47
+        24
+        23
+        49
+        45
+        19
+        38
+        39
+        11
+        1
+        32
+        25
+        35
+        8
+        17
+        7
+        9
+        4
+        2
+        34
+        10
+        3";
+        let result = Day::test(INPUT).partTwo();
+        assert_eq!(result, 19208);
+    }
 }
-
-
