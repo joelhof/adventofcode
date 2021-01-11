@@ -120,7 +120,7 @@ impl Day {
     }
 
     pub fn partTwo(&self) -> u64 {
-        let init: Vec<Vec<State>> = self.seats.iter()
+        let init: Vec<Vec<State>> = parseInput(&loadInput("Eleven")).iter()
             .map(move |seats| seats.into_iter()
                 .map(move |layout| match layout {
                     Layout::Floor(_) => State::Floor,
@@ -133,19 +133,18 @@ impl Day {
         };
         let mut changed = true;
         let mut iteration = 0;
+        // println!("{}", conwayGrid);
+        // println!("--------------------------------------");
         while changed {
             let (res, grid) = conwayGrid.nextGeneration();
             conwayGrid.grid = grid;
             changed = res;
             iteration = iteration + 1;
             //println!("iteration {} ", iteration);
-            // println!("{}", conwayGrid);
-            // if iteration > 6 {
-            //     changed = false;
-            // }
+            //println!("{}", conwayGrid);
+            //println!("--------------------------------------");
         }
 
-        println!("nr of iterations until steady state {}", iteration);
         return conwayGrid.getGrid().iter()
                 .map(|seatRow| seatRow.into_iter()
                     .filter(|seat| **seat == State::Occupied)
@@ -270,21 +269,21 @@ impl PartTwo {
         //println!("neighbours {:?}", self.getNeighbours(coordinate));
         //println!("directions {:?}", directions);
         //}
-        let mut seats = self.getGrid().into_iter()
-            .enumerate()
-            .flat_map(|(row, seatRow)| seatRow.into_iter()
-                .enumerate()
-                .filter(|(_col, state)| **state == State::Occupied || **state == State::Unoccupied)
-                .map(move |(col, _state)| [row, col])
-            )
-            .collect::<Vec<[usize; 2]>>();
+        // let mut seats = self.getGrid().into_iter()
+        //     .enumerate()
+        //     .flat_map(|(row, seatRow)| seatRow.into_iter()
+        //         .enumerate()
+        //         .filter(|(_col, state)| **state == State::Occupied || **state == State::Unoccupied)
+        //         .map(move |(col, _state)| [row, col])
+        //     )
+        //     .collect::<Vec<[usize; 2]>>();
         
         // find first seat in each direction.
         // The set of first seat in each direction can be pre-computed and stored in a map
         let res = directions.into_iter()
                 .filter(|dir| {
                     let first = self.findFirst(dir, coordinate);
-                    println!("First hit {:?}", first);
+                    //println!("First hit {:?}", first);
                     return match first {
                         None => false,
                         Some([x,y]) => self.grid[x][y] == State::Occupied
