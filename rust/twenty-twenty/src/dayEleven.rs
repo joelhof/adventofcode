@@ -136,13 +136,13 @@ impl Day {
         while changed {
             let (res, grid) = conwayGrid.nextGeneration();
             conwayGrid.grid = grid;
-            //changed = res;
+            changed = res;
             iteration = iteration + 1;
             //println!("iteration {} ", iteration);
-            println!("{}", conwayGrid);
-            if iteration > 6 {
-                changed = false;
-            }
+            // println!("{}", conwayGrid);
+            // if iteration > 6 {
+            //     changed = false;
+            // }
         }
 
         println!("nr of iterations until steady state {}", iteration);
@@ -279,27 +279,15 @@ impl PartTwo {
             )
             .collect::<Vec<[usize; 2]>>();
         
-        seats.sort_by(|[x1, y1], [x2, y2]| {
-            let d1 = cartesianDistance(coordinate, &[*x1, *y1]);
-            let d2 = cartesianDistance(coordinate, &[*x2, *y2]);
-            if d1 == d2 {
-                Ordering::Equal
-            } else if d1 > d2 {
-                Ordering::Greater
-            } else {
-                Ordering::Less
-            }
-        });
-        
+        // find first seat in each direction.
+        // The set of first seat in each direction can be pre-computed and stored in a map
         let res = directions.into_iter()
                 .filter(|dir| {
-                    let first = seats[..].into_iter()
-                        .filter(|point| point != &coordinate)
-                        .find(|point| onLine(dir, point, &coordinate));
-                    //println!("First hit {:?}", first);
+                    let first = self.findFirst(dir, coordinate);
+                    println!("First hit {:?}", first);
                     return match first {
                         None => false,
-                        Some([x,y]) => self.grid[*x][*y] == State::Occupied
+                        Some([x,y]) => self.grid[x][y] == State::Occupied
                     };
                 }
                 )
@@ -308,6 +296,20 @@ impl PartTwo {
         //     println!("nr of visible {}", res);
         // }
         return res;
+    }
+
+    fn findFirst(&self, direction: &[isize; 2], origin: &[usize; 2]) -> Option<[usize; 2]> {
+        // loop until either a seat is found, or an edge is reached.
+        let mut candidate: Vec<usize> = origin.iter().cloned().collect();
+        loop {
+            candidate = candidate.iter().zip(direction).map(|(a, b)| (*a as isize + *b) as usize).collect();
+            match self.getGrid().get(candidate[0]).and_then(|row| row.get(candidate[1])) {
+                Some(State::Floor) => continue,
+                Some(State::Unoccupied) => return Some([candidate[0], candidate[1]]),
+                Some(State::Occupied) => return Some([candidate[0], candidate[1]]),
+                None => return None
+            }
+        };
     }
 }
 
@@ -385,7 +387,7 @@ mod tests {
         L.LLLLLL.L
         L.LLLLL.LL";
         let result = Day::test(INPUT).partTwo();
-        assert_eq!(result, 27);
+        assert_eq!(result, 26);
     }
     
     #[test]
