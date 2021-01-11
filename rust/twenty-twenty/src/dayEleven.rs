@@ -12,18 +12,21 @@ enum Layout {
 
 pub struct Day {
     seats: Vec<Vec<Layout>>,
+    input: Vec<Vec<Layout>>
 }
 
 impl Day {
     fn test(input: &str) -> Day {
         return Day {
-            seats: parseInput(input)
+            seats: parseInput(input),
+            input: parseInput(input)
         }
     }
 
     pub fn new() -> Day {
         return Day {
-            seats: parseInput(&loadInput("Eleven"))
+            seats: parseInput(&loadInput("Eleven")),
+            input: parseInput(&loadInput("Eleven"))
         }
     }
 
@@ -120,7 +123,7 @@ impl Day {
     }
 
     pub fn partTwo(&self) -> u64 {
-        let init: Vec<Vec<State>> = parseInput(&loadInput("Eleven")).iter()
+        let init: Vec<Vec<State>> = self.input.iter()
             .map(move |seats| seats.into_iter()
                 .map(move |layout| match layout {
                     Layout::Floor(_) => State::Floor,
@@ -152,15 +155,6 @@ impl Day {
                 ).sum();
     }
 }
-
-// impl AdventOfCodeSolver for Day {
-//     fn day(&self) -> &str {
-//         return "Eleven";
-//     }
-
-//     fn partTwo(&self) -> u64 {
-//     }
-// }
 
 #[derive(Debug, PartialEq, Clone, Copy)]
 enum State {
