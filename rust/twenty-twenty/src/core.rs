@@ -19,6 +19,12 @@ pub trait AdventOfCodeSolver {
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Coordinate(pub isize, pub isize);
 
+impl Coordinate {
+    pub fn manhattan(&self, other: Coordinate) -> usize {
+        return ((self.0 - other.0).abs() + (self.1 - other.1).abs()) as usize;
+    }
+}
+
 pub fn loadInput(day: &str) -> String {
     let mut d = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
     d.push("resources");
