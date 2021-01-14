@@ -3,6 +3,7 @@
 use crate::core::*;
 use std::cell::Cell;
 use std::convert::TryInto;
+use std::str::FromStr;
 
 #[derive(Debug, Copy, Clone, PartialEq)]
 enum Instruction {
@@ -37,20 +38,23 @@ pub struct Day {
 struct Ship(pub Coordinate, pub Instruction);
 
 impl Day {
-    pub fn test(input: &str) -> Day {
-        let instructions: Vec<Instruction> = parseInput(input);
-        println!("{:?}", instructions);
-        return Day {
-            instructions: instructions,
-            ship: Cell::new(Ship(Coordinate(0, 0), Instruction::East(0))),
-        };
-    }
 
     pub fn new() -> Day {
         return Day {
             instructions: parseInput(&loadInput("Twelve")),
             ship: Cell::new(Ship(Coordinate(0, 0), Instruction::East(0))),
         };
+    }
+}
+
+impl FromStr for Day {
+    type Err = std::string::ParseError;
+
+    fn from_str(input: &str) -> Result<Self, Self::Err> {
+        return Ok(Day {
+            instructions: parseInput(input),
+            ship: Cell::new(Ship(Coordinate(0, 0), Instruction::East(0)))
+        });
     }
 }
 
@@ -65,11 +69,29 @@ impl AdventOfCodeSolver for Day {
         }
         return self.ship.get().manhattanDistance();
     }
+
+    fn partTwo(&self) -> u64 {
+        // Set ship facing to follow waypoint, i.e update ship facing when way point is moved.
+        // way point coordinates are relative to the ship.
+
+        // loop over instructions, if F instruction update ship heading, then move ship.
+        // if other instruction, move waypoint
+        let waypointShip = Waypoint {
+            ship: Coordinate(0,0),
+            waypoint: Coordinate(10,1)
+        };
+        let result = self.instructions.iter().fold(waypointShip, |mut acc, instruction| {
+            //println!("{:?}, next instruction {:?}", acc, instruction);
+            acc.execute(instruction);
+            return acc;
+        });
+        //println!("{:?}", result);
+        return result.ship.manhattan(Coordinate(0,0)) as u64;
+    }
 }
 
 impl Ship {
     fn execute(&self, instruction: &Instruction) -> Ship {
-        let Coordinate(x,y) = self.0;
         return match instruction {
             Instruction::Forward(x) => self.forward(*x),
             Instruction::Left(x) => self.turn(0isize.checked_sub((*x).try_into().unwrap()).unwrap()),
@@ -120,7 +142,52 @@ impl Ship {
     }
 
     fn manhattanDistance(&self) -> u64 {
-        return (self.0.0.abs() + self.0.1.abs()) as u64;
+        return self.0.manhattan(Coordinate(0,0)) as u64;
+    }
+}
+
+#[derive(Debug)]
+struct Waypoint {
+    ship: Coordinate,
+    waypoint: Coordinate
+}
+
+impl Waypoint {
+    fn execute(&mut self, instruction: &Instruction) {
+        return match instruction {
+            Instruction::Forward(x) => self.forward(*x),
+            Instruction::Left(x) => self.rotation((*x).try_into().unwrap()),
+            Instruction::Right(x) => self.rotation(0isize.checked_sub((*x).try_into().unwrap()).unwrap()),
+            heading => self.translation(*heading)
+        }
+    }
+
+    fn translation(&mut self, heading: Instruction) {
+        let Coordinate(x,y) = self.waypoint;
+        self.waypoint = match heading {
+            Instruction::West(d) => Coordinate(x - (d as isize), y),
+            Instruction::East(d) => Coordinate(x + (d as isize), y),
+            Instruction::North(d) => Coordinate(x, y + (d as isize)),
+            Instruction::South(d) => Coordinate(x, y - (d as isize)),
+            h => panic!("Unknown heading {:?}", h),
+        };
+    }
+
+    fn rotation(&mut self, rotation: isize) {
+        let Coordinate(x,y) = self.waypoint;
+        self.waypoint = match rotation {
+            r if r == 270 || r == -90 => Coordinate(y, -x),
+            r if r == 90 || r == -270 => Coordinate(-y, x),
+            r if r == 180 || r == -180 => Coordinate(-x, -y),
+            r if r.abs() == 360 => Coordinate(x,y),
+            r => panic!("Unsupported rotation {}", r)
+        };
+    }
+
+    fn forward(&mut self, forward: usize) {
+        let Coordinate(x,y) = self.waypoint;
+        let Coordinate(x1, y1) = self.ship;
+        self.ship = Coordinate(x1 + (forward as isize * x), y1 + (forward as isize * y));
     }
 }
 
@@ -153,7 +220,18 @@ mod tests {
             F7
             R90
             F11";
-        let result = Day::test(INPUT).partOne();
+        let result = INPUT.parse::<Day>().unwrap().partOne();
         assert_eq!(result, 25);
+    }
+
+    #[test]
+    fn twelvePartTwoExampleTest() {
+        const INPUT: &str = "F10
+            N3
+            F7
+            R90
+            F11";
+        let result = INPUT.parse::<Day>().unwrap().partTwo();
+        assert_eq!(result, 286);
     }
 }
