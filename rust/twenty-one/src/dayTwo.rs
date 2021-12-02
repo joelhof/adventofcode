@@ -46,6 +46,29 @@ pub fn partOne(input: &str) -> i32 {
     return forward * depth;
 }
 
+struct SubmarinePosition {
+    horizontal: i32,
+    depth: i32,
+    aim: i32
+}
+
+pub fn partTwo(input: &str) -> i32 {
+    let lines: Vec<Instruction> = input.split("\n")
+        .map(|line| line.trim())
+        .filter(|line| !line.is_empty())
+        .map(|line| Instruction::try_from(line))
+        .filter(|res| res.is_ok())
+        .map(|res| res.unwrap())
+        .collect();
+    let p: SubmarinePosition = lines.iter()
+        .fold(SubmarinePosition{ horizontal: 0, depth: 0, aim: 0 }, |pos, instruction| match instruction {
+            Instruction::FORWARD(v) => SubmarinePosition{ horizontal: pos.horizontal + v, depth: pos.depth + v * pos.aim, aim: pos.aim },
+            Instruction::DOWN(v) => SubmarinePosition{ horizontal: pos.horizontal, depth: pos.depth, aim: pos.aim + v },
+            Instruction::UP(v) => SubmarinePosition{ horizontal: pos.horizontal, depth: pos.depth, aim: pos.aim - v }
+        });
+    return p.horizontal * p.depth;
+}
+
 
 #[cfg(test)]
 mod tests {
@@ -63,4 +86,15 @@ mod tests {
         assert_eq!(150, res);
     }
 
+    #[test]
+    fn partTwoExample() {
+        let example = "forward 5
+        down 5
+        forward 8
+        up 3
+        down 8
+        forward 2";
+        let res = partTwo(example);
+        assert_eq!(900, res);
+    }
 }
