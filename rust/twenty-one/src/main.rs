@@ -2,9 +2,12 @@
 
 use std::path::PathBuf;
 use std::fs;
+use twentyone::*;
 
 fn main() {
     dayOne();
+    let res = dayTwo::partOne(&loadInput("Two"));
+    println!("Day 2, part 1: {}", res);
 }
 
 fn dayOne() {
