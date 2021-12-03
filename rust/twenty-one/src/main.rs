@@ -6,8 +6,18 @@ use twentyone::*;
 
 fn main() {
     dayOne();
-    let res = dayTwo::partOne(&loadInput("Two"));
-    println!("Day 2, part 1: {}", res);
+    {
+        let res = dayTwo::partOne(&loadInput("Two"));
+        println!("Day 2, part 1: {}", res);
+    }
+    {
+        let res = dayTwo::partTwo(&loadInput("Two"));
+        println!("Day 2, part 2: {}", res);
+    }
+    {
+        let res = dayThree::partOne(&loadInput("Three"));
+        println!("Day 3, part 1: {}", res);
+    }
 }
 
 fn dayOne() {
