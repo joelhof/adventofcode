@@ -2,13 +2,11 @@
 
 pub fn partOne(input: &str) -> u32 {
     let bitSize = input.split("\n").count();
-    println!("Bit size {}", bitSize);
     
     let columnCount = match input.split("\n").next() {
         Some(line) => line.chars().count(),
         None => 0
     };
-    println!("{} {}",columnCount, (bitSize / 2));
     let mut columns: Vec<u32> = vec![0; columnCount];
 
     columns = input.split("\n")
@@ -31,14 +29,12 @@ pub fn partOne(input: &str) -> u32 {
             .fold(String::from(""), |mut nr, bit| { nr.push(bit); nr}), 2).unwrap();
    
     let b = getBitMask(columnCount);
-    println!("{} {}", gamma, !gamma & b);
 
     return gamma * (!gamma & b);
 }
 
 fn bitCount(lines: &[&str]) -> Vec<u32> {
     let len = lines[0].len();
-    //println!("nr of lines {:?} {}", lines.len(), (lines.len() as u32 / 2));
     let x = lines.iter()
     .map(|line| line.chars())
     .fold(vec![0; len], |mut cols, chars| {
@@ -51,7 +47,6 @@ fn bitCount(lines: &[&str]) -> Vec<u32> {
 
         return cols;
     });
-    println!("ones count {:?}", x);
     return x;
 }
 
@@ -63,9 +58,7 @@ pub fn partTwo(input: &str) -> u32 {
         .collect();
 
     let oxygen_rating = recurCounterOxygen(&numbers, 0);
-    //println!("-------");
     let co2_rating = recurCounterCarbonDioxide(&numbers, 0);
-    //println!("{} {}", oxygen_rating, co2_rating);
     return u32::from_str_radix(&oxygen_rating, 2).unwrap() * u32::from_str_radix(&co2_rating, 2).unwrap();
 }
 
@@ -73,15 +66,10 @@ fn recurCounterOxygen(numbers: &[&str], pos: usize) -> String {
     if numbers.len() == 1 {
         return numbers[0].to_string();
     }
-    //println!("{:?}", numbers);
-    
     let ones: Vec<char> = bitCount(numbers)
         .iter()
         .map(|nr_of_ones| if *nr_of_ones >= (numbers.len() as u32 - nr_of_ones) { '1' } else { '0' })
         .collect();
-    //println!("pos {} {:?}", pos, ones);
-
-    
     let next: Vec<&str> = numbers.iter()
         .filter(|nr| nr.chars().nth(pos).unwrap() == ones[pos])
         .map(|nr| *nr)
@@ -93,18 +81,13 @@ fn recurCounterCarbonDioxide(numbers: &[&str], pos: usize) -> String {
     if numbers.len() == 1 {
         return numbers[0].to_string();
     }
-    //println!("{:?}", numbers);
     
     let ones: Vec<char> = bitCount(numbers)
         .iter()
         .map(|nr_of_ones| {
-            //println!("{} - {} = {}",numbers.len(), nr_of_ones, (numbers.len() as u32 - nr_of_ones));
             if *nr_of_ones >= (numbers.len() as u32 - nr_of_ones) { '0' } else { '1' }
         })
         .collect();
-    //println!("pos {} {:?}", pos, ones);
-
-    
     let next: Vec<&str> = numbers.iter()
         .filter(|nr| nr.chars().nth(pos).unwrap() == ones[pos])
         .map(|nr| *nr)
