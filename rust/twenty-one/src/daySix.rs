@@ -16,14 +16,14 @@ impl Timer {
 
 #[derive(Debug)]
 struct Lanterfish {
-    school: HashMap<Timer, u32>
+    school: HashMap<Timer, u64>
 }
 
 impl Lanterfish {
     fn nextDay(&self) -> Lanterfish {
         let newFish = self.school.get(&Timer(0));
             
-        let mut next: HashMap<Timer, u32> = self.school.iter()
+        let mut next: HashMap<Timer, u64> = self.school.iter()
             .filter(|(_k, v)| *v > &0)
             .map(|(k,v)| (k.next(), *v))
             .fold(HashMap::new(), |mut nextIteration, (k,v)| {
@@ -44,7 +44,7 @@ impl FromStr for Lanterfish {
     type Err = &'static str;
 
     fn from_str(input: &str) -> Result<Self, Self::Err> {
-        let fish_population: HashMap<Timer, u32> = input.lines()
+        let fish_population: HashMap<Timer, u64> = input.lines()
             .map(|l| l.split(",").map(|nr| nr.parse()))
             .flatten()
             .filter(|nr| nr.is_ok())
@@ -59,12 +59,27 @@ impl FromStr for Lanterfish {
     }
 }
 
-pub fn partOne(input: &str) -> u32 {
+pub fn partOne(input: &str) -> u64 {
     let fish_population: Result<Lanterfish, _> = input.parse();
     //println!("{:?}", fish_population);
     if fish_population.is_ok() {
         let mut fishes = fish_population.unwrap();
         for day in 0..80 {
+            //println!("fish count: {} {:?}", fishes.school.values().sum::<u32>(), fishes);
+            fishes = fishes.nextDay();
+        }
+        
+        return fishes.school.values().sum();
+    }
+    return 0;
+}
+
+pub fn partTwo(input: &str) -> u64 {
+    let fish_population: Result<Lanterfish, _> = input.parse();
+    //println!("{:?}", fish_population);
+    if fish_population.is_ok() {
+        let mut fishes = fish_population.unwrap();
+        for day in 0..256 {
             //println!("fish count: {} {:?}", fishes.school.values().sum::<u32>(), fishes);
             fishes = fishes.nextDay();
         }
@@ -83,5 +98,12 @@ mod tests {
         let input = "3,4,3,1,2";
         let res = partOne(input);
         assert_eq!(5934, res);
+    }
+
+    #[test]
+    fn partTwoExample() {
+        let input = "3,4,3,1,2";
+        let res = partTwo(input);
+        assert_eq!(26984457539, res);
     }
 }
