@@ -20,27 +20,27 @@ impl Coordinate {
         let mut points: Vec<Coordinate> = Vec::new();
         let diffX: i64 = (other.0 as i64) - (self.0 as i64); 
         let diffY: i64 = (other.1 as i64) - (self.1 as i64);
-        println!("{} {}", diffX, diffY);
+        //println!("{} {}", diffX, diffY);
         if self.0 == other.0 {
-            println!("vertical line {:?} -> {:?}", self, other);
+            //println!("vertical line {:?} -> {:?}", self, other);
             let start = if self.1 >= other.1 { other.1 } else { self.1 };
             let end = if self.1 >= other.1 { self.1 } else { other.1 } + 1;
             for y in start..end {
                 points.push(Coordinate(self.0, y));
             }
         } else if self.1 == other.1 {
-            println!("horizontal line {:?} -> {:?}", self, other);
+            //println!("horizontal line {:?} -> {:?}", self, other);
             let start = if self.0 >= other.0 { other.0 } else { self.0 };
             let end = if self.0 >= other.0 { self.0 } else { other.0 } + 1;
             for x in start..end {
                 points.push(Coordinate(x, self.1));
             }
         } else if includeDiagonal && diffX.abs() == diffY.abs() {
-            println!("diagonal line {:?} -> {:?}", self, other);
+            //println!("diagonal line {:?} -> {:?}", self, other);
             for step in 0..diffX.abs() + 1 {
                 let x = self.0 as i64 + step * if diffX >= 0 { 1 } else { -1 };
                 let y = self.1 as i64 + step * if diffY >= 0 { 1 } else { -1 };
-                println!("x = {}, y = {}", x, y);
+                //println!("x = {}, y = {}", x, y);
                 points.push(Coordinate(x as u32, y as u32));
                 
             }
@@ -98,7 +98,7 @@ impl FromStr for VentMap {
 
 pub fn partOne(input: &str) -> u32 {
     let vents: VentMap = input.parse().unwrap();
-    println!("{}", vents.vents.keys().count());
+    //println!("{}", vents.vents.keys().count());
     return vents.vents.values().filter(|nr_of_vents| **nr_of_vents >= 2).count() as u32;
 }
 
@@ -122,7 +122,7 @@ pub fn partTwo(input: &str) -> u32 {
             *counter += 1;
             return points
         });
-    println!("{}", vents.keys().count());
+    //println!("{}", vents.keys().count());
     return vents.values().filter(|nr_of_vents| **nr_of_vents >= 2).count() as u32;
 }
 
