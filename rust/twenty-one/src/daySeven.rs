@@ -36,7 +36,27 @@ pub fn partOne(input: &str) -> i32 {
 }
 
 pub fn partTwo(input: &str) -> i32 {
-    return 0;
+    let crabs: Crabs = input.parse().unwrap();
+    let max = match crabs.positions.iter().max() { Some(x) => *x, None => 0 };
+    let mut min_nr_of_steps = i32::MAX;
+
+    for i in 0..max {
+        let delta: i32 = crabs.positions.iter()
+            .map(|pos| pos - i)
+            .map(|delta| fuelCost(&delta))
+            .sum();
+        
+        if delta < min_nr_of_steps {
+            min_nr_of_steps = delta;
+        }
+    }
+
+    return min_nr_of_steps;
+}
+
+fn fuelCost(distance: &i32) -> i32 {
+    let delta = distance.abs();
+    return delta * (1 + delta) / 2;
 }
 
 #[cfg(test)]
@@ -55,5 +75,16 @@ mod tests {
         let input = "16,1,2,0,4,2,7,1,2,14";
         let res = partTwo(input);
         assert_eq!(168, res);
+    }
+
+    #[test]
+    fn fuelCostTest() {
+        let input = vec![
+            (16 - 5, 66),
+            (1 - 5, 10),
+            (7 - 5, 3)
+        ];
+        input.iter()
+            .for_each(|(delta, expected)| assert_eq!(*expected, fuelCost(delta)));
     }
 }

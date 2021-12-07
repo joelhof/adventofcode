@@ -50,6 +50,10 @@ fn main() {
         let res = daySeven::partOne(&loadInput("Seven"));
         println!("Day 7, part 1: {}", res);
     }
+    {
+        let res = daySeven::partTwo(&loadInput("Seven"));
+        println!("Day 7, part 2: {}", res);
+    }
 }
 
 fn dayOne() {
