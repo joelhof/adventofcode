@@ -19,31 +19,22 @@ impl FromStr for Crabs {
 pub fn partOne(input: &str) -> i32 {
    
     let crabs: Crabs = input.parse().unwrap();
-    let max = match crabs.positions.iter().max() { Some(x) => *x, None => 0 };
-    let mut min_nr_of_steps = i32::MAX;
-    for i in 0..max {
-        let delta: i32 = crabs.positions.iter()
-            .map(|pos| pos - i)
-            .map(|delta| delta.abs())
-            .sum();
-        
-        if delta < min_nr_of_steps {
-            min_nr_of_steps = delta;
-        }
-    }
-
-    return min_nr_of_steps;
+    return minimizeFuel(crabs, &(|x| x.abs()));
 }
 
 pub fn partTwo(input: &str) -> i32 {
     let crabs: Crabs = input.parse().unwrap();
+    return minimizeFuel(crabs, &fuelCost);
+}
+
+fn minimizeFuel(crabs: Crabs, costFn: &dyn Fn(&i32) -> i32) -> i32 {
     let max = match crabs.positions.iter().max() { Some(x) => *x, None => 0 };
     let mut min_nr_of_steps = i32::MAX;
 
     for i in 0..max {
         let delta: i32 = crabs.positions.iter()
             .map(|pos| pos - i)
-            .map(|delta| fuelCost(&delta))
+            .map(|delta| costFn(&delta))
             .sum();
         
         if delta < min_nr_of_steps {
