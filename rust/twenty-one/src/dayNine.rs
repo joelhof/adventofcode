@@ -1,5 +1,7 @@
 use std::str::FromStr;
-
+use std::collections::VecDeque;
+use std::collections::HashSet;
+use std::iter::FromIterator;
 
 #[derive(Debug)]
 struct HeightMap {
@@ -50,6 +52,38 @@ impl HeightMap {
             .map(|(x,y)| self.map[*x][*y] + 1)
             .sum();
     }
+
+    fn adjacent(&self, x: &usize, y: &usize) -> Vec<(usize, usize)> {
+        return self.orthogonal_neighbours(x, y)
+            .into_iter()
+            .filter(|(row, col)| self.map[*row][*col] < 9)
+            .collect();
+    }
+
+    fn basin(&self, x: &usize, y: &usize) -> Vec<(usize, usize)> {
+
+        // breadth first search to find all positions connected to (x,y)
+        let mut queue: VecDeque<(usize, usize)> = VecDeque::new();
+        let mut visited: HashSet<(usize, usize)> = HashSet::new(); 
+        queue.push_back((*x, *y));
+        visited.insert((*x, *y));
+        while let Some(v) = queue.pop_front() {
+            for n in self.adjacent(&v.0, &v.1) {
+                if !visited.contains(&n) {
+                    visited.insert(n);
+                    queue.push_back(n);
+                }
+            }
+        };
+
+        return Vec::from_iter(visited);
+    }
+
+    fn basins(&self) -> Vec<Vec<(usize, usize)>> {
+        return self.low_points().iter()
+            .map(|(x,y)| self.basin(x,y))
+            .collect();
+    }
 }
 
 impl FromStr for HeightMap {
@@ -68,8 +102,20 @@ impl FromStr for HeightMap {
 }
 pub fn partOne(input: &str) -> u32 {
     let heightMap: HeightMap = input.parse().unwrap();
-    println!("{:?}", heightMap);
     return heightMap.total_risk();
+}
+
+pub fn partTwo(input: &str) -> u32 {
+    let heightMap: HeightMap = input.parse().unwrap();
+    let mut basins = heightMap.basins();
+        basins.sort_by(|a,b| b.len().cmp(&a.len()));
+    // let b1: Vec<usize> = basins.iter().map(|b|
+    //     b.len()
+    //     //b.iter().map(|p| heightMap.map[p.0][p.1]).collect::<Vec<u32>>()
+    // ).collect();
+    //println!("{:?}", basins);
+    //println!("{:?}", b1);
+    return basins.iter().take(3).map(|b| b.len() as u32).product();
 }
 
 #[cfg(test)]
@@ -85,5 +131,16 @@ mod tests {
         9899965678";
         let res = partOne(input);
         assert_eq!(15, res);
+    }
+
+    #[test]
+    fn partTwoExample() {
+        let input = "2199943210
+        3987894921
+        9856789892
+        8767896789
+        9899965678";
+        let res = partTwo(input);
+        assert_eq!(1134, res);
     }
 }
