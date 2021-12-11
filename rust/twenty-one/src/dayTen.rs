@@ -31,7 +31,7 @@ impl NavigationChunk {
         }
     }
 
-    fn complete(&self) -> Vec<char> {
+    fn complete(&self) -> Self {
         let mut stack: Vec<&char> = Vec::new();
         let opening: HashSet<&char> = HashSet::from_iter(['(', '[', '{', '<'].iter());
         let closing: HashSet<&char> = HashSet::from_iter([')', ']', '}', '>'].iter());
@@ -41,16 +41,17 @@ impl NavigationChunk {
                 stack.push(c);
             }
             if closing.contains(&c) {
-                let opening = stack.pop();
-                let closingToken = match opening {
-                    Some(opening) => NavigationChunk::closing(&opening),
-                    None => None
-                };
-                
-                
+                stack.pop();
             }
         }
-        return Vec::new();
+        let completions = stack.iter()
+            .rev()
+            .filter_map(|c| NavigationChunk::closing(c))
+            .collect();
+        //println!("autocompletions {:?}", completions);
+        return NavigationChunk { chunks: completions,
+                error: None
+            };
     }
 }
 
@@ -147,8 +148,10 @@ impl FromStr for Autocomplete {
 
 impl Autocomplete {
 
-    fn complete_chunk() {
-        
+    fn completions(&mut self) {
+        self.completions = self.chunks.iter()
+            .map(|uncompleted_chunk| uncompleted_chunk.complete())
+            .collect();
     }
 
     fn char_score(character: &char) -> u32 {
@@ -161,19 +164,22 @@ impl Autocomplete {
         };
     }
 
-    fn score(&self) -> Vec<u32> {
+    fn score(&self) -> Vec<u64> {
         return self.completions.iter()
             .map(|chunk| chunk.chunks.iter()
                 .map(|c| Autocomplete::char_score(c))
+                .map(|score| score as u64)
                 .fold(0, |acc, score| return 5 * acc + score)
             ).collect();
     }
 }
 
-pub fn partTwo(input: &str) -> u32 {
-    let autocomplete: Autocomplete = input.parse().unwrap();
-    autocomplete.score().iter().for_each(|score| println!("{}", score));
-    return 0;
+pub fn partTwo(input: &str) -> u64 {
+    let mut autocomplete: Autocomplete = input.parse().unwrap();
+    autocomplete.completions();
+    let mut scores = autocomplete.score();
+    scores.sort();
+    return scores[(autocomplete.score().len() + (2 - 1)) / 2 - 1];
 }
 
 #[cfg(test)]
