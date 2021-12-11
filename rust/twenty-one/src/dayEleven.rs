@@ -76,7 +76,7 @@ impl Grid {
         }
     } 
 
-    fn next(& mut self) {
+    fn next(& mut self) -> u32 {
         self.octupuses.iter_mut()
             .for_each(|row| row.iter_mut()
                 .for_each(|octopus| octopus.energylevel += 1 )
@@ -87,7 +87,7 @@ impl Grid {
             &mut HashSet::new()
         );    
 
-        self.flash_count += self.octupuses.iter_mut()
+        return self.octupuses.iter_mut()
             .map(|row| row.iter_mut()
                 .map(|octopus| octopus.flash())
                 .filter(|flashed| *flashed)
@@ -100,13 +100,16 @@ impl Grid {
 pub fn partOne(input: &str) -> u32 {
     let mut grid: Grid = input.parse().unwrap();
     //println!("Iteration: {}, flashed: {} grid: {:?}", 0, grid.flash_count, grid.octupuses);
-    for i in 0..100 {
-        //println!("--------------------------------");
-        grid.next();
-        //println!("after iteration: {}, flashed: {} grid: {:?}", i, grid.flash_count, grid.octupuses);
+    return (0..100).map(|_i| grid.next()).sum();
+}
+
+pub fn partTwo(input: &str) -> u32 {
+    let mut grid: Grid = input.parse().unwrap();
+    let mut count = 1;
+    while grid.next() != 100 {
+        count += 1;
     }
-    
-    return grid.flash_count;
+    return count;
 }
 
 #[cfg(test)]
@@ -127,5 +130,22 @@ mod tests {
         ";
         let res = partOne(input);
         assert_eq!(1656, res);
+    }
+
+    #[test]
+    fn partTwoExample() {
+        let input = "5483143223
+        2745854711
+        5264556173
+        6141336146
+        6357385478
+        4167524645
+        2176841721
+        6882881134
+        4846848554
+        5283751526
+        ";
+        let res = partTwo(input);
+        assert_eq!(195, res);
     }
 }
