@@ -9,3 +9,4 @@ pub mod daySeven;
 pub mod dayEight;
 pub mod dayNine;
 pub mod dayTen;
+pub mod dayEleven;
