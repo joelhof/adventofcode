@@ -16,7 +16,8 @@ use std::collections::HashMap;
 
 */
 struct Caves {
-    graph: HashMap<String, Vec<String>>
+    graph: HashMap<String, Vec<String>>,
+    paths: Vec<Vec<String>>
 }
 
 impl Caves {
@@ -34,16 +35,36 @@ impl Caves {
     fn connect(&mut self, v: &str, w: &str) {
         let neighbours = self.graph.entry(v.to_string()).or_insert(Vec::new());
         neighbours.push(w.to_string());
-        if Caves::is_big_cave(v) && !self.is_connected(v, w) {
+        if Caves::is_big_cave(v) && !self.is_connected(w, v) {
             self.connect(w, v);
         }
     }
 
-    
+    fn get_neighbours(&self, v: &str) -> Vec<String> {
+        return match self.graph.get(v) { Some(n) => n.to_vec(), None => Vec::new() };
+    }
+
+    fn depth_first_search<'a>(&mut self, start: &'a str, path: &'a mut Vec<&'a str>) {
+        println!("At Node: {}, path {:?}", start, path);
+        path.push(start);
+        if start == "end" {
+            self.paths.push(path.iter().map(|s| s.to_string()).collect());
+            //return 
+        };
+
+        let neighbours = self.get_neighbours(start);
+        neighbours.iter()
+            .filter(|v| Caves::is_big_cave(v) || !path.contains(&v.as_str()))
+            .for_each(|v| self.depth_first_search(v, &mut path.to_vec()));
+            //.flatten()
+            //.for_each
+            //.collect();
+        //return paths;
+    }
 }
 
 pub fn partOne(input: &str) -> u32 {
-    let mut caves: Caves = Caves { graph: HashMap::new() };
+    let mut caves: Caves = Caves { graph: HashMap::new(), paths: vec![] };
     input.lines()
         .map(|line| line.trim())
         .filter(|line| !line.is_empty())
@@ -51,7 +72,9 @@ pub fn partOne(input: &str) -> u32 {
             .collect::<Vec<&str>>())
         .for_each(|nodes| caves.connect(nodes[0], nodes[1]));
     println!("{:?}", caves.graph);
-    return 0;
+    caves.depth_first_search("start", &mut Vec::new());
+    caves.paths.iter().for_each(|path| println!("{:?}", path));
+    return caves.paths.len() as u32;
 }
 
 #[cfg(test)]
