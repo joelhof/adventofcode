@@ -22,7 +22,7 @@ struct Caves {
 
 impl Caves {
     fn is_big_cave(cave: &str) -> bool {
-        return cave.to_uppercase() == cave || cave == "start";
+        return cave.to_uppercase() == cave;
     }
 
     fn is_connected(&self, v: &str, w: &str) -> bool {
@@ -33,9 +33,10 @@ impl Caves {
     }
 
     fn connect(&mut self, v: &str, w: &str) {
+        println!("connect {} to {}", v, w);
         let neighbours = self.graph.entry(v.to_string()).or_insert(Vec::new());
         neighbours.push(w.to_string());
-        if (Caves::is_big_cave(v) || Caves::is_big_cave(w)) && !self.is_connected(w, v) {
+        if !self.is_connected(w, v) {
             self.connect(w, v);
         }
     }
@@ -64,6 +65,7 @@ impl Caves {
 }
 
 pub fn partOne(input: &str) -> u32 {
+    println!("PArt one input: {}", input);
     let mut caves: Caves = Caves { graph: HashMap::new(), paths: vec![] };
     input.lines()
         .map(|line| line.trim())
@@ -109,5 +111,29 @@ mod tests {
         kj-dc";
         let res = partOne(input);
         assert_eq!(19, res);
+    }
+    
+    #[test]
+    fn partOneBigExample() {
+        let input = "fs-end
+        he-DX
+        fs-he
+        start-DX
+        pj-DX
+        end-zg
+        zg-sl
+        zg-pj
+        pj-he
+        RW-he
+        fs-DX
+        pj-RW
+        zg-RW
+        start-pj
+        he-WI
+        zg-he
+        pj-fs
+        start-RW";
+        let res = partOne(input);
+        assert_eq!(226, res);
     }
 }
