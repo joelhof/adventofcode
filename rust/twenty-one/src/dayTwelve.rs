@@ -35,7 +35,7 @@ impl Caves {
     fn connect(&mut self, v: &str, w: &str) {
         let neighbours = self.graph.entry(v.to_string()).or_insert(Vec::new());
         neighbours.push(w.to_string());
-        if Caves::is_big_cave(v) && !self.is_connected(w, v) {
+        if (Caves::is_big_cave(v) || Caves::is_big_cave(w)) && !self.is_connected(w, v) {
             self.connect(w, v);
         }
     }
@@ -49,7 +49,7 @@ impl Caves {
         path.push(start);
         if start == "end" {
             self.paths.push(path.iter().map(|s| s.to_string()).collect());
-            //return 
+            return;
         };
 
         let neighbours = self.get_neighbours(start);
@@ -93,5 +93,21 @@ mod tests {
         ";
         let res = partOne(input);
         assert_eq!(10, res);
+    }
+    
+    #[test]
+    fn partOneMediumExample() {
+        let input = "dc-end
+        HN-start
+        start-kj
+        dc-start
+        dc-HN
+        LN-dc
+        HN-end
+        kj-sa
+        kj-HN
+        kj-dc";
+        let res = partOne(input);
+        assert_eq!(19, res);
     }
 }
