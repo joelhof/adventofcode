@@ -109,12 +109,6 @@ pub fn partTwo(input: &str) -> u32 {
     let heightMap: HeightMap = input.parse().unwrap();
     let mut basins = heightMap.basins();
         basins.sort_by(|a,b| b.len().cmp(&a.len()));
-    // let b1: Vec<usize> = basins.iter().map(|b|
-    //     b.len()
-    //     //b.iter().map(|p| heightMap.map[p.0][p.1]).collect::<Vec<u32>>()
-    // ).collect();
-    //println!("{:?}", basins);
-    //println!("{:?}", b1);
     return basins.iter().take(3).map(|b| b.len() as u32).product();
 }
 
