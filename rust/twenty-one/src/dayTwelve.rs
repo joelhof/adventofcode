@@ -22,7 +22,7 @@ struct Caves {
 
 impl Caves {
     fn is_big_cave(cave: &str) -> bool {
-        return cave.to_uppercase() == cave;
+        return cave.to_uppercase() == cave || cave == "start";
     }
 
     fn is_connected(&self, v: &str, w: &str) -> bool {
