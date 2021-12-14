@@ -108,6 +108,36 @@ pub fn partOne(input: &str) -> u32 {
     return folded.len() as u32;
 }
 
+pub fn partTwo(input: &str) -> u32 {
+    let coordinatePattern: Regex = Regex::new(r"\d+,\d+").unwrap();
+    let points: HashSet<Coordinate> = input.lines()
+        .map(|l| l.trim())
+        .filter(|line| coordinatePattern.is_match(line))
+        .filter_map(|line| line.parse().ok())
+        .collect();
+    let foldingInstructions: Vec<Folding> = input.lines()
+        .map(|l| l.trim())
+        .filter(|l| !l.is_empty())
+        .filter(|line| !coordinatePattern.is_match(line))
+        .filter_map(|line| line.parse().ok())
+        .collect();
+
+    let folded = foldingInstructions.iter()
+        .fold(points, |folded, folding| folded.iter().map(|point| folding.fold(point)).collect());
+    let x_max = folded.iter().map(|p| p.0).max().unwrap();
+    let y_max = folded.iter().map(|p| p.1).max().unwrap();
+    for x in 0..(x_max+5) {
+        let mut line: String = String::from("");
+        for y in 0..(y_max+5) {
+            let marker = if folded.contains(&Coordinate(x,y)) { "#" } else { "."};
+            line.push_str(marker);
+        }
+        println!("{}", line);
+    }
+    //folded.iter().for_each(|p| println!("{:?}", p));
+    return folded.len() as u32;
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
