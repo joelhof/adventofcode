@@ -2,6 +2,8 @@ use regex::Regex;
 use std::str::FromStr;
 use std::collections::HashMap;
 
+use itertools::Itertools;
+
 #[derive(Debug)]
 struct PolymerFactory {
     mapping: HashMap<String, String>,
@@ -47,6 +49,8 @@ impl PolymerFactory {
             sr
         });
     }
+
+
 }
 
 pub fn partOne(input: &str) -> u32 {
@@ -64,12 +68,69 @@ pub fn partOne(input: &str) -> u32 {
     return mostCommon.unwrap() - leastCommon.unwrap();
 }
 
+fn simulate_polymerization(
+    mapping: &HashMap<String, String>,
+    pair_counter: &HashMap<String, u64>,
+    frequencies: &mut HashMap<char, u64>) -> HashMap<String, u64> {
+    
+    let mut new_counter = pair_counter.clone();
+
+    for (key, old_count) in pair_counter.iter() {
+        let insert = mapping.get(key).unwrap();
+        // inc new key count
+        let next = format!("{}{}", key.chars().nth(0).unwrap(), insert);
+        let count = new_counter.entry(next).or_insert(0);
+        *count += old_count;
+        // inc new key count
+        let next = format!("{}{}", insert, key.chars().nth(1).unwrap());
+        let count = new_counter.entry(next).or_insert(0);
+        *count += old_count;
+        // dec old key count
+        let count = new_counter.entry(key.to_string()).or_insert(1);
+        *count = match count.checked_sub(*old_count) { None => 0, Some(x) => x };
+        // inc letter frequency
+        let count = frequencies.entry(insert.chars().next().unwrap()).or_insert(0);
+        *count += old_count;
+    }
+    return new_counter;
+}
+
+pub fn partTwo(input: &str) -> u64 {
+    let mut factory: PolymerFactory = input.parse().unwrap();
+    let mut pair_counter = HashMap::new();
+    let chars = factory.polymer.chars().collect::<Vec<char>>();
+    for pair in chars.windows(2) {
+        let f = pair_counter.entry(pair.iter().collect::<String>()).or_insert(0);
+        *f += 1;
+    };
+    
+
+    let foldInstructionPattern: Regex = Regex::new(r"([A-Z]{2}) -> ([A-Z]{1})").unwrap();
+    let caps = foldInstructionPattern.captures_iter(input);
+    let mapping = caps.map(|m| (m[1].to_string(), m[2].to_string())).collect::<HashMap<String, String>>();
+    let mut frequencies: HashMap<char, u64> = HashMap::new();
+    for c in factory.polymer.chars() {
+        let f = frequencies.entry(c).or_insert(0);
+        *f += 1;
+    };
+    for i in 0..40 {
+        //println!("{:?}", pair_counter);
+        pair_counter = simulate_polymerization(&mapping, &pair_counter, &mut frequencies);
+    }
+
+    //println!("{:?}", new_counter);
+    println!("{:?}", frequencies);
+    let mostCommon = frequencies.values().max();
+    let leastCommon = frequencies.values().min();
+    return mostCommon.unwrap() - leastCommon.unwrap();
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
-    fn partOneSmallExample() {
+    fn partOneExample() {
         let input = "NNCB
 
         CH -> B
@@ -90,5 +151,29 @@ mod tests {
         CN -> C";
         let res = partOne(input);
         assert_eq!(1588, res);
+    }
+
+    #[test]
+    fn partTwoExample() {
+        let input = "NNCB
+
+        CH -> B
+        HH -> N
+        CB -> H
+        NH -> C
+        HB -> C
+        HC -> B
+        HN -> C
+        NN -> C
+        BH -> H
+        NC -> B
+        NB -> B
+        BN -> B
+        BB -> N
+        BC -> B
+        CC -> N
+        CN -> C";
+        let res = partTwo(input);
+        assert_eq!(2188189693529, res);
     }
 }
