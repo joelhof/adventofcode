@@ -31,7 +31,6 @@ impl FromStr for Snailfish {
                 // do nothing?
             } else if ']' == c {
                 let rhs = stack.pop();
-                
                 let lhs = stack.pop();
                 println!("{:?}, {:?}", lhs, rhs);
                 let res = match (lhs, rhs) {
@@ -56,11 +55,12 @@ impl FromStr for Snailfish {
 }
 
 impl Snailfish {
-    pub fn addition(&self, rhs: &Snailfish) -> Snailfish {
+
+    fn addition(&self, rhs: &Snailfish) -> Snailfish {
         return Snailfish::Pair(Box::new(self.clone()), Box::new(rhs.clone()));
     }
 
-    pub fn magnitude(&self) -> u64 {
+    fn magnitude(&self) -> u64 {
         return match self {
             Snailfish::Regular(lhs, rhs) => (2 * rhs + 3 * lhs) as u64,
             Snailfish::LeftRegular(lhs, rhs) => (3 * lhs) as u64 + 2 * rhs.magnitude(),
@@ -68,17 +68,34 @@ impl Snailfish {
             Snailfish::Pair(lhs, rhs) => 3 * lhs.magnitude() + 2 * rhs.magnitude()
         };
     }
-}
 
-// fn addition
+    fn explode(&self, depth: u8) -> Snailfish {
+        return match self {
+            Snailfish::Pair(lhs, rhs) => Snailfish::Pair(Box::new(lhs.explode(depth + 1)), Box::new(rhs.explode(depth + 1))),
+            Snailfish::RightRegular(lhs, rhs) if depth >= 4 => match **lhs {
+                Snailfish::Regular(_left, right) => Snailfish::Regular(0, rhs + right),
+                _ => self.clone()
+            },
+            Snailfish::LeftRegular(lhs, rhs) if depth >= 4 => match **rhs {
+                Snailfish::Regular(left, _right) => Snailfish::Regular(lhs + left, 0),
+                _ => self.clone()
+            },
+            Snailfish::RightRegular(lhs, rhs) => Snailfish::RightRegular(Box::new(lhs.explode(depth + 1)), *rhs),
+            Snailfish::LeftRegular(lhs, rhs) => Snailfish::LeftRegular(*lhs, Box::new(rhs.explode(depth + 1))),
+            _ => self.clone()
+        };
+    }
+
+    fn reduce(& mut self) {
+        self.explode(0);
+    }
+}
 
 // fn reduce
 
 // fn to explode
 
 // fn to split
-
-// fn magnitude
 
 #[cfg(test)]
 mod tests {
@@ -106,9 +123,22 @@ mod tests {
         let lhs: Snailfish = "[[[[0,7],4],[[7,8],[6,0]]],[8,1]]".parse().unwrap();
         let res = lhs.magnitude();
         assert_eq!(1384, res);
-        
+
         let lhs: Snailfish = "[[[[8,7],[7,7]],[[8,6],[7,7]]],[[[0,7],[6,6]],[8,7]]]".parse().unwrap();
         let res = lhs.magnitude();
         assert_eq!(3488, res);
+    }
+
+    #[test]
+    fn explodeTest() {
+        let nr: Snailfish = "[[[[[9,8],1],2],3],4]".parse().unwrap();
+        let res = nr.explode(1);
+        println!("Exploded {:?}", res);
+        assert_eq!(548, res.magnitude());
+
+        let nr: Snailfish = "[7,[6,[5,[4,[3,2]]]]]".parse().unwrap();
+        let res = nr.explode(1);
+        println!("Exploded {:?}", res);
+        assert_eq!(548, res.magnitude());
     }
 }
