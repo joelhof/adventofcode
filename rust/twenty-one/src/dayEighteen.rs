@@ -63,7 +63,9 @@ impl Snailfish {
     pub fn magnitude(&self) -> u64 {
         return match self {
             Snailfish::Regular(lhs, rhs) => (2 * rhs + 3 * lhs) as u64,
-            _ => 0
+            Snailfish::LeftRegular(lhs, rhs) => (3 * lhs) as u64 + 2 * rhs.magnitude(),
+            Snailfish::RightRegular(lhs, rhs) => 3 * lhs.magnitude() + (2 * rhs) as u64,
+            Snailfish::Pair(lhs, rhs) => 3 * lhs.magnitude() + 2 * rhs.magnitude()
         };
     }
 }
@@ -96,5 +98,17 @@ mod tests {
         let lhs: Snailfish = "[9,1]".parse().unwrap();
         let res = lhs.magnitude();
         assert_eq!(29, res);
+
+        let lhs: Snailfish = "[[9,1],[1,9]]".parse().unwrap();
+        let res = lhs.magnitude();
+        assert_eq!(129, res);
+
+        let lhs: Snailfish = "[[[[0,7],4],[[7,8],[6,0]]],[8,1]]".parse().unwrap();
+        let res = lhs.magnitude();
+        assert_eq!(1384, res);
+        
+        let lhs: Snailfish = "[[[[8,7],[7,7]],[[8,6],[7,7]]],[[[0,7],[6,6]],[8,7]]]".parse().unwrap();
+        let res = lhs.magnitude();
+        assert_eq!(3488, res);
     }
 }
