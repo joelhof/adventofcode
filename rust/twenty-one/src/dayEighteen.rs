@@ -59,6 +59,13 @@ impl Snailfish {
     pub fn addition(&self, rhs: &Snailfish) -> Snailfish {
         return Snailfish::Pair(Box::new(self.clone()), Box::new(rhs.clone()));
     }
+
+    pub fn magnitude(&self) -> u64 {
+        return match self {
+            Snailfish::Regular(lhs, rhs) => (2 * rhs + 3 * lhs) as u64,
+            _ => 0
+        };
+    }
 }
 
 // fn addition
@@ -82,5 +89,12 @@ mod tests {
         let res = lhs.addition(&rhs);
         println!("{:?}", res);
         assert_eq!(1, 0);
+    }
+
+    #[test]
+    fn magnitudeTest() {
+        let lhs: Snailfish = "[9,1]".parse().unwrap();
+        let res = lhs.magnitude();
+        assert_eq!(29, res);
     }
 }
