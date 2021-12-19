@@ -144,8 +144,29 @@ impl ExplodeState {
 impl Snailfish {
 
     fn addition(&self, rhs: &Snailfish) -> Snailfish {
-        // re-caclulate order
-        return Snailfish::Pair(Box::new(self.clone()), Box::new(rhs.clone()));
+        let res = Snailfish::Pair(Box::new(self.clone()), Box::new(rhs.clone()))
+            .order(&mut ExplodeState::new());
+        return res;
+    }
+
+    fn order(&self, recurState: &mut ExplodeState) -> Snailfish {
+        let res = match self {
+            Snailfish::Pair(lhs, rhs) => Snailfish::Pair(
+                Box::new(lhs.order(recurState)),
+                Box::new(rhs.order(recurState))),
+            Snailfish::RightRegular(lhs, rhs) => Snailfish::RightRegular(
+                Box::new(lhs.order(recurState)),
+                LeftOrd { value: rhs.value, ord: recurState.order() }
+            ),
+            Snailfish::LeftRegular(lhs, rhs) => Snailfish::LeftRegular(
+                LeftOrd { value: lhs.value, ord: recurState.order() },
+                Box::new(rhs.order(recurState))),
+            Snailfish::Regular(lhs, rhs) => Snailfish::Regular(
+                LeftOrd { value: lhs.value, ord: recurState.order() },
+                LeftOrd { value: rhs.value, ord: recurState.order() }
+            )
+        };
+        return res;
     }
 
     fn magnitude(&self) -> u64 {
@@ -294,5 +315,18 @@ mod tests {
         let res = res.explode(&mut ExplodeState::new());
         println!("Exploded {}", res.toString());
         assert_eq!(633, res.magnitude());
+    }
+
+    #[test]
+    fn addTest() {
+        let term1: Snailfish = "[1,1]".parse().unwrap();
+        let term2: Snailfish  = "[2,2]".parse().unwrap();
+        let term3: Snailfish  = "[3,3]".parse().unwrap();
+        let term4: Snailfish  = "[4,4]".parse().unwrap();
+        let res = term1.addition(&term2);
+        let res = res.addition(&term3);
+        let res = res.addition(&term4);
+        assert_eq!("[[[[1,1],[2,2]],[3,3]],[4,4]]", res.toString());
+        
     }
 }
