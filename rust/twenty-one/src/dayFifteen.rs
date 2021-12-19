@@ -101,7 +101,7 @@ impl Grid {
 
   
 
-    fn lowest_risk(&self, start: (usize, usize)) -> Vec<Vec<u32>> {
+    fn dijkstra_lowest_risk(&self, start: (usize, usize)) -> Vec<Vec<u32>> {
         let mut priority_queue: BinaryHeap<Node> = BinaryHeap::with_capacity(self.rows * self.cols);
         let mut costs = vec![vec![u32::MAX; self.cols]; self.rows];
         let mut previous: HashMap<(usize, usize), (usize, usize)> = HashMap::new();
@@ -129,15 +129,55 @@ impl Grid {
 
         return costs;
     }
+
+    
+
+    fn expand(&mut self, rows: usize, cols: usize) {
+        let mut expandedGrid: Vec<Vec<u32>> = vec![vec![0; cols]; rows];
+
+        for row in 0..rows {
+            let expandedRow = match row.checked_sub(self.rows) { None => row, Some(c) => c};
+            for col in 0..cols {
+                if row < self.rows && col < self.cols {
+                    expandedGrid[row][col] = self.chitons[row][col];
+                } else if row >= self.rows && col >= self.cols {
+                    let expandedCol = match col.checked_sub(self.cols) { None => col, Some(c) => c};
+                    expandedGrid[row][col] = wrap_around(expandedGrid[row][expandedCol] + 1 as u32);
+                } else {
+                    let expandedCol = match col.checked_sub(self.cols) { None => col, Some(c) => c};
+                    expandedGrid[row][col] = wrap_around(expandedGrid[expandedRow][expandedCol] + 1 as u32);
+                }
+            }
+        }
+        self.chitons = expandedGrid;
+        self.rows = rows;
+        self.cols = cols;
+    }
+}
+
+fn wrap_around(value: u32) -> u32 {
+    if value > 9 {
+        return 1;
+    } else {
+        return value;
+    }
 }
 
 pub fn partOne(input: &str) -> u32 {
     let map: Grid = input.parse().unwrap();
     //map.chitons.iter().for_each(|r| println!("{:?}", r));
     let target = (map.rows-1, map.cols-1);
-    let risks = map.lowest_risk((0,0));
+    let risks = map.dijkstra_lowest_risk((0,0));
     //risks.iter().for_each(|r| println!("{:?}", r));
     //println!("{:?}, target: {:?}", prev, target);
+    return risks[target.0][target.1];
+}
+
+pub fn partTwo(input: &str) -> u32 {
+    let mut map: Grid = input.parse().unwrap();
+    map.expand(5 * map.rows, 5 * map.cols);
+    let target = (map.rows-1, map.cols-1);
+    let risks = map.dijkstra_lowest_risk((0,0));
     return risks[target.0][target.1];
 }
 
@@ -159,5 +199,21 @@ mod tests {
         2311944581";
         let result = partOne(INPUT);
         assert_eq!(40, result);
+    }
+
+    #[test]
+    fn partTwoExampleTest() {
+        const INPUT: &str = "1163751742
+        1381373672
+        2136511328
+        3694931569
+        7463417111
+        1319128137
+        1359912421
+        3125421639
+        1293138521
+        2311944581";
+        let result = partTwo(INPUT);
+        assert_eq!(315, result);
     }
 }
