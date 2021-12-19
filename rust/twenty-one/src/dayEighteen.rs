@@ -74,6 +74,7 @@ impl FromStr for Snailfish {
 #[derive(Debug)]
 struct ExplodeState {
     depth: u32,
+    order: u32,
     left_stack: Vec<LeftOrd>,
     right_stack: Vec<LeftOrd>,
     exploded: bool
@@ -104,6 +105,7 @@ impl ExplodeState {
     fn new() -> Self {
         return ExplodeState {
             depth: 0,
+            order: 0,
             left_stack: Vec::new(),
             right_stack: Vec::new(),
             exploded: false
@@ -132,6 +134,11 @@ impl ExplodeState {
             None => 0
         };
     }
+
+    fn order(&mut self) -> u32 {
+        self.order += 1;
+        return self.order;
+    }
 }
 
 impl Snailfish {
@@ -153,7 +160,6 @@ impl Snailfish {
     fn explode(&self, recurState: &mut ExplodeState) -> Snailfish {
         println!("{:?} {}", recurState, self.toString());
         recurState.incDepth();
-        // recalculate order before returning
         let res = match self {
             Snailfish::Pair(lhs, rhs) => Snailfish::Pair(
                 Box::new(lhs.explode(recurState)),
@@ -161,27 +167,31 @@ impl Snailfish {
             Snailfish::RightRegular(lhs, rhs) if recurState.exploding() => match **lhs {
                 Snailfish::Regular(left, right) => {
                     recurState.explode(None, Some(left));
-                    Snailfish::Regular(LeftOrd {value: 0, ord: 0}, LeftOrd { value: rhs.value + right.value, ord: 0 })
+                    Snailfish::Regular(
+                        LeftOrd {value: 0, ord: recurState.order() },
+                        LeftOrd { value: rhs.value + right.value, ord: recurState.order() }
+                    )
                 },
                 _ => self.clone()
             },
             Snailfish::LeftRegular(lhs, rhs) if recurState.exploding() => match **rhs {
                 Snailfish::Regular(left, right) => {
                     recurState.explode(Some(right), None);
-                    Snailfish::Regular(LeftOrd { value: lhs.value + left.value, ord: 0 }, LeftOrd { value: 0, ord: 0 } )
+                    Snailfish::Regular(
+                        LeftOrd { value: lhs.value + left.value, ord: recurState.order() },
+                        LeftOrd { value: 0, ord: recurState.order() }
+                    )
                 },
                 _ => self.clone()
             },
             Snailfish::RightRegular(lhs, rhs) => Snailfish::RightRegular(
                 Box::new(lhs.explode(recurState)),
-                LeftOrd { value: rhs.value + recurState.getRightValue(rhs), ord: 0 }
+                LeftOrd { value: rhs.value + recurState.getRightValue(rhs), ord: recurState.order() }
             ),
             Snailfish::LeftRegular(lhs, rhs) => Snailfish::LeftRegular(
-                LeftOrd { value: lhs.value + recurState.getLeftValue(lhs), ord: 0 },
+                LeftOrd { value: lhs.value + recurState.getLeftValue(lhs), ord: recurState.order() },
                 Box::new(rhs.explode(recurState))),
-            Snailfish::Regular(_,_) => {
-                self.clone()
-            }
+            Snailfish::Regular(_,_) => self.clone()
         };
         recurState.depth -= 1;
         return res;
@@ -223,9 +233,9 @@ impl Snailfish {
 
 // fn reduce
 
-// fn to explode
-
 // fn to split
+
+// fn to re-order
 
 #[cfg(test)]
 mod tests {
@@ -281,8 +291,7 @@ mod tests {
         println!("Exploded {:?}", res);
         assert_eq!(769, res.magnitude());
 
-        let nr: Snailfish = "[[3,[2,[8,0]]],[9,[5,[4,[3,2]]]]]".parse().unwrap();
-        let res = nr.explode(&mut ExplodeState::new());
+        let res = res.explode(&mut ExplodeState::new());
         println!("Exploded {}", res.toString());
         assert_eq!(633, res.magnitude());
     }
