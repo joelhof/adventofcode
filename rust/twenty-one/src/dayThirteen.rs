@@ -28,7 +28,7 @@ enum Folding {
 impl Folding {
 
     fn fold_on_x(offset: &i32, coordinate: &Coordinate) -> Coordinate {
-        println!("fold on x {} {},{}", offset, coordinate.0, coordinate.1);
+        //println!("fold on x {} {},{}", offset, coordinate.0, coordinate.1);
         let c: Coordinate = match offset {
             offset if offset > &coordinate.0 => Coordinate::from(*coordinate),
             offset => {
@@ -36,19 +36,19 @@ impl Folding {
                 Coordinate(offset - delta, coordinate.1)
             }
         };
-        println!("{},{}", c.0, c.1);
+        //println!("{},{}", c.0, c.1);
         return c;
     }
 
     fn fold_on_y(offset: &i32, coordinate: &Coordinate) -> Coordinate {
-        println!("fold on y {} {},{}", offset, coordinate.0, coordinate.1);
+        //println!("fold on y {} {},{}", offset, coordinate.0, coordinate.1);
         let c = if offset > &coordinate.1 {
             Coordinate::from(*coordinate)
         } else {
             let delta = coordinate.1 - offset;
             Coordinate(coordinate.0, offset - delta)
         };
-        println!("{},{}", c.0, c.1);
+        //println!("{},{}", c.0, c.1);
         return c;
     }
 
@@ -166,6 +166,6 @@ mod tests {
         fold along y=7
         fold along x=5";
         let res = partOne(input);
-        assert_eq!(334, res);
+        assert_eq!(17, res);
     }
 }
