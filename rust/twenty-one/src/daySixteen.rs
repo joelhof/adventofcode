@@ -3,16 +3,21 @@ use std::collections::VecDeque;
 
 #[derive(Debug)]
 enum Packet {
-    LITERAL(Literal),
-    OP_MODE_0(Operator),
-    OP_MODE_1(Operator),
+    Value(Literal),
+    SumOp(Operator),
+    ProductOp(Operator),
+    MinOp(Operator),
+    MaxOp(Operator),
+    GreaterThan(Operator),
+    LessThan(Operator),
+    Equal(Operator)
 }
 
 type PacketErr = &'static str;
 
 fn parse_literal_value(bits: &mut VecDeque<char>) -> Result<u64, std::num::ParseIntError> {
     let mut value = String::new();
-    while true {
+    loop {
         let mut valueBits = bits.drain(0..5);
         let controlBit = valueBits.next();
         valueBits.for_each(|b| value.push(b));
@@ -22,12 +27,10 @@ fn parse_literal_value(bits: &mut VecDeque<char>) -> Result<u64, std::num::Parse
             _ => ()
         }
     }
-    //println!("literal value bits {}", value);
     return u64::from_str_radix(&value, 2);
 }
 
 fn packet_parser(input: &mut VecDeque<char>) -> Result<Packet, PacketErr> {
-    //println!("input {:?}", input);
     let mut version = String::new();
     for _i in 0..3 {
         let bit = input.pop_front();
@@ -43,11 +46,10 @@ fn packet_parser(input: &mut VecDeque<char>) -> Result<Packet, PacketErr> {
             _ => return Err("Unable to parse Packet, type ID must be 3 bits long")
         }
     }
-    //println!("version bits {:?} typeID bits: {:?}", version, typeId);
     let version = u8::from_str_radix(&version, 2).unwrap();
     let typeId = u8::from_str_radix(&typeId, 2).unwrap();
     if typeId == 4 {
-        return Ok(Packet::LITERAL(Literal {
+        return Ok(Packet::Value(Literal {
             version: version,
             typeId: typeId, 
             value: parse_literal_value(input).unwrap()
@@ -68,31 +70,37 @@ fn packet_parser(input: &mut VecDeque<char>) -> Result<Packet, PacketErr> {
     }
     let length = usize::from_str_radix(&length_bits.iter().collect::<String>(), 2).unwrap();
 
-    // while length is not exhausted, keep parsing
     let mut subPackets = Vec::new();
     let mut keepParsing = true;
     let startCount = input.len();
     while keepParsing {
         let packet = packet_parser(input).unwrap();
-        //println!("subpacket {:?}", packet);
         subPackets.push(packet);
         keepParsing = match mode {
             OperatorMode::SubpacketLength => subPackets.len() < length,
             OperatorMode::BitLength => startCount - input.len() < length
         }
     }
-
-    return Ok(Packet::OP_MODE_0(Operator {
+    let op = Operator {
         mode: mode,
         version: version,
         typeId: typeId,
         length: length,
         packets: subPackets
-     }));
+     };
+    return match typeId {
+        0 => Ok(Packet::SumOp(op)),
+        1 => Ok(Packet::ProductOp(op)),
+        2 => Ok(Packet::MinOp(op)),
+        3 => Ok(Packet::MaxOp(op)),
+        5 => Ok(Packet::GreaterThan(op)),
+        6 => Ok(Packet::LessThan(op)),
+        7 => Ok(Packet::Equal(op)),
+        _ => Err("Unsupported Type Id")
+    }
 }
 
 fn from_str<'a>(input: &str) -> Result<Packet, PacketErr> {
-    //println!("{}", input);
     return packet_parser(&mut input.chars().collect::<VecDeque<char>>());
 }
 
@@ -153,9 +161,14 @@ fn hex_to_binary(hex: &str) -> String {
 
 fn version_sum(packet: &Packet) -> u32 {
     return match packet {
-        Packet::LITERAL(literal) => literal.version as u32,
-        Packet::OP_MODE_0(op) => (op.version as u32) + op.packets.iter().map(|p| version_sum(p)).sum::<u32>(),
-        Packet::OP_MODE_1(op) => op.version as u32 + op.packets.iter().map(|p| version_sum(p)).sum::<u32>()
+        Packet::Value(literal) => literal.version as u32,
+        Packet::SumOp(op) => (op.version as u32) + op.packets.iter().map(|p| version_sum(p)).sum::<u32>(),
+        Packet::ProductOp(op) => op.version as u32 + op.packets.iter().map(|p| version_sum(p)).sum::<u32>(),
+        Packet::MinOp(op) => op.version as u32 + op.packets.iter().map(|p| version_sum(p)).sum::<u32>(),
+        Packet::MaxOp(op) => op.version as u32 + op.packets.iter().map(|p| version_sum(p)).sum::<u32>(),
+        Packet::GreaterThan(op) => op.version as u32 + op.packets.iter().map(|p| version_sum(p)).sum::<u32>(),
+        Packet::LessThan(op) => op.version as u32 + op.packets.iter().map(|p| version_sum(p)).sum::<u32>(),
+        Packet::Equal(op) => op.version as u32 + op.packets.iter().map(|p| version_sum(p)).sum::<u32>(),
     };
 }
 
@@ -168,6 +181,30 @@ pub fn partOne(input: &str) -> u32 {
     return version_sum(&packet);
 }
 
+pub fn partTwo(input: &str) -> u64 {
+    let binary: String = input.lines()
+            .map(|hex_str| hex_to_binary(hex_str))
+            .collect();
+
+    let packet = from_str(&binary).unwrap();
+    return packet.value();
+}
+
+impl Packet {
+    fn value(&self) -> u64 {
+        return match self {
+            Packet::Value(literal) => literal.value,
+            Packet::SumOp(op) => op.packets.iter().map(|p| p.value()).sum::<u64>(),
+            Packet::ProductOp(op) => op.packets.iter().map(|p| p.value()).product::<u64>(),
+            Packet::MinOp(op) => match op.packets.iter().map(|p| p.value()).min() { Some(min) => min, None => 0 },
+            Packet::MaxOp(op) => match op.packets.iter().map(|p| p.value()).max() { Some(max) => max, None => 0 },
+            Packet::GreaterThan(op) => if op.packets[0].value() > op.packets[1].value() { 1 } else { 0 },
+            Packet::LessThan(op) => if op.packets[0].value() < op.packets[1].value() { 1 } else { 0 },
+            Packet::Equal(op) => if op.packets[0].value() == op.packets[1].value() { 1 } else { 0 },
+        };
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -176,7 +213,7 @@ mod tests {
     fn partOneLiteralExampleTest() {
         let INPUT = hex_to_binary("D2FE28");
         let result = match from_str(&INPUT).unwrap() {
-            Packet::LITERAL(literal) => Some(literal),
+            Packet::Value(literal) => Some(literal),
             _ => None
         };
         let literal = result.unwrap();
@@ -190,9 +227,14 @@ mod tests {
     fn partOneOperatorExampleTest() {
         let INPUT = hex_to_binary("38006F45291200");
         let result = match from_str(&INPUT).unwrap() {
-            Packet::LITERAL(_) => None,
-            Packet::OP_MODE_0(op) => Some(op),
-            Packet::OP_MODE_1(op) => Some(op),
+            Packet::Value(_) => None,
+            Packet::SumOp(op) => Some(op),
+            Packet::ProductOp(op) => Some(op),
+            Packet::MinOp(op) => Some(op),
+            Packet::MaxOp(op) => Some(op),
+            Packet::GreaterThan(op) => Some(op),
+            Packet::LessThan(op) => Some(op),
+            Packet::Equal(op) => Some(op),
         };
         let operator = result.unwrap();
         assert_eq!(1, operator.version);
@@ -217,5 +259,40 @@ mod tests {
         let INPUT1: &str = "A0016C880162017C3686B18A3D4780";
         let result = partOne(INPUT1);
         assert_eq!(31, result);
+    }
+
+    #[test]
+    fn partTwoExamplesTest() {
+        let INPUT1: &str = "C200B40A82";
+        let result = partTwo(INPUT1);
+        assert_eq!(3, result);
+
+        let INPUT1: &str = "04005AC33890";
+        let result = partTwo(INPUT1);
+        assert_eq!(54, result);
+
+        let INPUT1: &str = "880086C3E88112";
+        let result = partTwo(INPUT1);
+        assert_eq!(7, result);
+
+        let INPUT1: &str = "CE00C43D881120";
+        let result = partTwo(INPUT1);
+        assert_eq!(9, result);
+
+        let INPUT1: &str = "D8005AC2A8F0";
+        let result = partTwo(INPUT1);
+        assert_eq!(1, result);
+        
+        let INPUT1: &str = "F600BC2D8F";
+        let result = partTwo(INPUT1);
+        assert_eq!(0, result);
+
+        let INPUT1: &str = "9C005AC2F8F0";
+        let result = partTwo(INPUT1);
+        assert_eq!(0, result);
+
+        let INPUT1: &str = "9C0141080250320F1802104A08";
+        let result = partTwo(INPUT1);
+        assert_eq!(1, result);
     }
 }
