@@ -150,6 +150,27 @@ pub fn partOne(input: &str) -> i32 {
     return y_max;
 }
 
+pub fn partTwo(input: &str) -> i32 {
+    let mut trajectory: Trajectory = input.parse().unwrap();
+    let x_0 = (((1f32 + 8f32 * *trajectory.target_area.0.start() as f32).sqrt() - 1f32) / 2f32).ceil() as i32;
+    let mut count = 0;
+    
+    for v_x in x_0..500 {
+        for v_y in -600..600 {
+            trajectory.v_init = Velocity(v_x, v_y);
+            let res = trajectory.simulate();
+            match res {
+                Some(_c) => {
+                    count += 1;
+                },
+                None => ()
+            }
+        }
+    }
+    
+    return count;
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -204,5 +225,12 @@ mod tests {
         };
         assert_eq!(0, y);
         assert_eq!(0, x);
+    }
+
+    #[test]
+    fn partTwoExampleTest() {
+        let INPUT = "target area: x=20..30, y=-10..-5";
+        let result = partTwo(INPUT);
+        assert_eq!(112, result);
     }
 }
