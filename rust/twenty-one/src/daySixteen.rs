@@ -51,7 +51,6 @@ fn packet_parser(input: &mut VecDeque<char>) -> Result<Packet, PacketErr> {
     if typeId == 4 {
         return Ok(Packet::Value(Literal {
             version: version,
-            typeId: typeId, 
             value: parse_literal_value(input).unwrap()
         }));
     }
@@ -82,10 +81,7 @@ fn packet_parser(input: &mut VecDeque<char>) -> Result<Packet, PacketErr> {
         }
     }
     let op = Operator {
-        mode: mode,
         version: version,
-        typeId: typeId,
-        length: length,
         packets: subPackets
      };
     return match typeId {
@@ -107,7 +103,6 @@ fn from_str<'a>(input: &str) -> Result<Packet, PacketErr> {
 #[derive(Debug)]
 struct Literal {
     version: u8,
-    typeId: u8,
     value: u64
 }
 
@@ -129,10 +124,7 @@ impl OperatorMode {
 #[derive(Debug)]
 struct Operator {
     version: u8,
-    typeId: u8,
-    length: usize,
-    packets: Vec<Packet>,
-    mode: OperatorMode
+    packets: Vec<Packet>
 }
 
 fn hex_to_binary(hex: &str) -> String {
@@ -218,7 +210,6 @@ mod tests {
         };
         let literal = result.unwrap();
         assert_eq!(6, literal.version);
-        assert_eq!(4, literal.typeId);
         assert_eq!(2021, literal.value);
 
     }
@@ -238,8 +229,6 @@ mod tests {
         };
         let operator = result.unwrap();
         assert_eq!(1, operator.version);
-        assert_eq!(6, operator.typeId);
-        assert_eq!(27, operator.length);
     }
 
     #[test]
