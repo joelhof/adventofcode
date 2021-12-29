@@ -122,6 +122,10 @@ fn main() {
         let res = daySixteen::partTwo(&loadInput("Sixteen"));
         println!("Day 16, part 2: {}", res);
     }
+    {
+        let res = daySeventeen::partOne(&loadInput("Seventeen"));
+        println!("Day 17, part 1: {}", res);
+    }
 }
 
 fn dayOne() {
