@@ -1,4 +1,5 @@
 use std::str::FromStr;
+use itertools::Itertools;
 
 #[derive(Debug, Clone, Copy)]
 struct LeftOrd {
@@ -229,8 +230,6 @@ impl SnailfishNode {
 struct ExplodeState {
     depth: u32,
     order: u32,
-    left_stack: Vec<LeftOrd>,
-    right_stack: Vec<LeftOrd>,
     exploded: bool
 }
 
@@ -243,14 +242,6 @@ impl ExplodeState {
     fn explode(&mut self, right: Option<LeftOrd>, left: Option<LeftOrd>) {
         self.exploded = true;
         //self.depth -= 1;
-        match right {
-            None => (),
-            Some(r) => self.right_stack.push(r) 
-        };
-        match left {
-            None => (),
-            Some(l) => self.left_stack.push(l) 
-        };
     }
 
     fn incDepth(&mut self) {
@@ -261,8 +252,6 @@ impl ExplodeState {
         return ExplodeState {
             depth: 0,
             order: 0,
-            left_stack: Vec::new(),
-            right_stack: Vec::new(),
             exploded: false
         }
     }
@@ -291,6 +280,24 @@ pub fn partOne(input: &str) -> u64 {
     };
 }
 
+pub fn partTwo(input: &str) -> u64 {
+    let snailfishNumbers: Vec<SnailfishNode> = input.lines()
+            .map(|l| l.trim())
+            .map(|l| l.parse().unwrap())
+            .collect();
+    return match snailfishNumbers.iter().combinations(2).
+        map(|combo| {
+            let mut sum1 = combo[0].addition(combo[1]);
+            let magitude1 = sum1.reduce().magnitude();
+            let mut sum2 = combo[1].addition(combo[0]);
+            let magnitude2 = sum2.reduce().magnitude();
+            if magitude1 >= magnitude2 { magitude1 } else { magnitude2 }
+        }).max() {
+            Some(maximum) => maximum,
+            None => 0
+        };
+}
+ 
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -367,11 +374,6 @@ mod tests {
         let res = res.addition(&term3);
         let res = res.addition(&term4);
         assert_eq!("[[[[1,1],[2,2]],[3,3]],[4,4]]", res.toString());
-
-        // let term3: SnailfishNode  = "[3,3]".parse().unwrap();
-        // let term4: SnailfishNode  = "[]".parse().unwrap();
-        // let res = term3.addition(&term4);
-        // assert_eq!("[3,3]", res.toString());
     }
 
     #[test]
@@ -381,22 +383,6 @@ mod tests {
             None => SnailfishNode::Leaf(LeftOrd { value: 0, ord: 0 })
         };
         assert_eq!("[[[[0,7],4],[[7,8],[0,13]]],[1,1]]", split.toString());
-
-        // let input = "[1,1]
-        // [2,2]
-        // [3,3]
-        // [4,4]
-        // [5,5]";
-        // let res: Option<SnailfishNode> = input.lines().map(|l| l.parse().unwrap()).reduce(|result: SnailfishNode, term| {
-        //     let sum: SnailfishNode = result.addition(&term);
-        //     sum.reduce()
-        // });
-        // assert_eq!("[[[[3,0],[5,3]],[4,4]],[5,5]]", res.unwrap().toString());
-       
-        // let split1: Snailfish = "[[[[0,7],4],[15,[0,13]]],[1,1]]".parse().unwrap();
-        // let res = split1.split(&mut ExplodeState::new());
-        // println!("{}", res.toString());
-        // assert_eq!("[[[[0,7],4],[[7,8],[0,13]]],[1,1]]", res.toString());
     }
 
     #[test]
@@ -460,5 +446,21 @@ mod tests {
         [[[[5,2],5],[8,[3,7]]],[[5,[7,5]],[4,4]]]";
         let res = partOne(&input);
         assert_eq!(4140, res);
+    }
+
+    #[test]
+    fn partTwoExampleTest() {
+        let input = "[[[0,[5,8]],[[1,7],[9,6]]],[[4,[1,2]],[[1,4],2]]]
+        [[[5,[2,8]],4],[5,[[9,9],0]]]
+        [6,[[[6,2],[5,6]],[[7,6],[4,7]]]]
+        [[[6,[0,7]],[0,9]],[4,[9,[9,0]]]]
+        [[[7,[6,4]],[3,[1,3]]],[[[5,5],1],9]]
+        [[6,[[7,3],[3,2]]],[[[3,8],[5,7]],4]]
+        [[[[5,4],[7,7]],8],[[8,3],8]]
+        [[9,3],[[9,9],[6,[4,9]]]]
+        [[2,[[7,7],7]],[[5,8],[[9,3],[0,2]]]]
+        [[[[5,2],5],[8,[3,7]]],[[5,[7,5]],[4,4]]]";
+        let res = partTwo(&input);
+        assert_eq!(3993 ,res);
     }
 }
