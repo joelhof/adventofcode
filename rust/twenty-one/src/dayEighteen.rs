@@ -113,7 +113,7 @@ impl SnailfishNode {
                 Box::new(lhs.split(recurState)), Box::new(rhs.split(recurState))
             ),
             SnailfishNode::Leaf(leaf) if leaf.value >= 10 && !recurState.exploded => {
-                println!("Splitting node {}", &self.toString());
+                //println!("Splitting node {}", &self.toString());
                 recurState.exploded = true;
                 SnailfishNode::Node(
                     Box::new(SnailfishNode::Leaf(LeftOrd {
@@ -156,13 +156,13 @@ impl SnailfishNode {
         let res = self.explodeSelf(&mut state);
         if let Some((lhs, rhs)) = res {
             if let Some(leftOrd) = lhs.ord.checked_sub(1) {
-                let old_left = self.updateLeafAt(leftOrd, lhs.value);
-                println!("old left value: {:?}", old_left);
+                let _old_left = self.updateLeafAt(leftOrd, lhs.value);
+                //println!("old left value: {:?}", old_left);
             } 
-            let old_right = self.updateLeafAt(rhs.ord + 1, rhs.value);
-            println!("old right value: {:?}", old_right);
+            let _old_right = self.updateLeafAt(rhs.ord + 1, rhs.value);
+            //println!("old right value: {:?}", old_right);
         };
-        self.order(&mut ExplodeState::new());
+        *self = self.order(&mut ExplodeState::new());
         /*
         find left and right neigbour leafs to exploded leafs
         update their values
@@ -172,16 +172,16 @@ impl SnailfishNode {
     }
 
     fn explodeSelf(&mut self, recurState: &mut ExplodeState) -> Option<(LeftOrd, LeftOrd)> {
-        println!("------");
-        println!("{:?} {}", recurState, self.toString());
+        //println!("------");
+        //println!("{:?} {}", recurState, self.toString());
         recurState.incDepth();
         let res = match self {
             SnailfishNode::Node(lhs, rhs) => {
                 match (*lhs.clone(), *rhs.clone()) {
                     (SnailfishNode::Leaf(left), SnailfishNode::Leaf(right)) if recurState.exploding() => {
-                        println!("Explode node: {:?}", &self.toString());
+                        //println!("Explode node: {:?}", &self.toString());
                         recurState.explode(Some(right), Some(left));
-                        *self = SnailfishNode::Leaf(LeftOrd { value: 0, ord: recurState.order() });
+                        *self = SnailfishNode::Leaf(LeftOrd { value: 0, ord: u32::MAX });
                         Some((left, right))
                     },
                     (_left, _right) => {
@@ -195,54 +195,9 @@ impl SnailfishNode {
                 }
             },
             SnailfishNode::Leaf(_leaf) => None
-            // SnailfishNode::Leaf(leaf) => SnailfishNode::Leaf(LeftOrd {
-            //     value: recurState.getNodeValue(leaf),
-            //     ord: recurState.order()
-            // })
         };
         recurState.depth -= 1;
-        // res = match &res {
-        //     SnailfishNode::Node(lhs, rhs) => {
-        //         match (*lhs.clone(), *rhs.clone()) {
-        //             (SnailfishNode::Leaf(left), SnailfishNode::Leaf(right)) => {
-        //                 //println!("updating leaf {:?}", left);
-        //                 let leftValue = recurState.getNodeValue(&left);
-        //                 //let leftOord = recurState.order();
-                        
-        //                 //println!("updating leaf {:?}", right);
-        //                 let rightValue = recurState.getNodeValue(&right);
-        //                 //let rightOrd = recurState.order();
-                        
-        //                 SnailfishNode::Node(
-        //                     Box::new(SnailfishNode::Leaf(LeftOrd { value: leftValue, ord: left.ord })),
-        //                     Box::new(SnailfishNode::Leaf(LeftOrd { value: rightValue, ord: right.ord }))
-        //                 )
-        //             },
-        //             (SnailfishNode::Leaf(leaf), rhs) => {
-        //                 //println!("updating leaf {:?}", leaf);
-        //                 SnailfishNode::Node(
-        //                     Box::new(SnailfishNode::Leaf(LeftOrd { value: recurState.getNodeValue(&leaf), ord: leaf.ord })),
-        //                     Box::new(rhs)
-        //                 )
-        //             },
-        //             (lhs, SnailfishNode::Leaf(leaf)) => {
-        //                 //println!("updating leaf {:?}", leaf);
-        //                 SnailfishNode::Node(
-        //                     Box::new(lhs),
-        //                     Box::new(SnailfishNode::Leaf(LeftOrd { value: recurState.getNodeValue(&leaf), ord: leaf.ord }))
-        //                 )
-        //             },
-        //             (lhs, rhs) => SnailfishNode::Node(Box::new(lhs), Box::new(rhs))
-        //         }
-        //     },
-        //     SnailfishNode::Leaf(mut leaf) => {
-        //         //println!("updating leaf {:?}", leaf);
-        //         leaf.value = recurState.getNodeValue(&leaf);
-        //         leaf.ord = leaf.ord;
-        //         SnailfishNode::Leaf(leaf)
-        //     }
-        // };
-        println!("post explode {:?} new node {:?}", recurState, self.toString());
+        //println!("post explode {:?} new node {:?}", recurState, self.toString());
         return res;
     }
 
@@ -254,10 +209,10 @@ impl SnailfishNode {
         // if split does nothing, return
         // else return to step 1
         let exploded = self.explode();
-        println!("after explode: {}", self.toString());
+        //println!("after explode: {:?}", self);
         if exploded.is_none() {
             let mut splitted = self.split(&mut ExplodeState::new());
-            println!("after split: {}", splitted.toString());
+            //println!("after split: {:?}", splitted);
             if splitted.toString() == self.toString() {
                 return splitted;
             }
@@ -312,21 +267,6 @@ impl ExplodeState {
         }
     }
 
-    fn getNodeValue(&mut self, node: &LeftOrd) -> u32 {
-        let mut newValue = node.value;
-        if let Some(left) = self.left_stack.last() {
-            if node.ord < left.ord {
-                newValue += self.left_stack.pop().unwrap().value;
-            }
-        }
-        if let Some(right) = self.right_stack.last() {
-            if node.ord > right.ord {
-                newValue += self.right_stack.pop().unwrap().value;
-            }
-        }
-        return newValue;
-    }
-
     fn order(&mut self) -> u32 {
         self.order += 1;
         return self.order;
@@ -337,14 +277,14 @@ pub fn partOne(input: &str) -> u64 {
     let res: Option<SnailfishNode> = input.lines()
         .map(|l| l.trim())
         .map(|l| {
-            println!("{}", l);
+            //println!("{}", l);
             l.parse().unwrap()
         })
         .reduce(|result: SnailfishNode, term| {
             let mut sum: SnailfishNode = result.addition(&term);
             sum.reduce()
         });
-    println!("final node {}", match &res { Some(n) => n.toString(), None => "".to_string() } );
+    //println!("final node {}", match &res { Some(n) => n.toString(), None => "".to_string() } );
     return match res {
         Some(node) => node.magnitude(),
         None => 0
@@ -459,57 +399,66 @@ mod tests {
         // assert_eq!("[[[[0,7],4],[[7,8],[0,13]]],[1,1]]", res.toString());
     }
 
-    // #[test]
-    // fn reduceTest() {
-    //     let lhs: SnailfishNode = "[[[[4,3],4],4],[7,[[8,4],9]]]".parse().unwrap();
-    //     let rhs: SnailfishNode = "[1,1]".parse().unwrap();
-    //     let sum = lhs.addition(&rhs);
-    //     assert_eq!("[[[[[4,3],4],4],[7,[[8,4],9]]],[1,1]]", sum.toString());
-    //     let res = sum.reduce();
-    //     assert_eq!("[[[[0,7],4],[[7,8],[6,0]]],[8,1]]", res.toString());
+    #[test]
+    fn reduceTest() {
+        let lhs: SnailfishNode = "[[[[4,3],4],4],[7,[[8,4],9]]]".parse().unwrap();
+        let rhs: SnailfishNode = "[1,1]".parse().unwrap();
+        let mut sum = lhs.addition(&rhs);
+        assert_eq!("[[[[[4,3],4],4],[7,[[8,4],9]]],[1,1]]", sum.toString());
+        let res = sum.reduce();
+        assert_eq!("[[[[0,7],4],[[7,8],[6,0]]],[8,1]]", res.toString());
+        println!("-----------------------------");
+        println!("");
+        let lhs: SnailfishNode = "[[[0,[4,5]],[0,0]],[[[4,5],[2,6]],[9,5]]]".parse().unwrap();
+        let rhs: SnailfishNode = "[7,[[[3,7],[4,3]],[[6,3],[8,8]]]]".parse().unwrap();
+        let mut sum = lhs.addition(&rhs);
+        println!("{:?}", sum);
+        let res = sum.reduce();
+        assert_eq!("[[[[4,0],[5,4]],[[7,7],[6,0]]],[[8,[7,7]],[[7,9],[5,0]]]]", res.toString());
+    }
 
-    //     let lhs: SnailfishNode = "[[[0,[4,5]],[0,0]],[[[4,5],[2,6]],[9,5]]]".parse().unwrap();
-    //     let rhs: SnailfishNode = "[7,[[[3,7],[4,3]],[[6,3],[8,8]]]]".parse().unwrap();
-    //     let sum = lhs.addition(&rhs);
-    //     println!("{:?}", sum);
-    //     let res = sum.reduce();
-    //     assert_eq!("[[[[4,0],[5,4]],[[7,7],[6,0]]],[[8,[7,7]],[[7,9],[5,0]]]]", res.toString());
-    // }
+    #[test]
+    fn partOneExamplesTest() {
+        let input = "[1,1]
+        [2,2]
+        [3,3]
+        [4,4]";
+        let res = partOne(&input);
+        assert_eq!(445, res);
 
-    // #[test]
-    // fn partOneExamplesTest() {
-    //     let input = "[1,1]
-    //     [2,2]
-    //     [3,3]
-    //     [4,4]";
-    //     let res = partOne(&input);
-    //     assert_eq!(445, res);
+        let input = "[1,1]
+        [2,2]
+        [3,3]
+        [4,4]
+        [5,5]";
+        let res = partOne(&input);
+        assert_eq!(791, res);
 
-    //     let input = "[1,1]
-    //     [2,2]
-    //     [3,3]
-    //     [4,4]
-    //     [5,5]";
-    //     let res = partOne(&input);
-    //     assert_eq!(791, res);
+        let input = "[1,1]
+        [2,2]
+        [3,3]
+        [4,4]
+        [5,5]
+        [6,6]";
+        let res = partOne(&input);
+        assert_eq!(1137, res);
 
-    //     let input = "[1,1]
-    //     [2,2]
-    //     [3,3]
-    //     [4,4]
-    //     [5,5]
-    //     [6,6]";
-    //     let res = partOne(&input);
-    //     assert_eq!(1137, res);
+        let input = "[[[[4,3],4],4],[7,[[8,4],9]]]
+        [1,1]";
+        let res = partOne(&input);
+        assert_eq!(1384, res);
 
-    //     let input = "[[[[4,3],4],4],[7,[[8,4],9]]]
-    //     [1,1]";
-    //     let res = partOne(&input);
-    //     assert_eq!(1384, res);
-
-    //     let input = "[[[0,[4,5]],[0,0]],[[[4,5],[2,6]],[9,5]]]
-    //     [7,[[[3,7],[4,3]],[[6,3],[8,8]]]]";
-    //     let res = partOne(&input);
-    //     assert_eq!(1384, res);
-    // }
+        let input = "[[[0,[5,8]],[[1,7],[9,6]]],[[4,[1,2]],[[1,4],2]]]
+        [[[5,[2,8]],4],[5,[[9,9],0]]]
+        [6,[[[6,2],[5,6]],[[7,6],[4,7]]]]
+        [[[6,[0,7]],[0,9]],[4,[9,[9,0]]]]
+        [[[7,[6,4]],[3,[1,3]]],[[[5,5],1],9]]
+        [[6,[[7,3],[3,2]]],[[[3,8],[5,7]],4]]
+        [[[[5,4],[7,7]],8],[[8,3],8]]
+        [[9,3],[[9,9],[6,[4,9]]]]
+        [[2,[[7,7],7]],[[5,8],[[9,3],[0,2]]]]
+        [[[[5,2],5],[8,[3,7]]],[[5,[7,5]],[4,4]]]";
+        let res = partOne(&input);
+        assert_eq!(4140, res);
+    }
 }
