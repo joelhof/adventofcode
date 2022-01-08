@@ -10,12 +10,6 @@ struct BeaconMap {
     scanners: HashMap<usize, HashSet<Coordinate>>
 }
 
-struct Scanner {
-    overlapping: Vec<Scanner>,
-    beacons: Vec<Coordinate>,
-    transform: (Orientation, Coordinate)
-}
-
 #[derive(Debug, PartialEq, Eq, Hash, PartialOrd, Ord, Clone, Copy)]
 struct Coordinate(i32,i32,i32);
 
@@ -29,6 +23,10 @@ impl Coordinate {
 
     fn translate(&self, translation: &Coordinate) -> Coordinate {
         return Coordinate( self.0 - translation.0, self.1 - translation.1, self.2 - translation.2);
+    }
+
+    fn manhattan(&self, other: &Coordinate) -> u32 {
+        return ((self.0 - other.0).abs() + (self.1 - other.1).abs() + (self.2 - other.2).abs()) as u32;
     }
 
     fn toVec(&self) -> Vec<i32> {
@@ -110,9 +108,8 @@ impl BeaconMap {
                 .map(|(_k, (b1, b2))| [b1,b2]).flatten().collect();
         
             if overlappingBeacons.len() >= 12 {
-                //println!("found overlap between scanner {} and {} rotated intersection length {}",
-                //    scannerId1, scannerId2, overlappingBeacons.len());
-                //overlappingBeacons.iter().for_each(|b| println!("{:?}", b));
+                // println!("found overlap between scanner {} and {} rotated intersection length {}",
+                //     scannerId1, scannerId2, overlappingBeacons.len());
                 // find a common beacon,
                 let commonBeacon = rotatedVectors.iter().next().unwrap();
                 // calculate translation from it.
@@ -126,15 +123,6 @@ impl BeaconMap {
                 } else {
                     translation1
                 };
-                //println!("Translation {:?}", translation);
-                // apply rotation + translation to scanner 1 ones beacons
-                // let scanner = self.scanners.get(&1).unwrap();
-                // let beaconsInScanner0: HashSet<Coordinate> = scanner.iter()
-                //     .map(|beacon| rot.rotate(beacon))
-                //     .map(|rotated| rotated.translate(&translation))
-                //     .collect();
-                //beaconsInScanner0.iter().for_each(|b| println!("{:?}", b));
-                // add mapped scanner 1 beacons to set of beacons
                 return Some((rot.clone(), translation, HashSet::new()));
             }
         }
@@ -190,13 +178,6 @@ impl Orientation {
     }
 }
 
-struct Overlap {
-    fromScanner: usize,
-    toScanner: usize,
-    rotation: Orientation,
-    translation: Coordinate
-}
-
 fn transform(beacons: HashSet<Coordinate>, rotation: &Orientation, translation: &Coordinate) ->  HashSet<Coordinate> {
     return beacons.iter().map(|beacon| rotation.rotate(beacon))
                  .map(|rotated| rotated.translate(translation))
@@ -216,7 +197,6 @@ fn recurTransform(source: &usize, beaconMap: &BeaconMap, orientations: &Vec<Orie
             beacons.extend(&transform(targetBeacons, &rotation, &translation));
         };
     }
-    
     return beacons;
 } 
 
@@ -238,45 +218,6 @@ pub fn partOne(input: &str) -> u32 {
     //          return Transform(recur j) + beacons
     //
 
-    // ----- Keep for reference ------
-    // let scanner1BeaconMap = map.beaconVectors(None, &0);
-    // for rot in rotations.iter() {
-    //     let mut rotatedVectors = map.beaconVectors(Some(rot), &1);
-    //     rotatedVectors.retain(|k, _| scanner1BeaconMap.contains_key(k));
-    //     let overlappingBeacons: HashSet<&Coordinate> = scanner1BeaconMap.iter()
-    //         .filter(|(k,_beacons)| rotatedVectors.contains_key(k))
-    //         .map(|(_k, (b1, b2))| [b1,b2]).flatten().collect();
-
-    //     if overlappingBeacons.len() >= 12 {
-    //         println!("rotated intersection length {}", overlappingBeacons.len());
-    //         overlappingBeacons.iter().for_each(|b| println!("{:?}", b));
-    //         // find a common beacon,
-    //         let commonBeacon = rotatedVectors.iter().next().unwrap();
-    //         // calculate translation from it.
-    //         let originBeacon = scanner1BeaconMap.get(commonBeacon.0).unwrap();
-    //         let translation0 = originBeacon.0.createVector(&commonBeacon.1.0);
-    //         let translation1 = originBeacon.0.createVector(&commonBeacon.1.1);
-    //         let translation2 = originBeacon.1.createVector(&commonBeacon.1.0);
-    //         let translation3 = originBeacon.1.createVector(&commonBeacon.1.1);
-    //         let translation = if translation0 == translation1 || translation0 == translation2 || translation0 == translation3 {
-    //             translation0
-    //         } else {
-    //             translation1
-    //         };
-    //         println!("Translation {:?}", translation);
-    //         // apply rotation + translation to scanner 1 ones beacons
-    //         let scanner = map.scanners.get(&1).unwrap();
-    //         let beaconsInScanner0: HashSet<Coordinate> = scanner.iter()
-    //             .map(|beacon| rot.rotate(beacon))
-    //             .map(|rotated| rotated.translate(translation))
-    //             .collect();
-    //         beaconsInScanner0.iter().for_each(|b| println!("{:?}", b));
-    //         // add mapped scanner 1 beacons to set of beacons
-
-    //         break;
-    //     }
-    // }
-    
     /*
     Task is to find unique beacon coordinates.
     First, find which scanners that overlap.
@@ -293,12 +234,36 @@ pub fn partOne(input: &str) -> u32 {
                 add scanner j's mapped beacon coordinates to scanner i's beacons.
             else 
                 no overlap, continue to scanner j+1
-
-
-    
     */
+}
 
-    //return 0;
+fn scannerDistances(source: &usize, beaconMap: &BeaconMap, orientations: &Vec<Orientation>, visited: &mut HashSet<(usize, usize)>) -> Vec<Coordinate> {
+    let mut overlaps = vec![];
+    for targetScanner in beaconMap.scanners.keys() {
+        if visited.contains(&(*source,*targetScanner)) || source == targetScanner {
+            continue;
+        }
+        if let Some((rotation, translation, _beacons1)) = beaconMap.overlap(source, targetScanner, &orientations) {
+            visited.insert((*source, *targetScanner));
+            visited.insert((*targetScanner, *source));
+            let dist = scannerDistances(targetScanner, beaconMap, orientations, visited);
+            for i in 0..dist.len() {
+                overlaps.push(rotation.rotate(&dist[i]).translate(&translation));
+            }
+        };
+    }
+    overlaps.push(Coordinate(0,0,0));
+    return overlaps;
+} 
+
+pub fn partTwo(input: &str) -> u32 {
+    let map: BeaconMap = input.parse().unwrap();
+    let orientations = Orientation::axis_rotations();
+    let overlaps = scannerDistances(&0, &map, &orientations, &mut HashSet::new());
+    return match overlaps.iter()
+        .tuple_combinations()
+        .map(|(a,b)| a.manhattan(b))
+        .max() { Some(max) => max, None => 0 };
 }
 
 #[cfg(test)]
@@ -336,7 +301,6 @@ mod tests {
         println!("{:?}", res);
         assert_eq!(3, res);
     }
-
 
     #[test]
     fn rotationTest() {
@@ -398,9 +362,8 @@ mod tests {
         );
     }
 
-    #[test]
-    fn partOneOverlapTest() {
-        let input = "--- scanner 0 ---
+
+    const EXAMPLE_INPUT: &str = "--- scanner 0 ---
         404,-588,-901
         528,-643,409
         -838,591,734
@@ -536,8 +499,19 @@ mod tests {
         891,-625,532
         -652,-548,-490
         30,-46,-14";
-        let res = partOne(&input);
+
+    #[test]
+    fn partOneOverlapTest() {
+        
+        let res = partOne(&EXAMPLE_INPUT);
         println!("{:?}", res);
         assert_eq!(79, res);
+    }
+
+    #[test]
+    fn partTwoTest() {
+        let res = partTwo(&EXAMPLE_INPUT);
+        println!("{:?}", res);
+        assert_eq!(3621, res);
     }
 }
