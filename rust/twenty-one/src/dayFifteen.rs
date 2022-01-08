@@ -1,9 +1,7 @@
 use std::str::FromStr;
-use std::collections::HashSet;
 use std::collections::HashMap;
 use std::collections::BinaryHeap;
 use std::cmp::Ordering;
-use std::cmp::Reverse;
 
 struct Grid {
     chitons: Vec<Vec<u32>>,

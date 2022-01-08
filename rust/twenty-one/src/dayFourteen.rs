@@ -2,8 +2,6 @@ use regex::Regex;
 use std::str::FromStr;
 use std::collections::HashMap;
 
-use itertools::Itertools;
-
 #[derive(Debug)]
 struct PolymerFactory {
     mapping: HashMap<String, String>,
