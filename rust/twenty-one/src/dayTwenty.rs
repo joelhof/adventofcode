@@ -145,7 +145,7 @@ impl ImageEnhancer {
 pub fn partOne(input: &str) -> u32 {
     let enhancer: ImageEnhancer = input.parse().unwrap();
     //println!("{:?}", enhancer.algorithm);
-    enhancer.image.displayImage();
+    //enhancer.image.displayImage();
     let enhancedImage = enhancer.enhance(2);
     
     return enhancedImage.0.iter()
@@ -154,10 +154,23 @@ pub fn partOne(input: &str) -> u32 {
         .count() as u32;
 }
 
+
+pub fn partTwo(input: &str) -> u32 {
+    let enhancer: ImageEnhancer = input.parse().unwrap();
+    //println!("{:?}", enhancer.algorithm);
+    //enhancer.image.displayImage();
+    let enhancedImage = enhancer.enhance(50);
+    
+    return enhancedImage.0.iter()
+        .map(|row| row.iter().filter(|pixel| **pixel == '#'))
+        .flatten()
+        .count() as u32;
+}
+
+
 #[cfg(test)]
 mod tests {
     use super::*;
-    
     #[test]
     fn partOneExample() {
         let input = "..#.#..#####.#.#.#.###.##.....###.##.#..###.####..#####..#....#..#..##..##
@@ -175,6 +188,26 @@ mod tests {
         ..###
         ";
         let res = partOne(input);
-        assert_eq!(36, res);
+        assert_eq!(35, res);
+    }
+
+    #[test]
+    fn partTwoExample() {
+        let input = "..#.#..#####.#.#.#.###.##.....###.##.#..###.####..#####..#....#..#..##..##
+        #..######.###...####..#..#####..##..#.#####...##.#.#..#.##..#.#......#.###
+        .######.###.####...#.##.##..#..#..#####.....#.#....###..#.##......#.....#.
+        .#..#..##..#...##.######.####.####.#.#...#.......#..#.#.#...####.##.#.....
+        .#..#...##.#.##..#...##.#.##..###.#......#.#.......#.#.#.####.###.##...#..
+        ...####.#..#..#.##.#....##..#.####....##...##..#...#......#.#.......#.....
+        ..##..####..#...#.#.#...##..#.#..###..#####........#..####......#..#
+        
+        #..#.
+        #....
+        ##..#
+        ..#..
+        ..###
+        ";
+        let res = partTwo(input);
+        assert_eq!(3351, res);
     }
 }
