@@ -181,7 +181,7 @@ impl SnailfishNode {
                 match (*lhs.clone(), *rhs.clone()) {
                     (SnailfishNode::Leaf(left), SnailfishNode::Leaf(right)) if recurState.exploding() => {
                         //println!("Explode node: {:?}", &self.toString());
-                        recurState.explode(Some(right), Some(left));
+                        recurState.explode();
                         *self = SnailfishNode::Leaf(LeftOrd { value: 0, ord: u32::MAX });
                         Some((left, right))
                     },
@@ -239,7 +239,7 @@ impl ExplodeState {
         return !self.exploded && self.depth == 5;
     }
 
-    fn explode(&mut self, right: Option<LeftOrd>, left: Option<LeftOrd>) {
+    fn explode(&mut self) {
         self.exploded = true;
         //self.depth -= 1;
     }
@@ -334,12 +334,12 @@ mod tests {
     #[test]
     fn explodeTest() {
         let mut nr: SnailfishNode = "[[[[[9,8],1],2],3],4]".parse().unwrap();
-        let res = nr.explode();
+        nr.explode();
         println!("Exploded {:?}", nr.toString());
         assert_eq!(548, nr.magnitude());
 
         let mut nr: SnailfishNode = "[7,[6,[5,[4,[3,2]]]]]".parse().unwrap();
-        let res = nr.explode();
+        nr.explode();
         assert_eq!("[7,[6,[5,[7,0]]]]", nr.toString());
         assert_eq!(285, nr.magnitude());
 
@@ -359,7 +359,7 @@ mod tests {
 
         
         let mut nr: SnailfishNode = "[[[[4,0],[5,0]],[[[4,5],[2,6]],[9,5]]],[7,[[[3,7],[4,3]],[[6,3],[8,8]]]]]".parse().unwrap();
-        let res = nr.explode();
+        nr.explode();
         assert_eq!("[[[[4,0],[5,4]],[[0,[7,6]],[9,5]]],[7,[[[3,7],[4,3]],[[6,3],[8,8]]]]]", nr.toString());
         assert_eq!(4888, nr.magnitude());
     }

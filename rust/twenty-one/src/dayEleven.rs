@@ -18,8 +18,7 @@ impl DumboOctopus {
 
 
 struct Grid {
-    octupuses: [[DumboOctopus; 10]; 10],
-    flash_count: u32
+    octupuses: [[DumboOctopus; 10]; 10]
 }
 
 impl FromStr for Grid {
@@ -37,7 +36,7 @@ impl FromStr for Grid {
                 }
             }
         }
-        return Ok(Grid { octupuses: grid, flash_count: 0 });
+        return Ok(Grid { octupuses: grid });
     }
 }
 

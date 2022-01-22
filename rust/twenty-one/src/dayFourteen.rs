@@ -94,7 +94,7 @@ fn simulate_polymerization(
 }
 
 pub fn partTwo(input: &str) -> u64 {
-    let mut factory: PolymerFactory = input.parse().unwrap();
+    let factory: PolymerFactory = input.parse().unwrap();
     let mut pair_counter = HashMap::new();
     let chars = factory.polymer.chars().collect::<Vec<char>>();
     for pair in chars.windows(2) {

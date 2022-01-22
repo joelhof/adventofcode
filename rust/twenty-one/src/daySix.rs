@@ -64,7 +64,7 @@ pub fn partOne(input: &str) -> u64 {
     //println!("{:?}", fish_population);
     if fish_population.is_ok() {
         let mut fishes = fish_population.unwrap();
-        for day in 0..80 {
+        for _day in 0..80 {
             //println!("fish count: {} {:?}", fishes.school.values().sum::<u32>(), fishes);
             fishes = fishes.nextDay();
         }
@@ -79,7 +79,7 @@ pub fn partTwo(input: &str) -> u64 {
     //println!("{:?}", fish_population);
     if fish_population.is_ok() {
         let mut fishes = fish_population.unwrap();
-        for day in 0..256 {
+        for _day in 0..256 {
             //println!("fish count: {} {:?}", fishes.school.values().sum::<u32>(), fishes);
             fishes = fishes.nextDay();
         }
