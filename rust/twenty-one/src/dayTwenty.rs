@@ -56,21 +56,23 @@ impl Image {
         return points;
     }
 
-    fn window_at(&self, x: isize, y: isize) -> String {
+    fn window_at(&self, x: isize, y: isize, defaultPixel: char) -> String {
         let window = Image::neighbours(x, y);
-        return window.iter()
-            .map(|(i, j)| self.get(i, j))
+        let x = window.iter()
+            .map(|(i, j)| self.get(i, j, defaultPixel))
             .map(|c| match c { '#' => '1', _ => '0' })
             .collect();
+        //println!("{:?}", x);
+        return x;
     }
 
-    fn get(&self, i: &isize, j: &isize) -> char {
+    fn get(&self, i: &isize, j: &isize, defaultPixel: char) -> char {
         //
-        let x: Result<usize, _> = usize::try_from(*i - 1);
-        let y: Result<usize, _> = usize::try_from(*j - 1);
+        let x: Result<usize, _> = usize::try_from(*i);
+        let y: Result<usize, _> = usize::try_from(*j);
         let res = match (x,y) {
-            (Ok(x), Ok(y)) => self.0.get(x).and_then(|row| row.get(y)).unwrap_or(&'.'),
-            (_, _) => &'.'
+            (Ok(x), Ok(y)) => self.0.get(x).and_then(|row| row.get(y)).unwrap_or(&defaultPixel),
+            (_, _) => &defaultPixel
         };
         //println!("get value in input image at {}, {} = {}", i, j, res);
         return *res;
@@ -108,18 +110,25 @@ impl ImageEnhancer {
     
     fn enhance(&self, iterations: usize) -> Image {
         let mut img = self.image.clone();
-        for _i in 0..iterations {
+        for i in 0..iterations {
             let output_rows = img.rows() + 2;
             let output_cols = img.cols() + 2;
-            let mut output = Image(vec![vec!['.'; output_cols]; output_rows]);
+            let defaultPixel = if self.algorithm[0] == '#' && self.algorithm[self.algorithm.len() - 1] == '.' {
+                if i % 2 == 0 { '.' } else { '#' }
+                } else { '.' };
+            let mut output = Image(vec![vec![defaultPixel; output_cols]; output_rows]);
+            //println!("defaultpixel: {}", defaultPixel);
             //println!("output image size {} x {}", output.rows(), output.cols());
             // for each pixel in output img, find the source img pixels
             for x in 0..output_rows {
                 for y in 0..output_cols {
                     //println!("output index: ({}, {})", x, y);
-                    let index = match usize::from_str_radix(&img.window_at(x as isize, y as isize), 2) {
+                    let index = match usize::from_str_radix(&img.window_at(x as isize - 1, y as isize - 1, defaultPixel), 2) {
                         Ok(nr) => nr,
-                        Err(_) => 0
+                        Err(_) => {
+                            println!("Error parsing index!");
+                            0
+                        }
                     };
                     //println!("index: {}", index);
                     output.0[x][y] = self.algorithm[index];
@@ -127,7 +136,7 @@ impl ImageEnhancer {
                 }
             }
             img = output.clone();
-            img.displayImage();
+            //img.displayImage();
         }
         return img.clone();
     }
@@ -135,7 +144,7 @@ impl ImageEnhancer {
 
 pub fn partOne(input: &str) -> u32 {
     let enhancer: ImageEnhancer = input.parse().unwrap();
-    println!("{:?}", enhancer.algorithm);
+    //println!("{:?}", enhancer.algorithm);
     enhancer.image.displayImage();
     let enhancedImage = enhancer.enhance(2);
     
@@ -148,6 +157,7 @@ pub fn partOne(input: &str) -> u32 {
 #[cfg(test)]
 mod tests {
     use super::*;
+    
     #[test]
     fn partOneExample() {
         let input = "..#.#..#####.#.#.#.###.##.....###.##.#..###.####..#####..#....#..#..##..##
@@ -165,6 +175,6 @@ mod tests {
         ..###
         ";
         let res = partOne(input);
-        assert_eq!(35, res);
+        assert_eq!(36, res);
     }
 }
