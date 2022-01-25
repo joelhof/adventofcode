@@ -4,7 +4,7 @@ use std::str::FromStr;
 #[derive(Clone, Copy, Debug, PartialEq)]
 struct Player {
     id: u8,
-    start_postion: CylindricalPosition,
+    postion: CylindricalPosition,
     points: u32
 }
 
@@ -35,15 +35,13 @@ impl FromStr for Player {
         let caps = Regex::new(r"Player (\d+) starting position: (\d+)").unwrap().captures(input).unwrap();
         let id = caps.get(1).map_or("", |m| m.as_str()).parse().unwrap();
         let pos = caps.get(2).map_or("", |m| m.as_str()).parse().unwrap();
-        return Ok(Player { id: id, start_postion: CylindricalPosition(pos), points: 0 });
+        return Ok(Player { id: id, postion: CylindricalPosition(pos), points: 0 });
     }
 }
 
 #[derive(Debug)]
 struct DiracDiceEngine {
-    spaces: [Option<Player>; 10],
     players: Vec<Player>,
-    deterministic_dice: u32,
     rolls: u32 
 }
 
@@ -51,14 +49,12 @@ impl FromStr for DiracDiceEngine {
     type Err = &'static str;
 
     fn from_str(input: &str) -> Result<Self, Self::Err> {
-        let mut spaces: [Option<Player>; 10] = [None; 10];
         let mut players: Vec<Player> = vec![];
         for l in input.lines() {
             let p: Player = l.parse().unwrap();
-            spaces[(p.start_postion.0 - 1) as usize] = Some(p);
             players.push(p);
         }
-        return Ok(DiracDiceEngine { spaces: spaces, players: players, deterministic_dice: 0, rolls: 0 });
+        return Ok(DiracDiceEngine { players: players, rolls: 0 });
     }
 }
 
@@ -68,16 +64,16 @@ impl DiracDiceEngine {
         // add score to position
         // move player to position
         let isPlayerOne = ((self.rolls / times) % 2) == 0;
-        let mut currentPlayer = self.players[ if isPlayerOne { 0 } else { 1 } ];
+        let mut currentPlayer = self.players.get_mut(if isPlayerOne { 0 } else { 1 } ).unwrap();
         //println!("current pos {}", currentPlayer.start_postion.0);
         self.rolls += times;
         let mut sum = 0;
         for _i in 0..times {
             sum += self.rolls - 1;
         }
-        currentPlayer.start_postion = currentPlayer.start_postion.add(sum as u32);
-        currentPlayer.points += currentPlayer.start_postion.0 as u32;
-        self.players[ if isPlayerOne { 0 } else { 1 } ] = currentPlayer;
+        currentPlayer.postion = currentPlayer.postion.add(sum as u32);
+        currentPlayer.points += currentPlayer.postion.0 as u32;
+        //self.players[ if isPlayerOne { 0 } else { 1 } ] = currentPlayer;
         //println!("roll count {} player id {} next pos {} points {}", self.rolls, currentPlayer.id, currentPlayer.start_postion.0, currentPlayer.points);
     }
 
@@ -114,7 +110,7 @@ mod tests {
         let input = "Player 1 starting position: 4
         Player 2 starting position: 8";
         let track: DiracDiceEngine = input.parse().unwrap();
-        assert_eq!(track.spaces[3].unwrap(), "Player 1 starting position: 4".parse().ok().unwrap());
+        assert_eq!(track.players[0], "Player 1 starting position: 4".parse().ok().unwrap());
     }
 
     #[test]
@@ -131,6 +127,6 @@ mod tests {
         let input = "Player 1 starting position: 4
         Player 2 starting position: 8";
         let res = partOne(input);
-        assert_eq!(739785, res+1);
+        assert_eq!(739785, res);
     }
 }
