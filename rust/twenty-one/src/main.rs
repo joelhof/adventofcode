@@ -154,6 +154,10 @@ fn main() {
         let res = dayTwenty::partTwo(&loadInput("Twenty"));
         println!("Day 20, part 2: {}", res);
     }
+    {
+        let res = dayTwentyOne::partOne(&loadInput("TwentyOne"));
+        println!("Day 21, part 1: {}", res);
+    }
 }
 
 fn dayOne() {
