@@ -1,0 +1,17 @@
+[package]
+name = "twenty-fifteen"
+version = "0.1.0"
+authors = ["Joel <joel@hof4j.se>"]
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[[bin]]
+name = "fifteen"
+path = "src/main.rs"
+
+[lib]
+name = "fifteen"
+path = "src/lib.rs"
+
+[dependencies]
