@@ -1,24 +1,29 @@
-use crate::core::{Day, load_input};
+use crate::core::{Day};
 
 pub struct DayOne {
-
+    input: String
 }
 
-impl DayOne {
+impl Day for DayOne {
+    type R = i32;
 
-    fn problemOne(input: &str) -> i32 {
+    fn day() -> String {
+       String::from("1")
+    }
+
+    fn part_one(&self) -> Self::R {
         let mut floor = 0;
-        input.chars().for_each(|c| match c {
+        self.input.chars().for_each(|c| match c {
             '(' => floor = floor + 1,
             ')' => floor = floor - 1,
             _ => {}
         });
-        return floor;
+        floor
     }
 
-    fn problemTwo(input: &str) -> i32 {
+    fn part_two(&self) -> Self::R {
         let mut floor = 0;
-        for (i, c) in input.chars().enumerate()
+        for (i, c) in self.input.chars().enumerate()
         {
             match c {
                 '(' => floor = floor + 1,
@@ -31,31 +36,9 @@ impl DayOne {
         };
         return 0;
     }
-}
 
-impl Day for DayOne {
-    type R = i32;
-
-    fn part_one() -> Self::R {
-        let dayOneInput = load_input("1");
-        return match dayOneInput {
-            Ok(input) => DayOne::problemOne(&input),
-            Err(_err) => {
-                println!("Failed to read input!");
-                panic!();
-            }
-        };
-    }
-
-    fn part_two() -> Self::R {
-        let dayOneInput = load_input("1");
-        return match dayOneInput {
-            Ok(input) => DayOne::problemTwo(&input),
-            Err(_err) => {
-                println!("Failed to read input!");
-                panic!();
-            }
-        };
+    fn from(input: String) -> Box<dyn Day<R=Self::R>> {
+        Box::new(DayOne { input })
     }
 }
 
@@ -67,33 +50,48 @@ mod tests {
     #[test]
     fn partOneExampleTest() {
         let input = "(())";
-        let res = DayOne::problemOne(input);
+        let mut res = 0;
+        input.chars().for_each(|c| match c {
+            '(' => res = res + 1,
+            ')' => res = res - 1,
+            _ => {}
+        });
         assert_eq!(res, 0);
         let input = "()()";
-        let res = DayOne::problemOne(input);
+        let mut res = 0;
+        input.chars().for_each(|c| match c {
+            '(' => res = res + 1,
+            ')' => res = res - 1,
+            _ => {}
+        });
         assert_eq!(res, 0);
     }
 
     #[test]
     fn partOneExample2Test() {
-        let input = "(((";
-        let res = DayOne::problemOne(input);
+        let input = String::from("(((");
+        let d = DayOne { input };
+        let res = d.part_one();
         assert_eq!(res, 3);
-        let input = "))(((((";
-        let res = DayOne::problemOne(input);
+        let input = String::from("))(((((");
+        let d = DayOne { input };
+        let res = d.part_one();
         assert_eq!(res, 3);
-        let input = ")())())";
-        let res = DayOne::problemOne(input);
+        let input = String::from(")())())");
+        let d = DayOne { input };
+        let res = d.part_one();
         assert_eq!(res, -3);
     }
 
     #[test]
     fn partTwoExampleTest() {
-        let input = ")";
-        let res = DayOne::problemTwo(input);
+        let input = String::from(")");
+        let d = DayOne { input };
+        let res = d.part_two();
         assert_eq!(res, 1);
-        let input = "()())";
-        let res = DayOne::problemTwo(input);
+        let input = String::from("()())");
+        let d = DayOne { input };
+        let res = d.part_two();
         assert_eq!(res, 5);
     }
 
