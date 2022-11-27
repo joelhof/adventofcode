@@ -15,10 +15,10 @@ pub trait Day {
     fn day() -> String where Self: Sized;
     fn part_one(&self) -> Self::R;
     fn part_two(&self) -> Self::R;
-    fn from(input: String) -> Box<dyn Day<R=Self::R>> where Self: Sized;
-    fn solve() where Self: Sized {
-        let input = load_input(&Self::day());
-        let day = match input {
+    fn solve() where Self: Sized + From<String> {
+        println!("---------------------------------------");
+        let res = load_input(&Self::day());
+        let day = match res {
             Ok(problem) => Self::from(problem),
             Err(_) => {
                 println!("Failed to read input for day {}", Self::day());
@@ -28,5 +28,21 @@ pub trait Day {
         println!("Day {}, part 1: {}", Self::day(), day.part_one());
         println!("Day {}, part 2: {}", Self::day(), day.part_two());
     }
+}
 
+#[macro_export]
+macro_rules! solve {
+    ($day:ty) => {
+        println!("---------------------------------------");
+        let res = fifteen::core::load_input(&<$day>::day());
+        let day = match res {
+            Ok(input) => <$day>::from(input),
+            Err(_) => {
+                println!("Failed to read input for day {}", <$day>::day());
+                panic!()
+            }
+        };
+        println!("Day {}, part 1: {}", <$day>::day(), day.part_one());
+        println!("Day {}, part 2: {}", <$day>::day(), day.part_two());
+    };
 }

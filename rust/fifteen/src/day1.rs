@@ -4,6 +4,12 @@ pub struct DayOne {
     input: String
 }
 
+impl From<String> for DayOne {
+    fn from(input: String) -> Self {
+        DayOne { input }
+    }
+}
+
 impl Day for DayOne {
     type R = i32;
 
@@ -35,10 +41,6 @@ impl Day for DayOne {
             }
         };
         return 0;
-    }
-
-    fn from(input: String) -> Box<dyn Day<R=Self::R>> {
-        Box::new(DayOne { input })
     }
 }
 
