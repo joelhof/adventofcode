@@ -16,3 +16,5 @@ path = "src/lib.rs"
 
 [dependencies]
 itertools = "0.10.5"
+md5 = "0.7.0"
+hex = "0.4.3"
