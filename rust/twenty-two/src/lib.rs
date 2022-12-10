@@ -2,3 +2,4 @@
 
 pub mod core;
 pub mod day7;
+pub mod day10;
