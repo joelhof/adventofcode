@@ -38,6 +38,32 @@ impl Day for DaySeven {
          when done, filter map on size and sum
     */
     fn part_one(&self) -> Self::R {
+        let dir_size = self.get_directory_size();
+        return dir_size.values()
+            .filter(|size| *size <= &100000)
+            .sum();
+    }
+
+    fn part_two(&self) -> Self::R {
+        let dir_size = self.get_directory_size();
+        let total_disk_space = 70000000;
+        let minimum_disk_space_required = 30000000;
+        let current_unused_disk_space = total_disk_space - match dir_size.get("//") {
+            Some(x) => x, None => &0
+        };
+        let minimum_directory_size = minimum_disk_space_required - current_unused_disk_space;
+        match dir_size.values()
+            .filter(|dir| *dir >= &minimum_directory_size)
+            .min() {
+            Some(min) => *min,
+            None => 0
+        }
+
+    }
+}
+
+impl DaySeven {
+    fn get_directory_size(&self) -> HashMap<String, u64> {
         let mut dir_size: HashMap<String, u64> = HashMap::new();
         let mut dir_stack = Vec::new();
         for line in self.input.lines() {
@@ -79,15 +105,8 @@ impl Day for DaySeven {
                 },
                 None => ()
             };
-
         };
-        return dir_size.values()
-            .filter(|size| *size <= &100000)
-            .sum();
-    }
-
-    fn part_two(&self) -> Self::R {
-        todo!()
+        dir_size
     }
 }
 
@@ -122,5 +141,34 @@ mod tests {
                 7214296 k";
         let actual_res = DaySeven::from(String::from(input)).part_one();
         assert_eq!(95437, actual_res);
+    }
+
+    #[test]
+    fn partTwoExampleTest() {
+        let input = "$ cd /
+                $ ls
+                dir a
+                14848514 b.txt
+                8504156 c.dat
+                dir d
+                $ cd a
+                $ ls
+                dir e
+                29116 f
+                2557 g
+                62596 h.lst
+                $ cd e
+                $ ls
+                584 i
+                $ cd ..
+                $ cd ..
+                $ cd d
+                $ ls
+                4060174 j
+                8033020 d.log
+                5626152 d.ext
+                7214296 k";
+        let actual_res = DaySeven::from(String::from(input)).part_two();
+        assert_eq!(24933642, actual_res);
     }
 }
