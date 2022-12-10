@@ -78,17 +78,6 @@ impl Day for DayTen {
 mod tests {
     use super::*;
 
-
-    #[test]
-    fn cycleTest() {
-        let input = "noop
-            addx 3
-            addx -5";
-
-        let actual_res = DayTen::from(String::from(input)).part_one();
-        assert_eq!(13140, actual_res);
-    }
-
     #[test]
     fn partOneExampleTest() {
         let input = "addx 15
