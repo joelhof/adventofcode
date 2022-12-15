@@ -1,3 +1,5 @@
+use std::cmp::Ordering;
+use std::cmp::Ordering::Equal;
 use std::collections::VecDeque;
 use crate::core::{Day};
 
@@ -19,7 +21,7 @@ enum PacketData {
 
 impl PacketData {
     fn compare(&self, other: &PacketData) -> Option<bool> {
-        println!("lhs: {:?} rhs: {:?}", self, other);
+        //println!("lhs: {:?} rhs: {:?}", self, other);
         match (self, other) {
             (PacketData::INT(lhs), PacketData::INT(rhs)) => Self::compare_ints(lhs, rhs),
             (PacketData::LIST(lhs), PacketData::LIST(rhs)) => Self::compare_list(lhs, rhs),
@@ -31,10 +33,10 @@ impl PacketData {
     fn compare_ints(lhs: &u32, rhs: &u32) -> Option<bool> {
         //print!("comparing ints: lhs: {} rhs {}", lhs, rhs);
         if lhs < rhs {
-            println!(" -> lhs is smaller, right order");
+           // println!(" -> lhs is smaller, right order");
            return Some(true);
         } else if lhs > rhs {
-            println!(" -> lhs is bigger, wrong order");
+            //println!(" -> lhs is bigger, wrong order");
            return Some(false);
         }
         //print!(" -> equal, continue");
@@ -42,7 +44,7 @@ impl PacketData {
     }
 
     fn compare_list(lhs: &Vec<PacketData>, rhs: &Vec<PacketData>) -> Option<bool> {
-        println!("list comparison lhs: {:?} rhs: {:?} ", lhs, rhs);
+        //println!("list comparison lhs: {:?} rhs: {:?} ", lhs, rhs);
         for (i, left) in lhs.iter().enumerate() {
 
             // If left side ends first
@@ -53,7 +55,7 @@ impl PacketData {
             // if right side ends first
             let right = rhs.get(i);
             if right.is_none() {
-                println!("rhs ended first");
+                //println!("rhs ended first");
                 return Some(false);
             }
             // compare
@@ -67,14 +69,16 @@ impl PacketData {
         }
         //println!("lhs {:?} ended, rhs {:?}", lhs, rhs);
         if lhs.len() == rhs.len() {
-            println!("Equal length, continue {:?} {:?}", lhs, rhs);
+            //println!("Equal length, continue {:?} {:?}", lhs, rhs);
             return None;
         } else if rhs.len() > lhs.len() {
-            println!("zxcxzclhs ended first, {:?} {:?}", lhs, rhs);
+            //println!("zxcxzclhs ended first, {:?} {:?}", lhs, rhs);
             return Some(true);
         }
         panic!("Left side ran out but right was smaller!?")
     }
+
+
 }
 
 struct Pair {
@@ -84,14 +88,18 @@ struct Pair {
 
 impl Pair {
     fn compare(&self) -> bool {
-        println!("-------------");
-        println!("Comparing Pair of {:?} and {:?}", self.lhs, self.rhs);
+        //println!("-------------");
+        //println!("Comparing Pair of {:?} and {:?}", self.lhs, self.rhs);
         let res = self.lhs.compare(&self.rhs);
-        println!("Comparison result: {:?}", res);
+        //println!("Comparison result: {:?}", res);
         match res {
             Some(comp) => comp,
             None => false
         }
+    }
+
+    fn toVec(&self) -> Vec<&PacketData> {
+        vec![&self.lhs, &self.rhs]
     }
 
     fn parse(packet_data: &mut VecDeque<char>) -> PacketData {
@@ -172,7 +180,38 @@ impl Day for DayThirteen {
     }
 
     fn part_two(&self) -> Self::R {
-        todo!()
+
+        let pairs: Vec<Pair> = self.input.split("\n\n")
+            .map(|pair| Pair::from(pair))
+            .collect();
+        let mut packets: Vec<&PacketData> = pairs.iter()
+            .flat_map(|p| p.toVec()).collect();
+        let cp1 = PacketData::LIST(vec![PacketData::INT(2)]);
+        packets.push(&cp1);
+
+        let cp2 = PacketData::LIST(vec![PacketData::INT(6)]);
+        packets.push(&cp2);
+
+        packets.sort_by(|left, right| match left.compare(right) {
+            Some(true) => Ordering::Less,
+            Some(false) => Ordering::Greater,
+            None => Equal
+        } );
+        let controlPacketIndex1 = packets.iter()
+            .position(|packet| match cp1.compare(packet) {
+                None => true,
+                Some(_) => false
+            } );
+
+        let controlPacketIndex2 = packets.iter()
+            .position(|packet| match cp2.compare(packet) {
+                None => true,
+                Some(_) => false
+            });
+        return match (controlPacketIndex1, controlPacketIndex2) {
+            (Some(x), Some(y)) => ((x + 1) * (y + 1)) as u32,
+            (_, _) => panic!("Could not find controlpackets!!")
+        };
     }
 }
 
@@ -207,10 +246,34 @@ mod tests {
                 [1,[2,[3,[4,[5,6,0]]]],8,9]";
         let actual_res = DayThirteen::from(input.to_string()).part_one();
         assert_eq!(13, actual_res);
-
-        //let input = "";
-        //let actual_res = DayThirteen::from(input.to_string()).part_one();
-        //assert_eq!(13, actual_res);
     }
 
+    #[test]
+    fn partTwoExampleTest() {
+        let input = "[1,1,3,1,1]
+                [1,1,5,1,1]
+
+                [[1],[2,3,4]]
+                [[1],4]
+
+                [9]
+                [[8,7,6]]
+
+                [[4,4],4,4]
+                [[4,4],4,4,4]
+
+                [7,7,7,7]
+                [7,7,7]
+
+                []
+                [3]
+
+                [[[]]]
+                [[]]
+
+                [1,[2,[3,[4,[5,6,7]]]],8,9]
+                [1,[2,[3,[4,[5,6,0]]]],8,9]";
+        let actual_res = DayThirteen::from(input.to_string()).part_two();
+        assert_eq!(140, actual_res);
+    }
 }
