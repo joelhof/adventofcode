@@ -20,8 +20,8 @@ enum PacketData {
 }
 
 impl PacketData {
-    fn compare(&self, other: &PacketData) -> Option<bool> {
-        //println!("lhs: {:?} rhs: {:?}", self, other);
+
+    fn compare(&self, other: &PacketData) -> Ordering {
         match (self, other) {
             (PacketData::INT(lhs), PacketData::INT(rhs)) => Self::compare_ints(lhs, rhs),
             (PacketData::LIST(lhs), PacketData::LIST(rhs)) => Self::compare_list(lhs, rhs),
@@ -30,55 +30,39 @@ impl PacketData {
         }
     }
 
-    fn compare_ints(lhs: &u32, rhs: &u32) -> Option<bool> {
-        //print!("comparing ints: lhs: {} rhs {}", lhs, rhs);
+    fn compare_ints(lhs: &u32, rhs: &u32) -> Ordering {
         if lhs < rhs {
-           // println!(" -> lhs is smaller, right order");
-           return Some(true);
+           return Ordering::Less;
         } else if lhs > rhs {
-            //println!(" -> lhs is bigger, wrong order");
-           return Some(false);
+           return Ordering::Greater;
         }
-        //print!(" -> equal, continue");
-        None
+        Equal
     }
 
-    fn compare_list(lhs: &Vec<PacketData>, rhs: &Vec<PacketData>) -> Option<bool> {
-        //println!("list comparison lhs: {:?} rhs: {:?} ", lhs, rhs);
+    fn compare_list(lhs: &Vec<PacketData>, rhs: &Vec<PacketData>) -> Ordering {
         for (i, left) in lhs.iter().enumerate() {
 
-            // If left side ends first
-            // if left.is_none() {
-            //     println!("lhs ended first none");
-            //     return Some(true);
-            // }
-            // if right side ends first
             let right = rhs.get(i);
             if right.is_none() {
-                //println!("rhs ended first");
-                return Some(false);
+                return Ordering::Greater;
             }
             // compare
             let right = right.unwrap();
 
             match left.compare(right) {
-                Some(res) => return Some(res),
-                None => continue
+                Ordering::Less => return Ordering::Less,
+                Ordering::Greater => return Ordering::Greater,
+                Equal => continue
             }
 
         }
-        //println!("lhs {:?} ended, rhs {:?}", lhs, rhs);
         if lhs.len() == rhs.len() {
-            //println!("Equal length, continue {:?} {:?}", lhs, rhs);
-            return None;
+            return Equal;
         } else if rhs.len() > lhs.len() {
-            //println!("zxcxzclhs ended first, {:?} {:?}", lhs, rhs);
-            return Some(true);
+            return Ordering::Less;
         }
         panic!("Left side ran out but right was smaller!?")
     }
-
-
 }
 
 struct Pair {
@@ -87,15 +71,11 @@ struct Pair {
 }
 
 impl Pair {
-    fn compare(&self) -> bool {
+    fn compare(&self) -> Ordering {
         //println!("-------------");
         //println!("Comparing Pair of {:?} and {:?}", self.lhs, self.rhs);
-        let res = self.lhs.compare(&self.rhs);
+        self.lhs.compare(&self.rhs)
         //println!("Comparison result: {:?}", res);
-        match res {
-            Some(comp) => comp,
-            None => false
-        }
     }
 
     fn toVec(&self) -> Vec<&PacketData> {
@@ -107,13 +87,10 @@ impl Pair {
         let mut child = None;
         let mut list = vec![];
         while let Some(left) = packet_data.pop_front() {
-            //println!("{}", left);
             if left.is_digit(10) {
                 element.push(left);
             } else if '[' == left {
-                //println!("new PacketData");
                 child = Some(Self::parse(packet_data));
-                //println!("child: {:?}", child);
             } else if ',' == left {
                 let nr: String = element.iter().collect();
                 list.push(child.or(
@@ -124,7 +101,6 @@ impl Pair {
                 ));
                 element.clear();
                 child = None;
-                //println!("Added element {:?}", list.last());
             } else if ']' == left {
                 let nr: String = element.iter().collect();
                 list.push(child.or(
@@ -133,7 +109,6 @@ impl Pair {
                         |n| Some(PacketData::INT(n))
                     )
                 ));
-                //println!("end of list {:?}", list);
                 return PacketData::LIST(list.into_iter()
                     .filter(|c| c.is_some())
                     .map(|c| c.unwrap())
@@ -142,7 +117,6 @@ impl Pair {
             }
         }
        child.expect("Not a Packet!")
-
     }
 }
 
@@ -171,7 +145,7 @@ impl Day for DayThirteen {
             .collect();
         let mut right: Vec<usize> = Vec::new();
         for (i, pair) in pairs.iter().enumerate() {
-            if pair.compare() {
+            if pair.compare() == Ordering::Less {
                 right.push(i);
             }
         }
@@ -192,21 +166,17 @@ impl Day for DayThirteen {
         let cp2 = PacketData::LIST(vec![PacketData::INT(6)]);
         packets.push(&cp2);
 
-        packets.sort_by(|left, right| match left.compare(right) {
-            Some(true) => Ordering::Less,
-            Some(false) => Ordering::Greater,
-            None => Equal
-        } );
+        packets.sort_by(|left, right| left.compare(right)  );
         let controlPacketIndex1 = packets.iter()
             .position(|packet| match cp1.compare(packet) {
-                None => true,
-                Some(_) => false
+                Equal => true,
+                _ => false
             } );
 
         let controlPacketIndex2 = packets.iter()
             .position(|packet| match cp2.compare(packet) {
-                None => true,
-                Some(_) => false
+                Equal => true,
+                _ => false
             });
         return match (controlPacketIndex1, controlPacketIndex2) {
             (Some(x), Some(y)) => ((x + 1) * (y + 1)) as u32,
