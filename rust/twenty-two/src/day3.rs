@@ -49,11 +49,7 @@ impl Day for DayThree {
                 rucksack.find_shared_items()
                     .iter()
                     .map(|item|
-                        if item.is_ascii_lowercase() { *item as u32 -96 }
-                        else if item.is_ascii_uppercase() { *item as u32 - 38 }
-                        else {
-                            panic!("Unsupported char: {}", item);
-                        }
+                        Self::get_priority(item)
                     )
                     .sum::<u32>()
             })
@@ -61,7 +57,25 @@ impl Day for DayThree {
     }
 
     fn part_two(&self) -> Self::R {
-        todo!()
+        let v: Vec<&str> = self.input.lines().collect();
+        return v.chunks(3)
+            .filter_map(|g|
+                g.iter()
+                    .map(|elf| elf.chars().collect::<HashSet<char>>())
+                    .into_iter()
+                    .reduce(|mut shared_items, elf| shared_items.intersection(&elf).copied().collect())
+            )
+            .map(|item| item.into_iter().next().expect("There should be a common item!"))
+            .map(|item| Self::get_priority(&item))
+            .sum();
+    }
+}
+
+impl DayThree {
+    fn get_priority(item: &char) -> u32 {
+        if item.is_ascii_lowercase() { *item as u32 - 96 } else if item.is_ascii_uppercase() { *item as u32 - 38 } else {
+            panic!("Unsupported char: {}", item);
+        }
     }
 }
 
@@ -80,5 +94,18 @@ CrZsJsPPZsGzwwsLwLmpwMDw";
         let actual_res = DayThree::from(input.to_string())
             .part_one();
         assert_eq!(157, actual_res);
+    }
+
+    #[test]
+    fn partTwoExampleTest() {
+        let input = "vJrwpWtwJgWrhcsFMMfFFhFp
+jqHRNqRjqzjGDLGLrsFMfFZSrLrFZsSL
+PmmdzqPrVvPwwTWBwg
+wMqvLMZHhHMvwLHjbvcjnnSBnvTQFn
+ttgJtRGJQctTZtZT
+CrZsJsPPZsGzwwsLwLmpwMDw";
+        let actual_res = DayThree::from(input.to_string())
+            .part_two();
+        assert_eq!(70, actual_res);
     }
 }
