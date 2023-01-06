@@ -10,11 +10,13 @@ use twentytwolib::day15::DayFifteen;
 use twentytwolib::day1::DayOne;
 use twentytwolib::day2::DayTwo;
 use twentytwolib::day3::DayThree;
+use twentytwolib::day4::DayFour;
 
 fn main() {
     solve!(DayOne);
     solve!(DayTwo);
     solve!(DayThree);
+    solve!(DayFour);
     solve!(DaySeven);
     solve!(DayNine);
     solve!(DayTen);
