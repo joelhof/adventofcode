@@ -47,7 +47,7 @@ impl Day for DayFive {
 
         for m in moves.iter() {
             let from = stacks.get_mut(&m.from).unwrap();
-            let mut moved: Vec<char> = from.drain(0..m.qty).collect();
+            let moved: Vec<char> = from.drain(0..m.qty).collect();
             let to = stacks.get_mut(&m.to).unwrap();
             //println!("move {:?} to {:?}", moved, to);
             for ccrate in moved.iter() {
@@ -84,14 +84,14 @@ impl DayFive {
         let initial_config = s.next().unwrap();
         let footer = initial_config.lines().last().unwrap();
         let stack_idx: HashMap<usize, usize> = footer.chars().enumerate()
-            .filter(|(i, n)| n.is_numeric())
+            .filter(|(_i, n)| n.is_numeric())
             .map(|(i, n)| (i, n.to_digit(10).unwrap() as usize)).collect();
         let mut stacks: HashMap<usize, VecDeque<char>> = footer.chars().enumerate()
-            .filter(|(i, n)| n.is_numeric())
-            .map(|(i, n)| (*stack_idx.get(&i).expect("Every index should have a stack id mapping"), VecDeque::new()))
+            .filter(|(_i, n)| n.is_numeric())
+            .map(|(i, _n)| (*stack_idx.get(&i).expect("Every index should have a stack id mapping"), VecDeque::new()))
             .collect();
 
-        for (i, l) in initial_config.lines().enumerate() {
+        for l in initial_config.lines() {
             for (j, c) in l.chars().enumerate() {
                 if c.is_ascii_uppercase() {
                     let idx = stack_idx.get(&j).unwrap();
