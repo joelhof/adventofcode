@@ -63,7 +63,7 @@ impl Day for DayThree {
                 g.iter()
                     .map(|elf| elf.chars().collect::<HashSet<char>>())
                     .into_iter()
-                    .reduce(|mut shared_items, elf| shared_items.intersection(&elf).copied().collect())
+                    .reduce(|shared_items, elf| shared_items.intersection(&elf).copied().collect())
             )
             .map(|item| item.into_iter().next().expect("There should be a common item!"))
             .map(|item| Self::get_priority(&item))

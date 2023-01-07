@@ -50,7 +50,7 @@ impl From<&str> for Round {
     fn from(input: &str) -> Self {
         let mut i = input.split(" ");
         let o = Opponent::from(
-            i.next().expect("There should be a move for your oppponent")
+            i.next().expect("There should be a move for your opponent")
         );
         let y = YourMove::from(
             i.next().expect("There should be a move for you")

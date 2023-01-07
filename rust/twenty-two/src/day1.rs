@@ -1,7 +1,5 @@
 use std::iter::Map;
 use std::str::Split;
-use lazy_static::lazy_static;
-use regex::Regex;
 use crate::core::{Day};
 
 pub struct DayOne {
